@@ -24,7 +24,8 @@ class PlanController extends Controller
     public function main($params)
     {
         $data['form'] = $this->model->processForm();
-        $data['links']['logout'] = $this->router->generate('auth.logout');
+        $data['links']['logout'] = $this->
+        router->generate('auth.logout');
         //todo written above
 
         //todo fill the form, show action menu
