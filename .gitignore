@@ -25,8 +25,12 @@ vendor/
 node_modules/
 
 # app specific
+assets/
 sessions/
 cache/
 docx/
 tools/
 logs/
+
+#php
+php_errors.log
