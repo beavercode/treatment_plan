@@ -91,8 +91,8 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= conf.imgDir %>/',
-                    src: ['**/*.{png,jpg,gif,ico}'],
-                    dest: '<%= conf.buildDir %>/img'
+                    src: ['./**/*.{png,jpg,jpeg,gif,ico}'],
+                    dest: '<%= conf.buildDir %>/img/'
                 }]
             }
         },
@@ -129,7 +129,7 @@ module.exports = function (grunt) {
          },*/
 
         copy: {
-            tb: {
+            fonts: {
                 files: [{
                     expand: true,
                     src: ['fonts/*'],
@@ -157,7 +157,7 @@ module.exports = function (grunt) {
                 }
             },
             images: {
-                files: ['<%= conf.imgDir %>/**/*.{png,jpg,gif}'],
+                files: ['<%= conf.imgDir %>/**/*.{png,jpg,jpeg,gif}'],
                 tasks: ['newer:imagemin'],
                 options: {
                     spawn: false,
