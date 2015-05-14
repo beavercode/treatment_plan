@@ -17,17 +17,15 @@ class System
     /**
      * Write data to log file
      *
-     * @param        $fileName
-     * @param        $data
-     * @return false|int
-     * @internal param string $time_sep
-     * @internal param string $nl New line separator, unix style be default
+     * @param  string $fileName
+     * @param  string $data
+     * @return int
      */
     public static function log($fileName, $data)
     {
         $timeSeparator = ' | ';
         $lineSeparator = "\n";
-        $data = date('Y-m-d H:i:s O') . " {$timeSeparator} " . $data;
+        $data = date('Y-m-d H:i:s O') . " {$timeSeparator} " . (string) $data;
 
         return File::write($fileName, $data . $lineSeparator);
     }
@@ -45,22 +43,6 @@ class System
             throw new AppException('Can\'t load file "' . $fileName . '""');
         }
         self::$conf = $data;
-    }
-
-    /**
-     * Include template file
-     *
-     * @param $fileName
-     * @return string
-     */
-    public static function loadData($fileName)
-    {
-        ob_start();
-        if (! include "$fileName") {
-            throw new AppException('Can\'t load file(ob) "' . $fileName . '"');
-        }
-
-        return ob_get_clean();
     }
 
     /**
