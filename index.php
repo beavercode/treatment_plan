@@ -6,4 +6,6 @@
  */
 
 //anti favicon.ico without apache
-($_SERVER['REQUEST_URI'] !== '/favicon.ico') ? require 'app/bootstrap.php' : die;
+($_SERVER['REQUEST_URI'] !== '/favicon.ico')
+    ? require 'app/bootstrap.php'
+    : die;
