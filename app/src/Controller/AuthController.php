@@ -3,6 +3,7 @@ namespace UTI\Controller;
 
 use UTI\Core\Controller;
 use UTI\Core\System;
+use UTI\Lib\Data;
 use UTI\Model\AuthModel;
 
 /**
@@ -28,12 +29,13 @@ class AuthController extends Controller
      */
     public function login()
     {
-        $form = $this->model->processForm();
+        $data = new Data(URI_BASE);
+        $data('form', $this->model->processForm());
 
         if ($this->model->isLogged()) {
             System::redirect2Url($this->router->generate('plan.main'), $_SERVER);
         }
-        $this->view->render('login_form.php', 'login_template.php', $form);
+        $this->view->render('login_form.php', 'login_template.php', $data);
     }
 
     /**
