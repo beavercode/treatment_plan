@@ -13,7 +13,17 @@
         .control-label {
             text-align: center;
         }
+        .brnAdd {
+        }
+        .btnRemove {
+            display: none;
+        }
+
     }
+}
+
+#remove-stage {
+    margin-left: 3px;
 }
 
 /* Responsive: Portrait smart-phones and up */
@@ -26,6 +36,11 @@
     .plan {
         .header .nav li:last-of-type {
             margin-left: 20px;
+        }
+    }
+    .form {
+        .file {
+            width: 240px;
         }
     }
 }

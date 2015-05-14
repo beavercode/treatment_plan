@@ -25,6 +25,6 @@ abstract class Controller
     public function __construct($router)
     {
         $this->router = $router;
-        $this->view = new View();
+        $this->view = new View(HTML_TYPE);
     }
 }

@@ -1,92 +1,54 @@
 <?php
-
+/** @var \UTI\Lib\Data $data */
 ?>
-<!-- plan-form -->
-<form class="plan-form" name="plan" action="#some">
-    <div class="form-horizontal">
-        <div class="form-group">
-            <label for="inputName" class="col-sm-2 control-label plan-form__label">Введите имя</label>
+<!-- Plan form -->
+<form class="form-horizontal form" role="form" name="plan" action="/add" method="post">
+    <!-- Common info -->
+    <div class="form-group col-sm-7">
+        <label for="inputName" class="col-sm-4 control-label">Введите имя</label>
 
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="inputName" placeholder="Фамилия Имя Отчество"
-                       autofocus>
-            </div>
+        <div class="col-sm-8">
+            <input type="text" id="inputName" class="form-control" name="inputName"
+                   placeholder="Фамилия Имя Отчество">
         </div>
     </div>
-    <h3 class="plan-form__title">Введите этапы</h3>
+    <div class="form-group col-sm-5">
+        <label for="inputDoctor" class="col-sm-4 control-label">Врач</label>
 
-    <!-- stage block -->
-    <div class="form-inline plan-form__inline">
-        <div class="form-group plan-form__group">
-            <label for="inputStage" class="plan-form__label">Название</label>
-            <input type="text" class="form-control" id="inputStage" placeholder="Этап лечения">
+        <div class="col-sm-8">
+            <select id="inputDoctor" class="selectpicker show-tick" name="inputDoctor" data-width="100%">
+                <?php foreach ($data('doctors') as $doctor_key => $doctor_val): ?>
+                    <option value="<?= $doctor_key ?>"><?= $doctor_val ?></option>
+                <?php endforeach; ?>
+            </select>
         </div>
-        <div class="form-group plan-form__group">
-            <label for="inputPeriod" class="plan-form__label">Период</label>
-            <input type="text" class="form-control" id="inputPeriod" placeholder="Длительность">
-        </div>
-        <button type="submit" class="btn btn-default plan-form__btn-upload">Загрузить прайс</button>
     </div>
-    <!-- /stage block -->
+    <!-- /Common info -->
 
-    <!-- stage block -->
-    <div class="form-inline plan-form__inline">
-        <div class="form-group plan-form__group">
-            <label for="inputStage" class="plan-form__label">Название</label>
-            <input type="text" class="form-control" id="inputStage" placeholder="Этап лечения">
-        </div>
-        <div class="form-group plan-form__group">
-            <label for="inputPeriod" class="plan-form__label">Период</label>
-            <input type="text" class="form-control" id="inputPeriod" placeholder="Длительность">
-        </div>
-        <button type="submit" class="btn btn-default plan-form__btn-upload">Загрузить прайс</button>
+    <!-- Title -->
+    <div class="form-group col-sm-12">
+        <hr/>
+        <h3 class="title">Введите этапы</h3>
     </div>
-    <!-- /stage block -->
+    <!-- /Title -->
 
-    <!-- stage block -->
-    <div class="form-inline plan-form__inline">
-        <div class="form-group plan-form__group">
-            <label for="inputStage" class="plan-form__label">Название</label>
-            <input type="text" class="form-control" id="inputStage" placeholder="Этап лечения">
-        </div>
-        <div class="form-group plan-form__group">
-            <label for="inputPeriod" class="plan-form__label">Период</label>
-            <input type="text" class="form-control" id="inputPeriod" placeholder="Длительность">
-        </div>
-        <button type="submit" class="btn btn-default plan-form__btn-upload">Загрузить прайс</button>
+    <!-- Stages -->
+    <div id="stages"></div>
+    <!-- /Stage  -->
+
+    <!-- Add/Remove stage -->
+    <div class="form-group col-sm-10 col-sm-offset-2">
+        <button type="button" id="add-stage" class="btn btn-primary btnAdd" role="button">Добавить этап</button>
+        <button type="button" id="remove-stage" class="btn btn-danger btnRemove" role="button">Удалить
+            этап
+        </button>
     </div>
-    <!-- /stage block -->
+    <!-- /Add/Remove stage -->
 
-    <!-- stage block -->
-    <div class="form-inline plan-form__inline">
-        <div class="form-group plan-form__group">
-            <label for="inputStage" class="plan-form__label">Название</label>
-            <input type="text" class="form-control" id="inputStage" placeholder="Этап лечения">
-        </div>
-        <div class="form-group plan-form__group">
-            <label for="inputPeriod" class="plan-form__label">Период</label>
-            <input type="text" class="form-control" id="inputPeriod" placeholder="Длительность">
-        </div>
-        <button type="submit" class="btn btn-default plan-form__btn-upload">Загрузить прайс</button>
+    <!-- Save plan -->
+    <div class="form-group col-sm-10 col-sm-offset-2">
+        <button type="submit" class="btn btn-success btn-lg">Сохранить план лечения</button>
     </div>
-    <!-- /stage block -->
-
-    <!-- stage block -->
-    <div class="form-inline plan-form__inline">
-        <div class="form-group plan-form__group">
-            <label for="inputStage" class="plan-form__label">Название</label>
-            <input type="text" class="form-control" id="inputStage" placeholder="Этап лечения">
-        </div>
-        <div class="form-group plan-form__group">
-            <label for="inputPeriod" class="plan-form__label">Период</label>
-            <input type="text" class="form-control" id="inputPeriod" placeholder="Длительность">
-        </div>
-        <button type="submit" class="btn btn-default plan-form__btn-upload">Загрузить прайс</button>
-    </div>
-    <!-- /stage block -->
-
-    <a href="#" id="add-stage" class="btn btn-primary active" role="button">Добавить этап</a>
-
-    <button type="button" class="btn btn-default btn-lg plan-form__btn-save">Сохранить</button>
+    <!-- /Save plan -->
 </form>
-<!-- /plan-form -->
+<!-- /Plan form -->

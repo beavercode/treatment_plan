@@ -3,6 +3,7 @@ namespace UTI\Controller;
 
 use UTI\Core\Controller;
 use UTI\Core\System;
+use UTI\Lib\Data;
 use UTI\Model\PlanModel;
 
 /**
@@ -23,19 +24,38 @@ class PlanController extends Controller
 
     public function main($params)
     {
-        $data['form'] = $this->model->processForm();
-        $data['links']['logout'] = $this->
-        router->generate('auth.logout');
-        //todo written above
+        $data = new Data(URI_BASE);
 
-        //todo fill the form, show action menu
+        //Ajax stages
+        if (isset($_POST['stage'])) {
+            // get stages 'id => name' from DB
+            $data('stages', $this->model->getFormStages());
+
+            $this->model->processFormStages(
+                $_POST['stage'],
+                $this->view->load('plan_form_stage.php', $data),
+                5,
+                1
+            );
+
+            return null;
+        }
+        //Usual page render
+
+        // get doctors 'id => name' from DB
+        $data('doctors', $this->model->getFormDoctors());
+        // action link
+        $data('link.action', $this->router->generate('plan.add'));
+        // logout link
+        $data('link.logout', $this->router->generate('auth.logout'));
+
         $this->view->render('plan_form.php', 'plan_template.php', $data);
     }
 
     public function add($params)
     {
-        //todo generate digest pdf
-        echo __METHOD__;
+        var_dump($_SERVER);
+        var_dump($_POST);
     }
 
     // -------------- NEXT ACTIONS IS OPTIONAL -------------- //
