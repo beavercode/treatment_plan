@@ -18,7 +18,9 @@
 
 return [
     'app' => [
+        'env'      => 'dev',
         'uri_base' => '/',
+        'html'     => 'min',
         'tpl'      => 'storage/tpl/',
         'session'  => [
             'dir'      => 'storage/sessions/',

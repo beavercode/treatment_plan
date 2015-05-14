@@ -12,7 +12,9 @@ ini_set('short_open_tag', 1);
 
 try {
     define('APP_DIR', __DIR__ . '/src/');
+
     System::loadConf(APP_DIR . 'config.php');
+    define('APP_ENV', System::getConfig('app.env'));
     define('URI_BASE', System::getConfig('app.uri_base'));
     define('APP_TPL', APP_DIR . System::getConfig('app.tpl'));
     define('APP_SES', APP_DIR . System::getConfig('app.session.dir'));
@@ -21,14 +23,16 @@ try {
     define('APP_PDF_IN', APP_DIR . System::getConfig('app.pdf_in'));
     define('APP_PDF_OUT', APP_DIR . System::getConfig('app.pdf_out'));
     define('APP_DOCX', APP_DIR . System::getConfig('app.docx'));
+    define('HTML_TYPE', System::getConfig('app.html'));
 
     $router = new Router($_SERVER, URI_BASE);
     $router->run();
-
 } catch (AppException $e) {
-    //enable for prod
-    //System::log(APP_LOG . 'exceptions.log', $e->getError());
-    echo $e->getError();
+    if (APP_ENV === 'prod') {
+        System::log(APP_LOG . 'exceptions.log', $e->getError());
+    } else {
+        echo $e->getError();
+    }
 } catch (\Exception $e) {
     die('Exception fired, really?!');
 }
