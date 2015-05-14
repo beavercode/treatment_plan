@@ -2,6 +2,9 @@
 namespace UTI\Lib;
 
 /**
+ * Session handling
+ *
+ * @src
  * http://amdy.su/work-with-session/
  * http://phpfaq.ru/sessions
  * http://phpclub.ru/detail/article/sessions
@@ -57,15 +60,11 @@ class Session
      */
     public function get($key = null)
     {
-        /* FUN =)
-         * return null === $key
-            ? ($this->session ?: null)
-            : (array_key_exists($key, $this->session) ? $this->session[$key] : null);*/
         if (null === $key) {
-            return $this->session ?: null;
+            return $this->session ?: false;
         }
 
-        return array_key_exists($key, $this->session) ? $this->session[$key] : null;
+        return array_key_exists($key, $this->session) ? $this->session[$key] : false;
     }
 
     /**
