@@ -3,7 +3,7 @@
 module.exports = function (grunt) {
     var conf = {
         buildDir: './../assets',
-        htmlDir: './../html',
+        htmlDir: './../dev_html',
         sassDir: 'sass',
         sassExt: 'scss',
         browserPrefix: ['last 2 versions', '> 1%', 'ie 8'],

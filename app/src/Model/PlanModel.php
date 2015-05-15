@@ -13,6 +13,7 @@ class PlanModel extends Model
 
     public function processForm()
     {
+        return true;
     }
 
     /**
@@ -24,7 +25,7 @@ class PlanModel extends Model
      * @param $maxStages int
      * @param $minStages int
      */
-    public function processFormStages($action, $rawHtml, $maxStages, $minStages)
+    public function crateStages($action, $rawHtml, $maxStages, $minStages)
     {
         //todo security check through $_SERVER['HTTP_REFERER']
 

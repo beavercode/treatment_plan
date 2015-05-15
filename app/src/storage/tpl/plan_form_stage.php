@@ -25,7 +25,9 @@
     <div class="form-group col-sm-2">
         <div class="col-sm-12">
             <!--todo: interactive upload-->
-            <input type="file" id="inputFile{{stage}}" class="file btn btn-default" name="inputFile{{stage}}">
+            <input type="file" id="inputFile{{stage}}" class="col-sm-12" name="inputFile{{stage}}"
+                   data-filename-placement="inside" title="Прайс">
+            <!--<input type="file" class="file btn btn-default" name="inputFile{{stage}}">-->
         </div>
     </div>
 </div>

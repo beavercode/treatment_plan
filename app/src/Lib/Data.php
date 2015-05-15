@@ -83,8 +83,8 @@ class Data
      */
     public function entities($key)
     {
-        if ($value = $this->get($key)) {
-            return htmlentities($value, ENT_QUOTES, 'UTF-8');
+        if (isset($this->data[$key])) {
+            return htmlentities($this->data[$key], ENT_QUOTES, 'UTF-8');
         }
 
         return null;

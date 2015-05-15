@@ -2,7 +2,7 @@
 /** @var \UTI\Lib\Data $data */
 ?>
 <!-- Plan form -->
-<form class="form-horizontal form" role="form" name="plan" action="/add" method="post">
+<form class="form-horizontal form" role="form" name="plan" action="<?= $data('link.action') ?>" method="post">
     <!-- Common info -->
     <div class="form-group col-sm-7">
         <label for="inputName" class="col-sm-4 control-label">Введите имя</label>
@@ -17,7 +17,7 @@
 
         <div class="col-sm-8">
             <select id="inputDoctor" class="selectpicker show-tick" name="inputDoctor" data-width="100%">
-                <?php foreach ($data('doctors') as $doctor_key => $doctor_val): ?>
+                <?php foreach ($data('form.doctors') as $doctor_key => $doctor_val): ?>
                     <option value="<?= $doctor_key ?>"><?= $doctor_val ?></option>
                 <?php endforeach; ?>
             </select>

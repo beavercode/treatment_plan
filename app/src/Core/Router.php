@@ -59,7 +59,7 @@ class Router
                 'controller' => 'Plan',
                 'action'     => 'main'
             ]);
-        $this->router->add('plan.add', $this->uriBase . 'add')
+        $this->router->add('plan.add', $this->uriBase . 'add{/hash}')
             ->addValues([
                 'controller' => 'Plan',
                 'action'     => 'add'

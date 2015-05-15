@@ -4,6 +4,7 @@ namespace UTI\Controller;
 use UTI\Core\Controller;
 use UTI\Core\System;
 use UTI\Lib\Data;
+use UTI\Lib\Form;
 use UTI\Model\PlanModel;
 
 /**
@@ -26,12 +27,12 @@ class PlanController extends Controller
     {
         $data = new Data(URI_BASE);
 
-        //Ajax stages
+        // Make stages for AJAX
         if (isset($_POST['stage'])) {
-            // get stages 'id => name' from DB
+            //todo get stages 'id => name' from DB
             $data('stages', $this->model->getFormStages());
 
-            $this->model->processFormStages(
+            $this->model->crateStages(
                 $_POST['stage'],
                 $this->view->load('plan_form_stage.php', $data),
                 5,
@@ -40,13 +41,13 @@ class PlanController extends Controller
 
             return null;
         }
-        //Usual page render
 
-        // get doctors 'id => name' from DB
-        $data('doctors', $this->model->getFormDoctors());
-        // action link
-        $data('link.action', $this->router->generate('plan.add'));
-        // logout link
+        //Usual page render
+        //todo get doctors 'id => name' from DB
+        $data('form.doctors', $this->model->getFormDoctors());
+        // Links
+        //$data('link.action', $this->router->generate('plan.add'));
+        $data('link.action', '/form/add');
         $data('link.logout', $this->router->generate('auth.logout'));
 
         $this->view->render('plan_form.php', 'plan_template.php', $data);
@@ -54,6 +55,9 @@ class PlanController extends Controller
 
     public function add($params)
     {
+        // Process form
+        echo $this->model->processForm();
+
         var_dump($_SERVER);
         var_dump($_POST);
     }

@@ -53,7 +53,7 @@
                                 <!--</li>-->
                                 <!--<li><a href="#doctors">Врачи</a></li>-->
                                 <!--<li><a class="disabled" href="#plans">Планы</a></li>-->
-                                <li><a href="<?= $data('links.logout') ?>">Выйти</a></li>
+                                <li><a href="<?= $data('link.logout') ?>">Выйти</a></li>
                             </ul>
 
                             <!-- search -->

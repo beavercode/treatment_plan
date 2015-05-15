@@ -25,20 +25,25 @@
  * @param container
  */
 function myAjaxContainer(url, container) {
+    var requestData = {"stage": "init"};
     //init stage
-    myAjax(url, "init", function (data) {
+    myAjax(url, requestData, function (data) {
         //show stage html with proper #number
         $(data.html).appendTo(container);
         //fix TW Select
         loadTWSelect('.selectpicker', {size: 7});
+        //fix TW file input
+        $("#inputFile" + data.stages).bootstrapFileInput();
 
         //debug:
-        console.log('Init..., num stages#' + data.stages);
+        console.log('Init... stages#' + data.stages);
     });
 
     //add stage
     $('#add-stage').on('click', function () {
-        myAjax(url, "add", function (data) {
+        var requestData = {"stage": "add"};
+
+        myAjax(url, requestData, function (data) {
             if (data.limit) {
                 return;
             }
@@ -46,6 +51,8 @@ function myAjaxContainer(url, container) {
             $(data.html).appendTo(container);
             //fix TW Select
             loadTWSelect('.selectpicker', {size: 7});
+            //fix TW file input
+            $("#inputFile" + data.stage).bootstrapFileInput();
             //Add / Remove buttons handling
             showHideButton('#remove-stage', '#add-stage', data.maxStages, data.stage);
 
@@ -56,7 +63,9 @@ function myAjaxContainer(url, container) {
 
     //delete stage
     $('#remove-stage').on('click', function () {
-        myAjax(url, "delete", function (data) {
+        var requestData = {"stage": "delete"};
+
+        myAjax(url, requestData, function (data) {
             if (data.limit) {
                 return;
             }
@@ -83,7 +92,7 @@ function myAjax(url, action, okFunc) {
         type: "post",
         dataType: "json",
         url: url,
-        data: {"stage": action},
+        data: action,
         success: okFunc,
         error: function (jqxhr, textStatus, error) {
             var err = textStatus + ", " + error;
