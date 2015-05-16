@@ -29,17 +29,21 @@ class AuthController extends Controller
      */
     public function login()
     {
-        $data = new Data(URI_BASE);
-        $data('form', $this->model->processForm());
+        $data = $this->data;
+        $this->view->set('login_template.php', $data, ['login_form']);
+
+        $data('title', 'Авторизация');
+        $data('login.form', $this->model->processForm());
 
         if ($this->model->isLogged()) {
             System::redirect2Url($this->router->generate('plan.main'), $_SERVER);
         }
-        $this->view->render('login_form.php', 'login_template.php', $data);
+
+        $this->view->render();
     }
 
     /**
-     * Log out of the system adn redirect to "auth.login"
+     * Log out of the system and redirect to "auth.login"
      */
     public function logout()
     {

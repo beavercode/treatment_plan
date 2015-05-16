@@ -1,6 +1,8 @@
 <?php
 namespace UTI\Core;
 
+use UTI\Lib\Data;
+
 abstract class Controller
 {
     /**
@@ -18,6 +20,11 @@ abstract class Controller
     protected $model;
 
     /**
+     * @var \UTI\Lib\Data
+     */
+    protected $data;
+
+    /**
      * Constructor.
      *
      * @param $router
@@ -25,6 +32,7 @@ abstract class Controller
     public function __construct($router)
     {
         $this->router = $router;
-        $this->view = new View(HTML_TYPE);
+        $this->view = new View(APP_TPL, HTML_TYPE);
+        $this->data = new Data(URI_BASE);
     }
 }

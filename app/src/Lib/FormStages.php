@@ -2,6 +2,8 @@
 
 namespace UTI\Lib;
 
+use UTI\Core\View;
+
 /**
  * Plan form stages handling
  *
@@ -10,26 +12,35 @@ namespace UTI\Lib;
  */
 class FormStages
 {
+    /**
+     * @var Session
+     */
     protected $session;
-    protected $rawHtml;
+
+    /**
+     * @var View
+     */
+    protected $view;
     protected $min;
     protected $max;
+    protected $template;
 
     /**
      * Init variables
-     * $min !== $max
      *
-     * @param Session $session
-     * @param string  $rawHtml
-     * @param int     $max
-     * @param int     $min
+     * @param $session
+     * @param $view
+     * @param $max
+     * @param $min
      */
-    public function __construct($session, $rawHtml, $max = 3, $min = 1)
+    public function __construct($session, $view, $max = 3, $min = 1)
     {
+        $this->session = $session;
+        $this->view = $view;
         $this->min = $min;
         $this->max = $max;
-        $this->rawHtml = $rawHtml;
-        $this->session = $session;
+
+        $this->template = 'plan_form_stage';
     }
 
     /**
@@ -58,7 +69,8 @@ class FormStages
         // Process html form 1+ stages
         $html = '';
         for ($i = 1, $num = $this->session->get('stage'); $i <= $num; ++$i) {
-            $html .= $this->populate($this->rawHtml, ['stage' => $i]);
+            //$html .= $this->populate($this->rawHtml, ['stageID' => $i]);
+            $html .= $this->view->block($this->template, ['plan.form.stageID' => $i]);
         }
 
         $data = [
@@ -66,7 +78,7 @@ class FormStages
             'html'   => $html
         ];
 
-        echo json_encode($data);
+        $this->sendJSON($data);
     }
 
     /**
@@ -78,7 +90,9 @@ class FormStages
 
         if ($this->isNotMax()) {
             $this->session->set('stage', $this->session->get('stage') + 1);
-            $html = $this->populate($this->rawHtml, ['stage' => $this->session->get('stage')]);
+            //$html = $this->populate($this->rawHtml, ['stageID' => $this->session->get('stage')]);
+            $html = $this->view->block($this->template, ['plan.form.stageID' => $this->session->get('stage')]);
+
             $data = [
                 'html'      => $html,
                 'stage'     => $this->session->get('stage'),
@@ -86,7 +100,7 @@ class FormStages
             ];
         }
 
-        echo json_encode($data);
+        $this->sendJSON($data);
     }
 
     /**
@@ -104,7 +118,7 @@ class FormStages
             $this->session->set('stage', $this->session->get('stage') - 1);
         }
 
-        echo json_encode($data);
+        $this->sendJSON($data);
     }
 
     /**
@@ -128,19 +142,14 @@ class FormStages
     }
 
     /**
-     * Parse and replace substring with values
+     * Send data as json
      *
      * @param $data
-     * @param $citizens
-     * @return mixed|string
      */
-    protected function populate($data, $citizens)
+    protected function sendJSON($data)
     {
-        $populated = '';
-        foreach ($citizens as $key => $val) {
-            $populated = str_replace('{{' . $key . '}}', $val, $data);
-        }
+        $json = json_encode($data);
 
-        return $populated;
+        echo $json;
     }
 }

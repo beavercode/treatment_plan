@@ -33,7 +33,7 @@ function myAjaxContainer(url, container) {
         //fix TW Select
         loadTWSelect('.selectpicker', {size: 7});
         //fix TW file input
-        $("#inputFile" + data.stages).bootstrapFileInput();
+        $("#file" + data.stages).bootstrapFileInput();
 
         //debug:
         console.log('Init... stages#' + data.stages);
@@ -52,7 +52,7 @@ function myAjaxContainer(url, container) {
             //fix TW Select
             loadTWSelect('.selectpicker', {size: 7});
             //fix TW file input
-            $("#inputFile" + data.stage).bootstrapFileInput();
+            $("#file" + data.stage).bootstrapFileInput();
             //Add / Remove buttons handling
             showHideButton('#remove-stage', '#add-stage', data.maxStages, data.stage);
 

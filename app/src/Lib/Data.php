@@ -22,21 +22,21 @@ class Data
     protected $data = [];
 
     /**
-     * Set base uri
+     * Set view and base uri
      *
-     * @param $uriBase
+     * @param string         $uriBase
      */
     public function __construct($uriBase)
     {
-        $this->data['uri_base'] = $uriBase;
+        $this->data['base'] = $uriBase;
     }
 
     /**
      * Set and get values
      *
-     * @param      $key
-     * @param null $value
-     * @return bool|null
+     * @param null|string $key
+     * @param mixed       $value
+     * @return mixed
      */
     public function __invoke($key = null, $value = null)
     {
@@ -51,7 +51,7 @@ class Data
             return true;
         }
 
-        return $this->data['uri_base'];
+        return $this->data['base'];
     }
 
     /**

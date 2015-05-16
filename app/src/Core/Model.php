@@ -27,6 +27,6 @@ abstract class Model
      */
     public function isLogged()
     {
-        return (bool) $this->session->get('auth');
+        return $this->session->get('auth');
     }
 }

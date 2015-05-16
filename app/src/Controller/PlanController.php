@@ -4,7 +4,6 @@ namespace UTI\Controller;
 use UTI\Core\Controller;
 use UTI\Core\System;
 use UTI\Lib\Data;
-use UTI\Lib\Form;
 use UTI\Model\PlanModel;
 
 /**
@@ -13,6 +12,9 @@ use UTI\Model\PlanModel;
  */
 class PlanController extends Controller
 {
+    /**
+     * @param $router
+     */
     public function __construct($router)
     {
         parent::__construct($router);
@@ -23,43 +25,60 @@ class PlanController extends Controller
         }
     }
 
-    public function main($params)
+    public function index()
     {
-        $data = new Data(URI_BASE);
+        // Data::__call() doest work on $this-data
+        $data = $this->data;
+        // Set view templates
+        $this->view->set('plan_template.php', $data, ['plan_form', 'plan_form_stage']);
+        // Links
+        $data('plan.logout', $this->router->generate('auth.logout'));
+        $data('title', 'План лечеиня');
 
-        // Make stages for AJAX
-        if (isset($_POST['stage'])) {
-            //todo get stages 'id => name' from DB
-            $data('stages', $this->model->getFormStages());
-
-            $this->model->crateStages(
-                $_POST['stage'],
-                $this->view->load('plan_form_stage.php', $data),
-                5,
-                1
-            );
-
-            return null;
+        // Initialize form with data and handle ajax requests
+        if ($this->model->makeForm($this->view, $data, 5)) {
+            //return true;
+        }
+        $this->model->processForm($data);
+        // if ok go to data processing, else save previous values and emit form again
+        if ($this->model->isFormPassed()) {
+            var_dump($_POST);
         }
 
-        //Usual page render
-        //todo get doctors 'id => name' from DB
-        $data('form.doctors', $this->model->getFormDoctors());
-        // Links
-        //$data('link.action', $this->router->generate('plan.add'));
-        $data('link.action', '/form/add');
-        $data('link.logout', $this->router->generate('auth.logout'));
 
-        $this->view->render('plan_form.php', 'plan_template.php', $data);
+
+        /*// get pdf if ready
+        if ($hash = $this->model->isPdfReady()) {
+            System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
+        }*/
+
+        $this->view->render();
     }
 
-    public function add($params)
+    public function get($params)
     {
-        // Process form
-        echo $this->model->processForm();
+    }
 
-        var_dump($_SERVER);
-        var_dump($_POST);
+    // todo
+    public function main2()
+    {
+        $data = new Data(URI_BASE);
+        $data('plan_form', $this->model->processForm());
+
+        if ($this->model->isPdfReady()) {
+            $hash = $this->model->getPdfName();
+            System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
+        }
+        $this->view->render('plan_result.php', 'login_template.php', $data);
+    }
+
+    // todo
+    public function get2($params)
+    {
+        $data = new Data(URI_BASE);
+        $data('pdf', $this->model->getPdf($params['hash']));
+
+        $this->view->render('plan_result.php', 'plan_template.php', $data);
     }
 
     // -------------- NEXT ACTIONS IS OPTIONAL -------------- //

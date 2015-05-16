@@ -4,35 +4,71 @@ namespace UTI\Core;
 
 use UTI\Lib\MinifyHTML;
 
+/**
+ * Class View
+ * @package UTI\Core
+ */
 class View
 {
+    /**
+     * Stores absolute path to file
+     * @var string
+     */
+    protected $dir;
+
+    /**
+     * @var string
+     */
+    protected $template;
+
+    /**
+     * Data to inject into loaded file
+     * @var \UTI\Lib\Data
+     */
+    protected $data;
+
+    /**
+     * Array's pairs what looks like: "blockName" => "path"
+     * @var array
+     */
+    protected $blocks;
+
+    /**
+     * Class used for minimisation of HTML
+     * @var MinifyHTML
+     */
     protected $compressor;
 
-    public function __construct($compression = 'raw')
+    /**
+     * @param string $dir
+     * @param string $compression Flag for minimisation:
+     * 'min': minify HTMLs
+     * 'raw': not, default
+     */
+    public function __construct($dir, $compression = 'raw')
     {
-        //todo compression level: min, comments, raw
+        $this->dir = $dir;
 
         if ($compression === 'min') {
             $this->compressor = new MinifyHTML();
         }
     }
 
-    /**
-     * Show
-     *
-     * @param string $contentView виды отображающие контент страниц;
-     * @param string $templateView общий для всех страниц шаблон
-     * @param null   $data массив, содержащий элементы контента страницы. Обычно заполняется в модели.
-     * @return string
-     */
-    public function render($contentView, $templateView, $data = null)
+    public function set($template, $data, array $blocks = [])
     {
-        $contentView = APP_TPL . $contentView;
-        $templateView = APP_TPL . $templateView;
+        $this->data = $data;
+        $this->blocks = $blocks;
+        $this->template = $template;
+    }
 
-        ob_start();
-        include "$templateView";
-        $html = ob_get_clean();
+    /**
+     * Load page template and set page blocks
+     */
+    public function render()
+    {
+        $html = $this->load($this->template);
+
+        //todo caching
 
         //minify html if need
         if (is_object($this->compressor)) {
@@ -43,19 +79,57 @@ class View
     }
 
     /**
-     * Load template file
+     * Load block with name what is in blocks
      *
-     * @param         $fileName
-     * @param  null   $data
+     * @param string $name Block name
+     * @param array  $additionalData
+     * @return null|string
+     */
+    public function block($name, array $additionalData = [])
+    {
+        $data = $this->data;
+        foreach ($additionalData as $key => $val) {
+            $data($key, $val);
+        }
+
+        if (! in_array($name, $this->blocks, true)) {
+            throw new AppException('No such block "' . $name . '""');
+        }
+
+        return $this->load($name . '.php');
+    }
+
+    /**
+     * Load file
+     *
+     * @param string $file
      * @return string
      */
-    public function load($fileName, $data = null)
+    protected function load($file)
     {
-        $file = APP_TPL . $fileName;
+        $path = $this->dir . $file;
 
+        if (! is_file($path)) {
+            throw new AppException('Failed to load ' . $path);
+        }
+        //inject variables used in template files
+        $data = $this->data;
         ob_start();
-        include $file;
+        include $path;
 
         return ob_get_clean();
+    }
+
+    /**
+     * todo see later
+     */
+    protected function populate($data, array $citizens)
+    {
+        $populated = '';
+        foreach ($citizens as $key => $val) {
+            $populated = str_replace('{{' . $key . '}}', $val, $data);
+        }
+
+        return $populated;
     }
 }

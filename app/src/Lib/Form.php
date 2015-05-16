@@ -16,6 +16,11 @@ class Form
     protected $name;
     protected $validate = [];
 
+    /**
+     * Initialize with form name
+     *
+     * @param string $value
+     */
     public function __construct($value = 'form')
     {
         $this->name = $value;
@@ -46,6 +51,26 @@ class Form
             : $default;
     }
 
+    public function getArrayValue($field, $template, array $array)
+    {
+        $cur = '';
+        foreach ($array as $key => $val) {
+            str
+            
+        }
+    }
+
+    //todo
+    protected function populate($data, array $citizens)
+    {
+        $populated = '';
+        foreach ($citizens as $key => $val) {
+            $populated = str_replace('{{' . $key . '}}', $val, $data);
+        }
+
+        return $populated;
+    }
+
     /**
      * Set field value of the form
      *
@@ -55,6 +80,21 @@ class Form
     public function setValue($field, $value)
     {
         $_POST[$this->getName()][$field] = $value;
+    }
+
+    /**
+     * Set field value of the form from array
+     * Search in array for value and return key
+     *
+     * @param string $field Key of super global array $_POST
+     * @param array  $array Array to search
+     * @param string $search Value to search
+     */
+    public function setArrayValue($field, array $array, $search)
+    {
+        if ($value = array_search($search, $array, true)) {
+            $_POST[$this->getName()][$field] = $value;
+        }
     }
 
     /**
@@ -80,16 +120,9 @@ class Form
             return array_key_exists($field, $this->validate)
                 ? $this->validate[$field]
                 : false;
-        } else {
-            return $this->validate;
         }
 
-//        return $field ? array_key_exists($field, $this->validate) : (bool)$this->validate;
-    }
-
-    public function errorMessage($field)
-    {
-        return $this->validate[$field];
+        return $this->validate;
     }
 
     /**

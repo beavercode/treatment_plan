@@ -1,25 +1,35 @@
 <?php
 /** @var \UTI\Lib\Data $data */
+/** @var \UTI\Lib\Form $form */
+$form = $data('plan.form');
 ?>
 <!-- Plan form -->
-<form class="form-horizontal form" role="form" name="plan" action="<?= $data('link.action') ?>" method="post">
+<form class="form-horizontal form" role="form" name="<?= $form->getName() ?>" action="" method="post">
     <!-- Common info -->
     <div class="form-group col-sm-7">
-        <label for="inputName" class="col-sm-4 control-label">Введите имя</label>
+        <label for="fio" class="col-sm-4 control-label">Введите имя</label>
 
         <div class="col-sm-8">
-            <input type="text" id="inputName" class="form-control" name="inputName"
+            <input type="text" id="fio" class="form-control" name="<?= $form->getName() ?>[fio]"
+                   value="<?= $form->getValue('fio') ?>"
                    placeholder="Фамилия Имя Отчество">
         </div>
     </div>
     <div class="form-group col-sm-5">
-        <label for="inputDoctor" class="col-sm-4 control-label">Врач</label>
+        <label for="doctor" class="col-sm-4 control-label">Врач</label>
 
         <div class="col-sm-8">
-            <select id="inputDoctor" class="selectpicker show-tick" name="inputDoctor" data-width="100%">
-                <?php foreach ($data('form.doctors') as $doctor_key => $doctor_val): ?>
+            <select id="doctor" class="selectpicker show-tick" name="<?= $form->getName() ?>[doctor]"
+                    data-width="100%">
+                <?php foreach ($data('plan.form.doctors') as $doctor_key => $doctor_val): ?>
                     <option value="<?= $doctor_key ?>"><?= $doctor_val ?></option>
                 <?php endforeach; ?>
+
+                <?= $form->getArrayValue(
+                    'doctor',
+                    '<option {{cur}} value="{{key}}">{{val}}</option>',
+                    $data('plan.form.doctors'))
+                ?>
             </select>
         </div>
     </div>

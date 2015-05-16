@@ -57,18 +57,14 @@ class Router
         $this->router->add('plan.main', $this->uriBase)
             ->addValues([
                 'controller' => 'Plan',
-                'action'     => 'main'
+                'action'     => 'index'
             ]);
-        $this->router->add('plan.add', $this->uriBase . 'add{/hash}')
+        $this->router->add('plan.get', $this->uriBase . 'get{/hash}')
             ->addValues([
                 'controller' => 'Plan',
-                'action'     => 'add'
+                'action'     => 'get'
             ]);
-//        $this->router->add('plan.get', '/get')
-//            ->addValues(array(
-//                'controller' => 'Plan',
-//                'action'     => 'get'
-//            ));
+
 
         // OPTIONAL OPTIONAL OPTIONAL OPTIONAL OPTIONAL OPTIONAL OPTIONAL OPTIONAL
         $this->router->add('plan.show', $this->uriBase . 'show')
@@ -103,13 +99,12 @@ class Router
         $path = parse_url($this->server['REQUEST_URI'], PHP_URL_PATH);
         // get the route based on the path and server
         $route = $this->router->match($path, $this->server);
-
         if (! $route) {
             // no route object was returned
             throw new AppException('No such routes');
-            //todo header('Location: /plan');
-            //$this->router->generate('auth.login');
+            //System::redirect2Url($this->router->generate('plan.main'), $_SERVER);
         }
+
         # DISPATCHING
         $params = $route->params;
         $class = '\\UTI\\Controller\\' . $params['controller'] . 'Controller';
