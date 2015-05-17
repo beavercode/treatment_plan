@@ -33,7 +33,14 @@ function myAjaxContainer(url, container) {
         //fix TW Select
         loadTWSelect('.selectpicker', {size: 7});
         //fix TW file input
-        $("#file" + data.stages).bootstrapFileInput();
+        for (var i = 1; i <= data.stages; i++) {
+            $("#file" + i).bootstrapFileInput();
+        }
+        //todo show 'delete' button when 'stages > 1'
+        //todo hide 'show' button if 'min === max'
+        if (data.stages > 1) {
+            $('#remove-stage').show();
+        }
 
         //debug:
         console.log('Init... stages#' + data.stages);
@@ -117,8 +124,8 @@ function loadTWSelect(container, params) {
  * Show / hide by selector
  * Use null to hide parameter if no need to hide
  *
- * @param show
- * @param hide
+ * @param show Selector to show
+ * @param hide Selector to hide
  * @param minMax
  * @param current
  */

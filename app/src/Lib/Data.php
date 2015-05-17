@@ -40,15 +40,15 @@ class Data
      */
     public function __invoke($key = null, $value = null)
     {
-        // get
-        if ($key && isset($this->data[$key])) {
-            return $this->data[$key];
-        }
-        // set
-        if (null !== $value && ! isset($this->data[$key])) {
+        // set, overwrite existing value
+        if (null !== $value) {
             $this->data[$key] = $value;
 
             return true;
+        }
+        // get
+        if ($key && isset($this->data[$key])) {
+            return $this->data[$key];
         }
 
         return $this->data['base'];

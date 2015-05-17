@@ -64,12 +64,11 @@ class FormStages
      */
     public function init()
     {
-        $this->session->set('stage', $this->min);
+//        $this->session->set('stage', $this->min);
 
         // Process html form 1+ stages
         $html = '';
         for ($i = 1, $num = $this->session->get('stage'); $i <= $num; ++$i) {
-            //$html .= $this->populate($this->rawHtml, ['stageID' => $i]);
             $html .= $this->view->block($this->template, ['plan.form.stageID' => $i]);
         }
 
@@ -90,7 +89,6 @@ class FormStages
 
         if ($this->isNotMax()) {
             $this->session->set('stage', $this->session->get('stage') + 1);
-            //$html = $this->populate($this->rawHtml, ['stageID' => $this->session->get('stage')]);
             $html = $this->view->block($this->template, ['plan.form.stageID' => $this->session->get('stage')]);
 
             $data = [
@@ -149,7 +147,14 @@ class FormStages
     protected function sendJSON($data)
     {
         $json = json_encode($data);
+        //todo
+        // http://stackoverflow.com/questions/10579116/how-to-flush-data-to-browser-but-continue-executing
+        // http://stackoverflow.com/questions/3133209/how-to-flush-output-after-each-echo-call
+        // http://stackoverflow.com/questions/265073/php-background-processes
 
+        ob_start();
         echo $json;
+        flush();
+        ob_flush();
     }
 }

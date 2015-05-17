@@ -46,29 +46,34 @@ class Form
      */
     public function getValue($field, $default = '')
     {
-        return array_key_exists($field, $_POST[$this->getName()])
-            ? htmlspecialchars($_POST[$this->getName()][$field], ENT_QUOTES, 'utf-8')
+
+        return (isset($_POST[$this->getName()]) && $_POST[$this->getName()][$field])
+            ? htmlspecialchars($_POST[$this->getName()][$field], ENT_QUOTES, 'UTF-8')
             : $default;
+
+        /*return array_key_exists($field, $_POST[$this->getName()])
+            ? htmlspecialchars($_POST[$this->getName()][$field], ENT_QUOTES, 'utf-8')
+            : $default;*/
     }
 
-    public function getArrayValue($field, $template, array $array)
+    public function getArrayValue($field, $template, array $array, $optional = '')
     {
-        $cur = '';
+        $res = '';
         foreach ($array as $key => $val) {
-            str
-            
+            $res .= str_replace(
+                ['{{key}}', '{{val}}', '{{opt}}'],
+                [
+                    htmlspecialchars($key, ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars($val, ENT_QUOTES, 'UTF-8'),
+                    (isset($_POST[$this->getName()][$field]) && (int)$_POST[$this->getName()][$field] === $key)
+                        ? $optional
+                        : ''
+                ],
+                $template
+            );
         }
-    }
 
-    //todo
-    protected function populate($data, array $citizens)
-    {
-        $populated = '';
-        foreach ($citizens as $key => $val) {
-            $populated = str_replace('{{' . $key . '}}', $val, $data);
-        }
-
-        return $populated;
+        return $res;
     }
 
     /**
@@ -90,10 +95,10 @@ class Form
      * @param array  $array Array to search
      * @param string $search Value to search
      */
-    public function setArrayValue($field, array $array, $search)
+    public function setArrayValue($field, array $array, $value)
     {
-        if ($value = array_search($search, $array, true)) {
-            $_POST[$this->getName()][$field] = $value;
+        if ($res = array_search($value, $array, true)) {
+            $_POST[$this->getName()][$field] = $res;
         }
     }
 

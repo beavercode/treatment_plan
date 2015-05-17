@@ -1,8 +1,10 @@
 <?php
+
 namespace UTI\Model;
 
 use UTI\Core\Model;
 use UTI\Lib\Form;
+use UTI\Lib\FormStages;
 
 /**
  * Class PlanModel
@@ -10,11 +12,6 @@ use UTI\Lib\Form;
  */
 class PlanModel extends Model
 {
-    /**
-     * @var Form
-     */
-    protected $form;
-
     /**
      * Initialize form with data and handle ajax requests
      *
@@ -26,20 +23,15 @@ class PlanModel extends Model
      */
     public function makeForm($view, $data, $max, $min = 1)
     {
-        $this->form = new Form('plan_form');
-        $data('plan.form', $this->form);
-        $data('plan.form.doctors', $this->getFormDoctors());
-        $data('plan.form.stages', $this->getFormStages());
-
         // process Ajax request for add / remove form stage
-//        if (isset($_POST['stage'])) {
-//            // get an event
-//            $event = $_POST['stage'];
-//            $stages = new FormStages($this->session, $view, $max, $min);
-//            $stages->$event();
-//
-//            return $event;
-//        }
+        if (isset($_POST['stage'])) {
+            // get an event
+            $event = $_POST['stage'];
+            $stages = new FormStages($this->session, $view, $max, $min);
+            $stages->$event();
+
+            return $event;
+        }
 
         return false;
     }
@@ -58,13 +50,37 @@ class PlanModel extends Model
      * 9. concatenate pdf together
      * 10. return pdf file or link?
      */
-    public function processForm($data)
+    public function processForm($data, $view)
     {
-        $this->session->set('form', null);
-        // build form: doctors, stages selects, ajax negotiation
+        //$min = $this->session->get('stage') ?: 1;
+        $min = 1;
+        $max = 5;
+        $form = new Form('plan_form');
+        $data('plan.form', $form);
+        $data('plan.form.doctors', $this->getFormDoctors());
+        $data('plan.form.stages', $this->getFormStages());
 
-        if ($this->form->isSubmit()) {
-            //login check
+        // process Ajax request for add / remove form stage
+        if (isset($_POST['stage'])) {
+            // get an event
+            $event = $_POST['stage'];
+            $stages = new FormStages($this->session, $view, $max, $min);
+            $stages->$event();
+
+            //todo need to flush this out!!!
+        }
+
+        // form sent but no stage handling
+        if ($form->isSubmit() && ! isset($_POST['stage'])) {
+            //FIO check
+            $fioLength = 5;
+            if (! $form->getValue('fio') || mb_strlen($form->getValue('fio')) < $fioLength = 5) {
+                $form->setInvalid(
+                    'fio',
+                    'Введите "ФИО", пожалуйста. Длинна поля не менее ' . $fioLength . ' символов.'
+                );
+            }
+
             /*if (! $form->getValue('login')) {
                 $form->setInvalid('login', 'Введите "Логин", пожалуйста.');
             } elseif ($form->getValue('login') !== $userInfo['login']) {
@@ -77,22 +93,27 @@ class PlanModel extends Model
                 $form->setInvalid('password', 'Введенный "Пароль" неправильный.');
             }*/
             //no errors there
-            if (! $this->form->isInvalid()) {
-                $this->session->set('form', $this->form->getName());
+            if (! $form->isInvalid()) {
+                $this->session->set('form', $form->getName());
+                $this->session->set('stage', $min);
             }
         } else {
-            //default values
+            $this->session->set('form', null);
+            $this->session->set('stage', $min);
+            //form default values
+            $form->setValue('fio', '');
+            $form->setArrayValue('doctor', $data('plan.form.doctors'), '');
 
-            $this->form->setValue('fio', 'Petrov A.');
-            $this->form->setArrayValue('doctor', $data('plan.form.doctors'), 'Воронин М. В.');
-
-//            $form->setValue('password', 123);
+            for ($i = 1; $i <= $this->session->get('stage'); ++$i) {
+                $form->setValue('period' . $i, '');
+                $form->setArrayValue('stage' . $i, $data('plan.form.stages'), '');
+            }
         }
     }
 
     public function isFormPassed()
     {
-        return (bool) $this->session->get('form');
+        return (bool)$this->session->get('form');
     }
 
     /**
@@ -135,7 +156,8 @@ class PlanModel extends Model
         //todo get from DB, using stub for now
         return [
             5  => 'Катаева В. Р.',
-            24 => 'Воронин М. В.'
+            24 => 'Воронин М. В.',
+            31 => 'Павленко Я. И.'
         ];
     }
 }

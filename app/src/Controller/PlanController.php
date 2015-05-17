@@ -31,22 +31,17 @@ class PlanController extends Controller
         $data = $this->data;
         // Set view templates
         $this->view->set('plan_template.php', $data, ['plan_form', 'plan_form_stage']);
-        // Links
+        // Make page
         $data('plan.logout', $this->router->generate('auth.logout'));
         $data('title', 'План лечеиня');
 
-        // Initialize form with data and handle ajax requests
-        if ($this->model->makeForm($this->view, $data, 5)) {
-            //return true;
-        }
-        $this->model->processForm($data);
+        // Process form
+        $this->model->processForm($data, $this->view);
+
         // if ok go to data processing, else save previous values and emit form again
         if ($this->model->isFormPassed()) {
             var_dump($_POST);
         }
-
-
-
         /*// get pdf if ready
         if ($hash = $this->model->isPdfReady()) {
             System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
