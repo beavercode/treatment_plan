@@ -21,7 +21,7 @@
 /**
  * Container for ajax actions
  *
- * @param url
+ * @param url Form action parameter, current page by default
  * @param container
  */
 function myAjaxContainer(url, container) {
@@ -32,7 +32,7 @@ function myAjaxContainer(url, container) {
         $(data.html).appendTo(container);
         //fix TW Select
         loadTWSelect('.selectpicker', {size: 7});
-        //fix TW file input
+        //fix TW file input for each input[type=file], doing this at once breaks TB Input plugin markup
         for (var i = 1; i <= data.stages; i++) {
             $("#file" + i).bootstrapFileInput();
         }
@@ -76,7 +76,7 @@ function myAjaxContainer(url, container) {
             if (data.limit) {
                 return;
             }
-            $("#stage" + data.stage).removeEffect(400);
+            $("#stage" + data.stage).removeEffect(350);
             //Add / Remove buttons handling
             // data.minStages + 1 because data.stage = min + 1
             showHideButton('#add-stage', '#remove-stage', data.minStages + 1, data.stage);
@@ -103,7 +103,6 @@ function myAjax(url, action, okFunc) {
         success: okFunc,
         error: function (jqxhr, textStatus, error) {
             var err = textStatus + ", " + error;
-
             //debug:
             console.log("Request Failed: " + err);
         }
