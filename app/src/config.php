@@ -14,13 +14,25 @@
  *          url     todo
  *          pattern todo
  *          pass    todo
+ *
+ *****************
+  * App options *
+ *****************
+ *
+ * app.env Mode in which application runs
+ *  - dev
+ *  - prod
+ *
+ * app.html Get HTML as is (comments, whitespaces etc) or
+ *  - raw
+ *  - min
  */
 
 return [
     'app' => [
         'env'      => 'dev',
         'uri_base' => '/',
-        'html'     => 'min',
+        'html'     => 'raw',
         'tpl'      => 'storage/tpl/',
         'session'  => [
             'dir'      => 'storage/sessions/',

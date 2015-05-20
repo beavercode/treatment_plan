@@ -36,16 +36,25 @@ class PlanController extends Controller
         $data('title', 'План лечеиня');
 
         // Process form
-        $this->model->processForm($data, $this->view);
+        if ($this->model->processForm($data, $this->view) === false) {
+            // null if it was ajax
+            return;
+        }
 
         // if ok go to data processing, else save previous values and emit form again
         if ($this->model->isFormPassed()) {
-            var_dump($_POST);
+            //echo print_r($_POST, 1);
+
+            header('Content-Type: text/html; charset=utf-8');
+            var_dump($_POST); //breaks charset, use header('Content-Type: text/html; charset=utf-8');
         }
+
+
         /*// get pdf if ready
         if ($hash = $this->model->isPdfReady()) {
             System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
         }*/
+
 
         $this->view->render();
     }

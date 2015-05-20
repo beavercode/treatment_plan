@@ -16,12 +16,11 @@ class PlanModel extends Model
      * Initialize form with data and handle ajax requests
      *
      * @param     $view
-     * @param     $data
      * @param int $max
      * @param int $min
      * @return bool
      */
-    public function makeForm($view, $data, $max, $min = 1)
+    public function ajaxStages($view, $max, $min = 1)
     {
         // process Ajax request for add / remove form stage
         if (isset($_POST['stage'])) {
@@ -30,6 +29,7 @@ class PlanModel extends Model
             $stages = new FormStages($this->session, $view, $max, $min);
             $stages->$event();
 
+            //todo need to flush this out!!!
             return $event;
         }
 
@@ -53,25 +53,21 @@ class PlanModel extends Model
     public function processForm($data, $view)
     {
         //$min = $this->session->get('stage') ?: 1;
-        $min = 1;
-        $max = 5;
+        $stagesMin = 3;
+        $stagesMax = 5;
         $form = new Form('plan_form');
         $data('plan.form', $form);
         $data('plan.form.doctors', $this->getFormDoctors());
         $data('plan.form.stages', $this->getFormStages());
 
         // process Ajax request for add / remove form stage
-        if (isset($_POST['stage'])) {
-            // get an event
-            $event = $_POST['stage'];
-            $stages = new FormStages($this->session, $view, $max, $min);
-            $stages->$event();
-
-            //todo need to flush this out!!!
+        if ($this->ajaxStages($view, $stagesMax, $stagesMin)) {
+            //todo nicer!
+            return false;
         }
 
         // form sent but no stage handling
-        if ($form->isSubmit() && ! isset($_POST['stage'])) {
+        if ($form->isSubmit()) {
             //FIO check
             $fioLength = 5;
             if (! $form->getValue('fio') || mb_strlen($form->getValue('fio')) < $fioLength = 5) {
@@ -80,6 +76,10 @@ class PlanModel extends Model
                     'Введите "ФИО", пожалуйста. Длинна поля не менее ' . $fioLength . ' символов.'
                 );
             }
+
+            //Period check for stages
+            //if ()
+
 
             /*if (! $form->getValue('login')) {
                 $form->setInvalid('login', 'Введите "Логин", пожалуйста.');
@@ -95,13 +95,13 @@ class PlanModel extends Model
             //no errors there
             if (! $form->isInvalid()) {
                 $this->session->set('form', $form->getName());
-                $this->session->set('stage', $min);
+                $this->session->set('stage', $stagesMin);
             }
         } else {
             $this->session->set('form', null);
-            $this->session->set('stage', $min);
+            $this->session->set('stage', $stagesMin);
             //form default values
-            $form->setValue('fio', '');
+            $form->setValue('fio', 'default name');
             $form->setArrayValue('doctor', $data('plan.form.doctors'), '');
 
             for ($i = 1; $i <= $this->session->get('stage'); ++$i) {

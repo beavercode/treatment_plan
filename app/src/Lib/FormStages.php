@@ -2,6 +2,7 @@
 
 namespace UTI\Lib;
 
+use UTI\Core\AppException;
 use UTI\Core\View;
 
 /**
@@ -23,22 +24,25 @@ class FormStages
     protected $view;
     protected $min;
     protected $max;
+    protected $cur;
     protected $template;
 
     /**
      * Init variables
-     *
-     * @param $session
-     * @param $view
-     * @param $max
-     * @param $min
      */
-    public function __construct($session, $view, $max = 3, $min = 1)
+    public function __construct(array $option = [])
     {
+        if (! $option || array_filter($option, function () {
+                
+            })
+        ) {
+            throw new AppException('Wrong parameter options!');
+        }
         $this->session = $session;
         $this->view = $view;
         $this->min = $min;
         $this->max = $max;
+        $this->cur = $cur;
 
         $this->template = 'plan_form_stage';
     }
@@ -152,9 +156,9 @@ class FormStages
         // http://stackoverflow.com/questions/3133209/how-to-flush-output-after-each-echo-call
         // http://stackoverflow.com/questions/265073/php-background-processes
 
-        ob_start();
+//        ob_start();
         echo $json;
-        flush();
-        ob_flush();
+//        flush();
+//        ob_flush();
     }
 }
