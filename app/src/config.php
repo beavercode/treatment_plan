@@ -32,7 +32,7 @@ return [
     'app' => [
         'env'      => 'dev',
         'uri_base' => '/',
-        'html'     => 'raw',
+        'html'     => 'min',
         'tpl'      => 'storage/tpl/',
         'session'  => [
             'dir'      => 'storage/sessions/',

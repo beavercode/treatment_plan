@@ -53,18 +53,29 @@ class Router
                 'controller' => 'Auth',
                 'action'     => 'logout'
             ]);
-        //plan
+
+        //PLAN
+        //catch ajax main first
+        $this->router->add('plan.main.ajax', $this->uriBase)
+            ->addValues([
+                'controller' => 'Plan',
+                'action'     => 'indexAjax'
+            ])
+            ->addServer([
+                'HTTP_ACCEPT' => 'application/json(;q=(\*|0\.01|[0\.[1-9]]))?'
+            ]);
+        //catch normal main
         $this->router->add('plan.main', $this->uriBase)
             ->addValues([
                 'controller' => 'Plan',
                 'action'     => 'index'
             ]);
+
         $this->router->add('plan.get', $this->uriBase . 'get{/hash}')
             ->addValues([
                 'controller' => 'Plan',
                 'action'     => 'get'
             ]);
-
 
         // OPTIONAL OPTIONAL OPTIONAL OPTIONAL OPTIONAL OPTIONAL OPTIONAL OPTIONAL
         $this->router->add('plan.show', $this->uriBase . 'show')

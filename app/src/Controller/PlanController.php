@@ -5,6 +5,7 @@ use UTI\Core\Controller;
 use UTI\Core\System;
 use UTI\Lib\Data;
 use UTI\Model\PlanModel;
+use UTI\Model\PlanStagesModel;
 
 /**
  * Class Plan
@@ -36,27 +37,34 @@ class PlanController extends Controller
         $data('title', 'План лечеиня');
 
         // Process form
-        if ($this->model->processForm($data, $this->view) === false) {
-            // null if it was ajax
-            return;
-        }
-
-        // if ok go to data processing, else save previous values and emit form again
-        if ($this->model->isFormPassed()) {
+        $this->model->processForm($data);
+/*        if ($this->model->isFormProcessed()) {
             //echo print_r($_POST, 1);
-
-            header('Content-Type: text/html; charset=utf-8');
-            var_dump($_POST); //breaks charset, use header('Content-Type: text/html; charset=utf-8');
-        }
-
+            //breaks charset, use header('Content-Type: text/html; charset=utf-8');
+            var_dump($_POST);
+        }*/
 
         /*// get pdf if ready
         if ($hash = $this->model->isPdfReady()) {
             System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
         }*/
 
-
         $this->view->render();
+    }
+
+    /**
+     * Process ajax request for stages
+     */
+    public function indexAjax()
+    {
+        if (isset($_POST['stage'])) {
+            // get an event
+            $event = $_POST['stage'];
+
+            //todo make view generation outside of the business logic
+            $stages = new PlanStagesModel($this->view, 5, 1);
+            $stages->$event();
+        }
     }
 
     public function get($params)

@@ -13,17 +13,33 @@ namespace UTI\Lib;
  */
 class Form
 {
+    /**
+     * @var string Form name
+     */
     protected $name;
+    /**
+     * @var Form method
+     */
+    protected $method;
+
+    /**
+     * @var array Error's array
+     */
     protected $validate = [];
 
     /**
      * Initialize with form name
      *
-     * @param string $value
+     * @param string      $value
+     * @param null|string $method Form method, POST as default
      */
-    public function __construct($value = 'form')
+    public function __construct($value = 'form', $method = '')
     {
         $this->name = $value;
+        if ($method === 'get') {
+            $this->method =& $_GET;
+        }
+        $this->method =& $_POST;
     }
 
     /**
@@ -37,6 +53,30 @@ class Form
     }
 
     /**
+     * Save form data from method array ($_POST, $_GET)
+     * @param array $default
+     * @return array|string
+     */
+    public function save(array $default = [])
+    {
+        return (isset($this->method[$this->getName()]))
+            ? $this->method[$this->getName()]
+            : $default;
+    }
+
+    /**
+     * Load form data from SESSION to method array ($_POST, $_GET)
+     *
+     * @param false|array $formData
+     */
+    public function load($formData)
+    {
+        if (false !== $formData) {
+            $this->method[$this->getName()] = $formData;
+        }
+    }
+
+    /**
      * Get field value of the form.
      * Escaping characters to prevent XSS
      *
@@ -46,14 +86,9 @@ class Form
      */
     public function getValue($field, $default = '')
     {
-
-        return (isset($_POST[$this->getName()]) && $_POST[$this->getName()][$field])
-            ? htmlspecialchars($_POST[$this->getName()][$field], ENT_QUOTES, 'UTF-8')
+        return (isset($this->method[$this->getName()]) && $this->method[$this->getName()][$field])
+            ? htmlspecialchars($this->method[$this->getName()][$field], ENT_QUOTES, 'UTF-8')
             : $default;
-
-        /*return array_key_exists($field, $_POST[$this->getName()])
-            ? htmlspecialchars($_POST[$this->getName()][$field], ENT_QUOTES, 'utf-8')
-            : $default;*/
     }
 
     public function getArrayValue($field, $template, array $array, $optional = '')
@@ -65,7 +100,7 @@ class Form
                 [
                     htmlspecialchars($key, ENT_QUOTES, 'UTF-8'),
                     htmlspecialchars($val, ENT_QUOTES, 'UTF-8'),
-                    (isset($_POST[$this->getName()][$field]) && (int)$_POST[$this->getName()][$field] === $key)
+                    (isset($this->method[$this->getName()][$field]) && (int)$this->method[$this->getName()][$field] === $key)
                         ? $optional
                         : ''
                 ],
@@ -84,7 +119,7 @@ class Form
      */
     public function setValue($field, $value)
     {
-        $_POST[$this->getName()][$field] = $value;
+        $this->method[$this->getName()][$field] = $value;
     }
 
     /**
@@ -93,12 +128,12 @@ class Form
      *
      * @param string $field Key of super global array $_POST
      * @param array  $array Array to search
-     * @param string $search Value to search
+     * @param string $value Value to search
      */
-    public function setArrayValue($field, array $array, $value)
+    public function setArrayValue($field, array $array, $value = '')
     {
         if ($res = array_search($value, $array, true)) {
-            $_POST[$this->getName()][$field] = $res;
+            $this->method[$this->getName()][$field] = $res;
         }
     }
 
@@ -114,7 +149,7 @@ class Form
     }
 
     /**
-     * Check if field is invalid or if there exists a fields that need validation
+     * Check if validation errors exists for field or fields of form
      *
      * @param null $field
      * @return array|bool
@@ -131,7 +166,7 @@ class Form
     }
 
     /**
-     * Is post a request method
+     * Is request method POST
      *
      * @return bool
      */
@@ -141,12 +176,12 @@ class Form
     }
 
     /**
-     * Is form submitted using post method
+     * Is form submitted using proper method
      *
      * @return bool
      */
     public function isSubmit()
     {
-        return isset($_POST[$this->getName()]);
+        return isset($this->method[$this->getName()]);
     }
 }

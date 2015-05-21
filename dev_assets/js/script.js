@@ -44,6 +44,7 @@ function myAjaxContainer(url, container) {
 
         //debug:
         console.log('Init... stages#' + data.stages);
+        console.dir(data);
     });
 
     //add stage

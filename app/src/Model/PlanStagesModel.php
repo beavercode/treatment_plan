@@ -1,9 +1,10 @@
 <?php
 
-namespace UTI\Lib;
+namespace UTI\Model;
 
-use UTI\Core\AppException;
+use UTI\Core\Model;
 use UTI\Core\View;
+use UTI\Lib\Form;
 
 /**
  * Plan form stages handling
@@ -11,12 +12,8 @@ use UTI\Core\View;
  * Class FormStages
  * @package UTI\Lib
  */
-class FormStages
+class PlanStagesModel extends Model
 {
-    /**
-     * @var Session
-     */
-    protected $session;
 
     /**
      * @var View
@@ -24,27 +21,24 @@ class FormStages
     protected $view;
     protected $min;
     protected $max;
-    protected $cur;
     protected $template;
 
     /**
      * Init variables
      */
-    public function __construct(array $option = [])
+    public function __construct($view, $max, $min = 1)
     {
-        if (! $option || array_filter($option, function () {
-                
-            })
-        ) {
-            throw new AppException('Wrong parameter options!');
-        }
-        $this->session = $session;
+        parent::__construct();
+
         $this->view = $view;
-        $this->min = $min;
         $this->max = $max;
-        $this->cur = $cur;
+        $this->min = $min;
 
         $this->template = 'plan_form_stage';
+
+        // next step
+        $form = new Form('plan_form');
+        $form->load($this->session->get($form->getName()));
     }
 
     /**
@@ -156,9 +150,9 @@ class FormStages
         // http://stackoverflow.com/questions/3133209/how-to-flush-output-after-each-echo-call
         // http://stackoverflow.com/questions/265073/php-background-processes
 
-//        ob_start();
+        ob_start();
+        header('Content-Type: application/json');
         echo $json;
-//        flush();
-//        ob_flush();
+        echo ob_get_clean();
     }
 }

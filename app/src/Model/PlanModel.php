@@ -13,30 +13,6 @@ use UTI\Lib\FormStages;
 class PlanModel extends Model
 {
     /**
-     * Initialize form with data and handle ajax requests
-     *
-     * @param     $view
-     * @param int $max
-     * @param int $min
-     * @return bool
-     */
-    public function ajaxStages($view, $max, $min = 1)
-    {
-        // process Ajax request for add / remove form stage
-        if (isset($_POST['stage'])) {
-            // get an event
-            $event = $_POST['stage'];
-            $stages = new FormStages($this->session, $view, $max, $min);
-            $stages->$event();
-
-            //todo need to flush this out!!!
-            return $event;
-        }
-
-        return false;
-    }
-
-    /**
      * 1. Name check
      * 2. get doc photo and name
      * Stage
@@ -50,21 +26,11 @@ class PlanModel extends Model
      * 9. concatenate pdf together
      * 10. return pdf file or link?
      */
-    public function processForm($data, $view)
+    public function processForm($data)
     {
-        //$min = $this->session->get('stage') ?: 1;
-        $stagesMin = 3;
-        $stagesMax = 5;
         $form = new Form('plan_form');
         $data('plan.form', $form);
         $data('plan.form.doctors', $this->getFormDoctors());
-        $data('plan.form.stages', $this->getFormStages());
-
-        // process Ajax request for add / remove form stage
-        if ($this->ajaxStages($view, $stagesMax, $stagesMin)) {
-            //todo nicer!
-            return false;
-        }
 
         // form sent but no stage handling
         if ($form->isSubmit()) {
@@ -80,7 +46,6 @@ class PlanModel extends Model
             //Period check for stages
             //if ()
 
-
             /*if (! $form->getValue('login')) {
                 $form->setInvalid('login', 'Введите "Логин", пожалуйста.');
             } elseif ($form->getValue('login') !== $userInfo['login']) {
@@ -94,26 +59,18 @@ class PlanModel extends Model
             }*/
             //no errors there
             if (! $form->isInvalid()) {
-                $this->session->set('form', $form->getName());
-                $this->session->set('stage', $stagesMin);
+                // reset form data in session
+                $this->session->set($form->getName(), null);
+
             }
         } else {
-            $this->session->set('form', null);
-            $this->session->set('stage', $stagesMin);
             //form default values
             $form->setValue('fio', 'default name');
-            $form->setArrayValue('doctor', $data('plan.form.doctors'), '');
-
-            for ($i = 1; $i <= $this->session->get('stage'); ++$i) {
-                $form->setValue('period' . $i, '');
-                $form->setArrayValue('stage' . $i, $data('plan.form.stages'), '');
-            }
+            $form->setArrayValue('doctor', $data('plan.form.doctors'));
         }
-    }
+        $this->session->set($form->getName(), $form->save());
 
-    public function isFormPassed()
-    {
-        return (bool)$this->session->get('form');
+        return $form;
     }
 
     /**

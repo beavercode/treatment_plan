@@ -55,16 +55,16 @@ class Session
     /**
      * Get session values by key
      *
-     * @param $key
-     * @return mixed
+     * @param string $key Key to search in SESSION array
+     * @return mixed Result, null if not exists
      */
-    public function get($key = null)
+    public function get($key = '')
     {
-        if (null === $key) {
-            return $this->session ?: false;
+        if (! $key) {
+            return $this->session ?: null;
         }
 
-        return array_key_exists($key, $this->session) ? $this->session[$key] : false;
+        return isset($this->session[$key]) ? $this->session[$key] : null;
     }
 
     /**
