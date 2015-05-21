@@ -132,8 +132,10 @@ class Form
      */
     public function setArrayValue($field, array $array, $value = '')
     {
-        if ($res = array_search($value, $array, true)) {
-            $this->method[$this->getName()][$field] = $res;
+        if ($value && ($find = array_search($value, $array, true))) {
+            $this->method[$this->getName()][$field] = $find;
+        } else {
+            list($this->method[$this->getName()][$field]) = each($array);
         }
     }
 
