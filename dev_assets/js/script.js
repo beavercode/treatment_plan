@@ -6,9 +6,10 @@
      *
      * @param speed
      */
-    jQuery.fn.removeEffect = function (speed) {
+    jQuery.fn.removeEffect = function (speed, maxStage) {
         $(this).fadeOut(speed, function () {
             $(this).remove();
+            showHideButtons(maxStage);
         });
     };
 
@@ -33,18 +34,14 @@ function myAjaxContainer(url, container) {
         //fix TW Select
         loadTWSelect('.selectpicker', {size: 7});
         //fix TW file input for each input[type=file], doing this at once breaks TB Input plugin markup
-        for (var i = 1; i <= data.stages; i++) {
+        for (var i = 1; i <= data.stage; i++) {
             $("#file" + i).bootstrapFileInput();
         }
-        //todo show 'delete' button when 'stages > 1'
         //todo hide 'show' button if 'min === max'
-        if (data.stages > 1) {
-            $('#remove-stage').show();
-        }
+        showHideButtons(data.maxStage);
 
         //debug:
-        console.log('Init... stages#' + data.stages);
-        console.dir(data);
+        console.log('Init... stages#' + data.stage);
     });
 
     //add stage
@@ -61,8 +58,9 @@ function myAjaxContainer(url, container) {
             loadTWSelect('.selectpicker', {size: 7});
             //fix TW file input
             $("#file" + data.stage).bootstrapFileInput();
-            //Add / Remove buttons handling
-            showHideButton('#remove-stage', '#add-stage', data.maxStages, data.stage);
+            //todo hide 'show' button if 'min === max'
+            showHideButtons(data.maxStage);
+            $('#notify-msg').hide();
 
             //debug:
             console.log('Add stage#' + data.stage);
@@ -77,10 +75,8 @@ function myAjaxContainer(url, container) {
             if (data.limit) {
                 return;
             }
-            $("#stage" + data.stage).removeEffect(350);
-            //Add / Remove buttons handling
-            // data.minStages + 1 because data.stage = min + 1
-            showHideButton('#add-stage', '#remove-stage', data.minStages + 1, data.stage);
+            $("#stage" + data.stage).removeEffect(350, data.maxStage);
+            $('#notify-msg').hide();
 
             //debug:
             console.log('Remove stage#' + data.stage);
@@ -121,17 +117,24 @@ function loadTWSelect(container, params) {
 }
 
 /**
- * Show / hide by selector
- * Use null to hide parameter if no need to hide
+ * Show or hide stage control buttons
  *
- * @param show Selector to show
- * @param hide Selector to hide
- * @param minMax
- * @param current
+ * @param maxStages
  */
-function showHideButton(show, hide, minMax, current) {
-    $(show).show();
-    if (hide && minMax === current) {
-        $(hide).hide();
+function showHideButtons(maxStages) {
+    var numStages = $('#stages').children().length,
+        addButton = '#add-stage',
+        delButton = '#remove-stage';
+
+    if (numStages > 1) {
+        $(delButton).show();
+    } else {
+        $(delButton).hide();
+    }
+
+    if (numStages < maxStages) {
+        $(addButton).show();
+    } else {
+        $(addButton).hide();
     }
 }
