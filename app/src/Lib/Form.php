@@ -1,4 +1,5 @@
 <?php
+
 namespace UTI\Lib;
 
 /**
@@ -86,11 +87,20 @@ class Form
      */
     public function getValue($field, $default = '')
     {
-        return (isset($this->method[$this->getName()]) && $this->method[$this->getName()][$field])
+        return (isset($this->method[$this->getName()]) && isset($this->method[$this->getName()][$field]))
             ? htmlspecialchars($this->method[$this->getName()][$field], ENT_QUOTES, 'UTF-8')
             : $default;
     }
 
+    /**
+     * Walk array get key=>val and insert them along with optional parameter(if set) into template
+     *
+     * @param        $field
+     * @param        $template
+     * @param array  $array
+     * @param string $optional
+     * @return string
+     */
     public function getArrayValue($field, $template, array $array, $optional = '')
     {
         $res = '';
@@ -100,7 +110,9 @@ class Form
                 [
                     htmlspecialchars($key, ENT_QUOTES, 'UTF-8'),
                     htmlspecialchars($val, ENT_QUOTES, 'UTF-8'),
-                    (isset($this->method[$this->getName()][$field]) && (int)$this->method[$this->getName()][$field] === $key)
+                    (isset($this->method[$this->getName()][$field])
+                        // in_array() can not be strict, because of different result(key or value)
+                        && in_array($this->method[$this->getName()][$field], [$key, $val]))
                         ? $optional
                         : ''
                 ],
@@ -134,9 +146,11 @@ class Form
     {
         if ($value && ($find = array_search($value, $array, true))) {
             $this->method[$this->getName()][$field] = $find;
-        } else {
-            list($this->method[$this->getName()][$field]) = each($array);
         }
+        //gets fist val of result array returned from db; really need this?
+        /* else {
+            list($this->method[$this->getName()][$field]) = each($array);
+        }*/
     }
 
     /**

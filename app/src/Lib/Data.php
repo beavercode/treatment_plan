@@ -51,7 +51,7 @@ class Data
             return $this->data[$key];
         }
 
-        return $this->data['base'];
+        return null;
     }
 
     /**
