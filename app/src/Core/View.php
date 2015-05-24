@@ -66,7 +66,7 @@ class View
      */
     public function render()
     {
-        $html = $this->load($this->template);
+        $html = $this->load($this->template . '.php');
 
         //todo caching
 

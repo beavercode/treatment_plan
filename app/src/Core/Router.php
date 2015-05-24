@@ -56,14 +56,14 @@ class Router
 
         //PLAN
         //catch ajax main first
-        $this->router->add('plan.main.ajax', $this->uriBase)
+        /*$this->router->add('plan.main.ajax', $this->uriBase)
             ->addValues([
                 'controller' => 'Plan',
                 'action'     => 'indexAjax'
             ])
             ->addServer([
                 'HTTP_ACCEPT' => 'application/json(;q=(\*|0\.01|[0\.[1-9]]))?'
-            ]);
+            ]);*/
         //catch normal main
         $this->router->add('plan.main', $this->uriBase)
             ->addValues([

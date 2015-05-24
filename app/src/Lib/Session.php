@@ -18,38 +18,25 @@ namespace UTI\Lib;
  */
 class Session
 {
-    protected $session;
-    protected $duration;
+    protected static $instance;
+    protected        $session;
+    protected        $duration;
 
     /**
-     * Constructor.
+     * Run session and return its instance
      *
      * @param null $savePath
      * @param int  $duration
+     * @return Session
      */
-    public function __construct($savePath = null, $duration = 1800)
+    public static function run($savePath = null, $duration = 1800)
     {
-        if (null !== $savePath) {
-            session_save_path($savePath);
+        if (empty(self::$instance)) {
+            self::$instance = new self($savePath, $duration);
+            self::$instance->start();
         }
-        $this->duration = $duration;
-        //ini_set('session.cookie_lifetime', $this->duration); //don't use it, session must live until browser is closed
-        ini_set('session.gc_maxlifetime', $this->duration);
-    }
 
-    /**
-     * Start session
-     *
-     * @return bool
-     */
-    public function run()
-    {
-        $state = session_start();
-        // for less super global variables usage
-        $this->session =& $_SESSION;
-        $this->timeout($this->duration);
-
-        return $state;
+        return self::$instance;
     }
 
     /**
@@ -76,7 +63,22 @@ class Session
      */
     public function set($key, $value)
     {
-        $this->session[$key] = $value;
+        return $this->session[$key] = $value;
+    }
+
+    /**
+     * Start session
+     *
+     * @return bool
+     */
+    protected function start()
+    {
+        $state = session_start();
+        // for less super global variables usage
+        $this->session =& $_SESSION;
+        $this->timeout($this->duration);
+
+        return $state;
     }
 
     /**
@@ -114,5 +116,33 @@ class Session
             $this->halt();
         }
         $this->set('last_seen', $time);
+    }
+
+    /**
+     * Init
+     *
+     * @param $savePath
+     * @param $duration
+     */
+    private function __construct($savePath, $duration)
+    {
+        if (null !== $savePath) {
+            session_save_path($savePath);
+        }
+        $this->duration = $duration;
+        //ini_set('session.cookie_lifetime', $this->duration); //don't use it, session must live until browser is closed
+        ini_set('session.gc_maxlifetime', $this->duration);
+    }
+
+    private function __clone()
+    {
+    }
+
+    private function __sleep()
+    {
+    }
+
+    private function __wakeup()
+    {
     }
 }

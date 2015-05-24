@@ -16,8 +16,7 @@ abstract class Model
 
     public function __construct()
     {
-        $this->session = new Session(APP_SES, APP_SES_DUR);
-        $this->session->run();
+        $this->session = Session::run(APP_SES, APP_SES_DUR);
     }
 
     /**
