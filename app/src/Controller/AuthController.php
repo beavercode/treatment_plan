@@ -30,7 +30,7 @@ class AuthController extends Controller
     public function login()
     {
         $data = $this->data;
-        $this->view->set('login_template.php', $data, ['login_form']);
+        $this->view->set('login_template', $data, ['login_form']);
 
         $data('title', 'Авторизация');
         $data('login.form', $this->model->processForm());

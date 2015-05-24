@@ -13,11 +13,10 @@ $form = $data('plan.form');
                     data-width="100%">
                 <?= $form->getArrayValue(
                     'stage' . $data('plan.form.stageID'),
-                    '<option {{opt}} value="{{key}}">{{val}}</option>',
+                    '<option {{opt}} value="{{val}}">{{val}}</option>',
                     $data('plan.form.stages'),
-                    'selected')
-                ?>
-
+                    'selected'
+                ) ?>
             </select>
         </div>
     </div>

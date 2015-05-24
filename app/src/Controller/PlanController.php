@@ -5,7 +5,6 @@ use UTI\Core\Controller;
 use UTI\Core\System;
 use UTI\Lib\Data;
 use UTI\Model\PlanModel;
-use UTI\Model\PlanStagesModel;
 
 /**
  * Class Plan
@@ -30,19 +29,32 @@ class PlanController extends Controller
     {
         // Data::__call() doest work on $this-data
         $data = $this->data;
+        $data('notify.success', '');
+        $data('notify.error', '');
         // Set view templates
-        $this->view->set('plan_template.php', $data, ['plan_form', 'plan_form_stage']);
+        $this->view->set('plan_template', $data, ['plan_form', 'plan_form_stage', 'plan_form_result']);
         // Make page
         $data('plan.logout', $this->router->generate('auth.logout'));
         $data('title', 'План лечеиня');
 
-        // Process form
-        $this->model->processForm($data);
-/*        if ($this->model->isFormProcessed()) {
+        // working with stages using ajax
+        if (false === ($form = $this->model->processForm($data, $this->view, 5))) {
+            return;
+        }
+
+        if ($this->model->isFormProcessed($form->getName())) {
             //echo print_r($_POST, 1);
             //breaks charset, use header('Content-Type: text/html; charset=utf-8');
-            var_dump($_POST);
-        }*/
+            //var_dump($_POST);
+
+            if ($hash = $this->model->processPdf($form)) {
+                $data('notify.success', $this->router->generate('plan.get', ['hash' => $hash]));
+                //System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
+            } else {
+                //error somewhere above
+                $data('notify.error', 'PDF not processed, retry...');
+            }
+        }
 
         /*// get pdf if ready
         if ($hash = $this->model->isPdfReady()) {
@@ -52,23 +64,16 @@ class PlanController extends Controller
         $this->view->render();
     }
 
-    /**
-     * Process ajax request for stages
-     */
-    public function indexAjax()
-    {
-        if (isset($_POST['stage'])) {
-            // get an event
-            $event = $_POST['stage'];
-
-            //todo make view generation outside of the business logic
-            $stages = new PlanStagesModel($this->view, 5, 1);
-            $stages->$event();
-        }
-    }
-
     public function get($params)
     {
+        // Data::__call() doest work on $this-data
+        $data = $this->data;
+        // Set view templates
+        $this->view->set('plan_pdf_result', $data);
+        $data('title', 'План лечения');
+
+
+        $this->view->render();
     }
 
     // todo
@@ -76,6 +81,8 @@ class PlanController extends Controller
     {
         $data = new Data(URI_BASE);
         $data('plan_form', $this->model->processForm());
+
+        //processPDF
 
         if ($this->model->isPdfReady()) {
             $hash = $this->model->getPdfName();

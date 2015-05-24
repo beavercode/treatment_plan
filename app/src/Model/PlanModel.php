@@ -4,7 +4,6 @@ namespace UTI\Model;
 
 use UTI\Core\Model;
 use UTI\Lib\Form;
-use UTI\Lib\FormStages;
 
 /**
  * Class PlanModel
@@ -26,63 +25,120 @@ class PlanModel extends Model
      * 9. concatenate pdf together
      * 10. return pdf file or link?
      */
-    public function processForm($data)
+    public function processForm($data, $view, $maxStages, $minStages = 1)
     {
         $form = new Form('plan_form');
         $data('plan.form', $form);
         $data('plan.form.doctors', $this->getFormDoctors());
 
+        // forming stages with ajax
+        if (isset($_POST['stage'])) {
+            // get an event
+            $event = $_POST['stage'];
+            // get stages names
+            $data('plan.form.stages', $this->getFormStages());
+            // init action's specific model
+            $realMinStages = $minStages;
+            if ($this->session->get('stage') && ! $this->isFormProcessed($form->getName())) {
+                $realMinStages = $this->session->get('stage');
+            }
+            //form default for stages template
+            $form->load($this->session->get($form->getName()));
+
+            //todo view generation outside of the model
+            $stages = new PlanStagesModel($data, $view, $maxStages, $realMinStages);
+            // default values for stages
+            $stages->$event(function ($stage) use ($form) {
+                if ($form->isPost()) {
+                    for ($N = 1; $N <= $stage; $N++) {
+                        // if there are the field value in method than no set defaults
+                        if (! isset($_POST[$form->getName()]['stage' . $N])) {
+                            $form->setArrayValue('stage' . $N, $this->getFormStages(), '');
+                        }
+                        if (! isset($_POST[$form->getName()]['period' . $N])) {
+                            $form->setValue('period' . $N, $N . 'month(s)');
+                        }
+                    }
+                }
+            });
+
+            return false;
+        }
+
         // form sent but no stage handling
         if ($form->isSubmit()) {
-            //FIO check
             $fioLength = 5;
-            if (! $form->getValue('fio') || mb_strlen($form->getValue('fio')) < $fioLength = 5) {
+            $periodLength = 5;
+            $fileExt = ['docx'];
+
+            // FIO check
+            if (! $form->getValue('fio') || mb_strlen($form->getValue('fio')) < $fioLength) {
                 $form->setInvalid(
                     'fio',
                     'Введите "ФИО", пожалуйста. Длинна поля не менее ' . $fioLength . ' символов.'
                 );
             }
-
-            //Period check for stages
-            //if ()
-
-            /*if (! $form->getValue('login')) {
-                $form->setInvalid('login', 'Введите "Логин", пожалуйста.');
-            } elseif ($form->getValue('login') !== $userInfo['login']) {
-                $form->setInvalid('login', 'Введенный "Логин" неправильный.');
+            // Period check for stages
+            for ($N = 1; $N <= $this->session->get('stage'); $N++) {
+                if (! $form->getValue('period' . $N) || mb_strlen($form->getValue('period' . $N)) < $periodLength) {
+                    $form->setInvalid(
+                        'period',
+                        'Введите "Период лечения", пожалуйста. Длинна поля не менее ' . $periodLength . ' символов.'
+                    );
+                }
             }
-            //pass check
-            if (! $form->getValue('password')) {
-                $form->setInvalid('password', 'Введите "Пароль", пожалуйста.');
-            } elseif ((int)$form->getValue('password') !== $userInfo['password']) {
-                $form->setInvalid('password', 'Введенный "Пароль" неправильный.');
+            // Load file(s)
+            //todo handle file loading
+            /*for ($N = 1; $N <= $this->session->get('stage'); $N++) {
+                if (! $form->loadFile('period' . $N, $fileExt)) {
+                    $form->setInvalid(
+                        'file',
+                        'Файл должен быть типа: "' . implode(',', $fileExt) . '"'
+                    );
+                }
             }*/
-            //no errors there
+            // No errors there, check form as processed
             if (! $form->isInvalid()) {
                 // reset form data in session
-                $this->session->set($form->getName(), null);
-
+                $this->session->set('form_processed', [$form->getName()]);
+            } else {
+                $this->session->set('form_processed', []);
             }
         } else {
             //form default values
-            $form->setValue('fio', 'default name');
-            $form->setArrayValue('doctor', $data('plan.form.doctors'));
+            $this->session->set('form_processed', []);
+            $this->session->set('stage', $minStages);
+            $form->setValue('fio', 'default_name');
+            $form->setArrayValue('doctor', $data('plan.form.doctors'), '');
         }
-        $this->session->set($form->getName(), $form->save());
+        $this->session->set($form->getName(), $form->save($_POST));
 
         return $form;
     }
 
     /**
-     * Check if pdf is ready to retrieve
+     * Check if form processed
      *
+     * @param $name
      * @return bool
      */
-    public function isPdfReady()
+    public function isFormProcessed($name)
     {
-        return $this->session->get('pdf');
+        return $this->session->get('form_processed') && in_array($name, $this->session->get('form_processed'), true);
     }
 
+    /**
+     * @param Form $form
+     * @return string
+     */
+    public function processPdf(Form $form)
+    {
+        $pdf = new PlanPdfModel($this->session->get($form->getName()));
+
+        //proccess pdf
+
+        return $pdf->getPdfName();
+    }
 
     // ------------------ STUBS ------------------
 

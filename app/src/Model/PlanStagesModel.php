@@ -3,20 +3,18 @@
 namespace UTI\Model;
 
 use UTI\Core\Model;
-use UTI\Core\View;
-use UTI\Lib\Form;
 
 /**
  * Plan form stages handling
  *
- * Class FormStages
- * @package UTI\Lib
+ * Class PlanStagesModel
+ * @package UTI\Model
  */
 class PlanStagesModel extends Model
 {
 
     /**
-     * @var View
+     * @var \UTI\Core\View
      */
     protected $view;
     protected $min;
@@ -26,19 +24,14 @@ class PlanStagesModel extends Model
     /**
      * Init variables
      */
-    public function __construct($view, $max, $min = 1)
+    public function __construct($data, $view, $max, $min = 1)
     {
         parent::__construct();
 
         $this->view = $view;
         $this->max = $max;
         $this->min = $min;
-
         $this->template = 'plan_form_stage';
-
-        // next step
-        $form = new Form('plan_form');
-        $form->load($this->session->get($form->getName()));
     }
 
     /**
@@ -60,19 +53,21 @@ class PlanStagesModel extends Model
     /**
      * Init stage value with min
      */
-    public function init()
+    public function init($callback)
     {
-//        $this->session->set('stage', $this->min);
-
-        // Process html form 1+ stages
+        //if no stages in session
+        $this->session->set('stage', $this->session->get('stage') ?: $this->min);
+        // default values
+        $callback($this->session->get('stage'));
         $html = '';
         for ($i = 1, $num = $this->session->get('stage'); $i <= $num; ++$i) {
             $html .= $this->view->block($this->template, ['plan.form.stageID' => $i]);
         }
 
         $data = [
-            'stages' => $this->session->get('stage'),
-            'html'   => $html
+            'stage'    => $this->session->get('stage'),
+            'maxStage' => $this->max,
+            'html'     => $html
         ];
 
         $this->sendJSON($data);
@@ -81,18 +76,20 @@ class PlanStagesModel extends Model
     /**
      * Handle stage number and echo html data
      */
-    public function add()
+    public function add($callback)
     {
         $data = ['limit' => $this->session->get('stage')];
 
         if ($this->isNotMax()) {
             $this->session->set('stage', $this->session->get('stage') + 1);
+            // default values
+            $callback($this->session->get('stage'));
             $html = $this->view->block($this->template, ['plan.form.stageID' => $this->session->get('stage')]);
 
             $data = [
-                'html'      => $html,
-                'stage'     => $this->session->get('stage'),
-                'maxStages' => $this->max
+                'html'     => $html,
+                'stage'    => $this->session->get('stage'),
+                'maxStage' => $this->max
             ];
         }
 
@@ -108,8 +105,8 @@ class PlanStagesModel extends Model
 
         if ($this->isNotMin()) {
             $data = [
-                'stage'     => $this->session->get('stage'),
-                'minStages' => $this->min
+                'stage'    => $this->session->get('stage'),
+                'maxStage' => $this->max
             ];
             $this->session->set('stage', $this->session->get('stage') - 1);
         }
@@ -124,7 +121,7 @@ class PlanStagesModel extends Model
      */
     protected function isNotMin()
     {
-        return $this->session->get('stage') > $this->min;
+        return $this->session->get('stage') > 1;
     }
 
     /**
@@ -134,7 +131,7 @@ class PlanStagesModel extends Model
      */
     protected function isNotMax()
     {
-        return $this->session->get('stage') <= $this->max;
+        return $this->session->get('stage') < $this->max;
     }
 
     /**
@@ -150,9 +147,9 @@ class PlanStagesModel extends Model
         // http://stackoverflow.com/questions/3133209/how-to-flush-output-after-each-echo-call
         // http://stackoverflow.com/questions/265073/php-background-processes
 
-        ob_start();
-        header('Content-Type: application/json');
+//        ob_start();
+//        header('Content-Type: application/json');
         echo $json;
-        echo ob_get_clean();
+        //echo ob_get_clean();
     }
 }

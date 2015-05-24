@@ -5,8 +5,8 @@ $form = $data('plan.form');
 ?>
 <!-- Plan form -->
 <?php if ($errors = $form->isInvalid()):
-          foreach ($errors as $error): ?>
-        <div class="col-lg-10 col-lg-offset-1 alert alert-danger login__alert" role="alert">
+    foreach ($errors as $error): ?>
+        <div class="col-lg-10 col-lg-offset-1 alert alert-danger" role="alert">
             <button aria-label="Close" data-dismiss="alert" class="close" type="button">
                 <span aria-hidden="true">×</span>
             </button>
@@ -32,10 +32,10 @@ $form = $data('plan.form');
             <select id="doctor" class="selectpicker show-tick" name="<?= $form->getName() ?>[doctor]" data-width="100%">
                 <?= $form->getArrayValue(
                     'doctor',
-                    '<option {{opt}} value="{{key}}">{{val}}</option>',
+                    '<option {{opt}} value="{{val}}">{{val}}</option>',
                     $data('plan.form.doctors'),
-                    'selected')
-                ?>
+                    'selected'
+                ) ?>
             </select>
         </div>
     </div>
