@@ -64,14 +64,15 @@ class View
     /**
      * Load page template and set page blocks
      */
-    public function render()
+    public function render($options = [])
     {
+        $compress = isset($options['minify']) ? $options['minify'] : true;
         $html = $this->load($this->template . '.php');
 
         //todo caching
 
-        //minify html if need
-        if (is_object($this->compressor)) {
+        // minify html base on setting in config.php and $options['minify']
+        if (! empty($this->compressor) && $compress) {
             $html = $this->compressor->minify($html);
         }
 
