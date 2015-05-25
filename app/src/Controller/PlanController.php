@@ -49,7 +49,7 @@ class PlanController extends Controller
 
             if ($hash = $this->model->processPdf($form)) {
                 $data('notify.success', $this->router->generate('plan.get', ['hash' => $hash]));
-                //System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
+                //System::redirect2Url($this->router->generate('plan.main', ['time' => time()]), $_SERVER);
             } else {
                 //error somewhere above
                 $data('notify.error', 'PDF not processed, retry...');

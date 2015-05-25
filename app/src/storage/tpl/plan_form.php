@@ -62,9 +62,10 @@ $form = $data('plan.form');
     <!-- /Add/Remove stage -->
 
     <!-- Save plan -->
-    <div class="form-group col-sm-10 col-sm-offset-2">
+    <div class="form-group col-sm-5 col-sm-offset-2">
         <button type="submit" class="btn btn-success btn-lg">Сохранить план лечения</button>
     </div>
+    <?= $this->block('plan_form_result') ?>
     <!-- /Save plan -->
 </form>
 <!-- /Plan form -->

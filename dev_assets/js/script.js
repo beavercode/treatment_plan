@@ -16,6 +16,11 @@
     $(document).ready(function () {
         //Form's stages handling
         myAjaxContainer('', "#stages");
+        //Hide #notify-msg when changing content in form
+        //http://stackoverflow.com/questions/12797700/jquery-detect-change-in-input-field/12797759#12797759
+        $(".form").change(function () {
+            $('#notify-msg').hide();
+        });
     });
 })();
 
@@ -60,6 +65,7 @@ function myAjaxContainer(url, container) {
             $("#file" + data.stage).bootstrapFileInput();
             //todo hide 'show' button if 'min === max'
             showHideButtons(data.maxStage);
+            // hide notify-msg
             $('#notify-msg').hide();
 
             //debug:
@@ -76,6 +82,7 @@ function myAjaxContainer(url, container) {
                 return;
             }
             $("#stage" + data.stage).removeEffect(350, data.maxStage);
+            // hide notify-msg
             $('#notify-msg').hide();
 
             //debug:

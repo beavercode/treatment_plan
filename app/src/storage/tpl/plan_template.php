@@ -76,7 +76,6 @@
             </noscript>
 
             <?= $this->block('plan_form') ?>
-            <?= $this->block('plan_form_result') ?>
         </div>
     </div>
 </div>
