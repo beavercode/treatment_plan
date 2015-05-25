@@ -49,14 +49,26 @@ class PlanModel extends Model
             $stages = new PlanStagesModel($data, $view, $maxStages, $realMinStages);
             // default values for stages
             $stages->$event(function ($stage) use ($form) {
+                //default period
+                $stageMSG = [
+                    1 => 'Отбеливание',
+                    2 => 'Ортодонтия',
+                    3 => 'Имплантация'
+                ];
+                //default period
+                $periodMSG = [
+                    1 => 'First period',
+                    2 => '2nddd',
+                    3 => 'one more period'
+                ];
                 if ($form->isPost()) {
                     for ($N = 1; $N <= $stage; $N++) {
                         // if there are the field value in method than no set defaults
                         if (! isset($_POST[$form->getName()]['stage' . $N])) {
-                            $form->setArrayValue('stage' . $N, $this->getFormStages(), '');
+                            $form->setArrayValue('stage' . $N, $this->getFormStages(), isset($stageMSG[$N]) ? $stageMSG[$N] : '');
                         }
                         if (! isset($_POST[$form->getName()]['period' . $N])) {
-                            $form->setValue('period' . $N, $N . 'month(s)');
+                            $form->setValue('period' . $N, isset($periodMSG[$N]) ? $periodMSG[$N] : $N . 'month(s)');
                         }
                     }
                 }
