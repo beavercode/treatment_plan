@@ -2,6 +2,7 @@
 
 namespace UTI\Model;
 
+use UTI\Core\AppException;
 use UTI\Core\Model;
 
 /**
@@ -26,22 +27,15 @@ class PlanPdfModel extends Model
 
     public function htmlToPdf()
     {
-
     }
 
     public function mergePdf()
     {
-
     }
 
     public function getPdfName()
     {
         //todo
-        return md5(time());
-    }
-
-    public function getPdf($name)
-    {
-        return $name;
+        return 'd9fdc8b5ff01b048417a2e1a4ef2edc8';
     }
 }

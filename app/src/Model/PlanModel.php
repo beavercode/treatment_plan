@@ -2,6 +2,7 @@
 
 namespace UTI\Model;
 
+use UTI\Core\AppException;
 use UTI\Core\Model;
 use UTI\Lib\Form;
 
@@ -39,7 +40,7 @@ class PlanModel extends Model
             $data('plan.form.stages', $this->getFormStages());
             // init action's specific model
             $realMinStages = $minStages;
-            if ($this->session->get('stage') && ! $this->isFormProcessed($form->getName())) {
+            if ($this->session->get('stage') && ! $this->isFormProcessed($form)) {
                 $realMinStages = $this->session->get('stage');
             }
             //form default for stages template
@@ -49,18 +50,17 @@ class PlanModel extends Model
             $stages = new PlanStagesModel($data, $view, $maxStages, $realMinStages);
             // default values for stages
             $stages->$event(function ($stage) use ($form) {
-                //default period
                 $stageMSG = [
                     1 => 'Отбеливание',
                     2 => 'Ортодонтия',
                     3 => 'Имплантация'
                 ];
-                //default period
                 $periodMSG = [
                     1 => 'First period',
                     2 => '2nddd',
                     3 => 'one more period'
                 ];
+                //todo situation when stage got from DB has fixed limit, e.g. 'Whitening' => '3 hours'
                 if ($form->isPost()) {
                     for ($N = 1; $N <= $stage; $N++) {
                         // if there are the field value in method than no set defaults
@@ -131,26 +131,83 @@ class PlanModel extends Model
     /**
      * Check if form processed
      *
-     * @param $name
+     * @param Form $form
      * @return bool
      */
-    public function isFormProcessed($name)
+    public function isFormProcessed(Form $form)
     {
-        return $this->session->get('form_processed') && in_array($name, $this->session->get('form_processed'), true);
+        return $this->session->get('form_processed') && in_array($form->getName(), $this->session->get('form_processed'), true);
     }
 
     /**
+     *
+     * 1. from data to html template
+     * 2. html template to pdf
+     * 3. make list of pdf files needed for result
+     * 4. merge pdf files in list
+     * 5. save result(one pdf file) to disk (good utilization of  disk space limiting pdf's number or overall size)
+     * 6. out pdf file to browser
+     *
      * @param Form $form
      * @return string
      */
     public function processPdf(Form $form)
     {
+        //todo list in doc block(upper)
         $pdf = new PlanPdfModel($this->session->get($form->getName()));
 
-        //proccess pdf
+        //process pdf
 
         return $pdf->getPdfName();
     }
+
+    /**
+     * Get pdf data and show inline or force to download
+     *
+     * @param        $hash
+     * @param string $action
+     * @return string
+     */
+    public function getPdfData($hash, $action = 'show')
+    {
+        $name = $hash . '.pdf';
+        $file = APP_PDF_OUT . $name;
+
+        if (! is_file($file) && ! is_readable($file)) {
+            throw new AppException('Failed to load pdf ' . $file);
+        }
+
+        //todo re-check for proper HTTP  headers
+        header('Content-type: application/pdf');
+        //header('Content-Type: application/octet-stream');
+        //header('Content-Description: File Transfer');
+        switch ($action) {
+            case 'download':
+                header('Content-Disposition: attachment; filename=' . urlencode($name));
+                //todo proper HTTP caching
+                header('Pragma: public');
+                header('Expires: 0');
+                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                header('Cache-Control: private', false); //use this to open files directly
+                break;
+            case 'show':
+            default:
+                header('Content-Disposition: inline; filename="' . urlencode($name) . '"');
+        }
+        header('Content-Length: ' . filesize($file)); // provide file size
+        header('Content-Transfer-Encoding: binary');
+        header('Accept-Ranges: bytes');
+        //header('Connection: close');
+
+        ob_start();
+        readfile($file);
+
+        return ob_get_clean();
+    }
+
+
+
+
 
     // ------------------ STUBS ------------------
 

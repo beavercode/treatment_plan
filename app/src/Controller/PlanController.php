@@ -36,19 +36,14 @@ class PlanController extends Controller
         // Make page
         $data('plan.logout', $this->router->generate('auth.logout'));
         $data('title', 'План лечеиня');
-
         // working with stages using ajax
-        if (false === ($form = $this->model->processForm($data, $this->view, 5))) {
+        if (false === ($form = $this->model->processForm($data, $this->view, 10, 1))) {
             return;
         }
-
-        if ($this->model->isFormProcessed($form->getName())) {
-            //echo print_r($_POST, 1);
-            //breaks charset, use header('Content-Type: text/html; charset=utf-8');
-            //var_dump($_POST);
-
-            if ($hash = $this->model->processPdf($form)) {
-                $data('notify.success', $this->router->generate('plan.get', ['hash' => $hash]));
+        // if form processed: all field are right, and files(docx) are loaded
+        if ($this->model->isFormProcessed($form)) {
+            if ($pdfName = $this->model->processPdf($form)) {
+                $data('notify.success', $this->router->generate('plan.get', ['pdf' => $pdfName]));
                 //System::redirect2Url($this->router->generate('plan.main', ['time' => time()]), $_SERVER);
             } else {
                 //error somewhere above
@@ -64,18 +59,27 @@ class PlanController extends Controller
         $this->view->render();
     }
 
+    /**
+     * http://mozilla.github.io/pdf.js/
+     *
+     * @param $params
+     */
     public function get($params)
     {
         // Data::__call() doest work on $this-data
         $data = $this->data;
         // Set view templates
         $this->view->set('plan_pdf_result', $data);
-        $data('title', 'План лечения');
 
+        $data('pdf', $this->model->getPdfData($params['pdf'], 'show'));
 
-        $this->view->render();
+        // DO NOT USE COMPRESSION FOR PDF!!!!!
+        $this->view->render(['minify' => false]);
     }
 
+
+
+    // DRAFTS
     // todo
     public function main2()
     {

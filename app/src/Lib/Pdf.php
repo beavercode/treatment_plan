@@ -10,7 +10,21 @@
 namespace UTI\Lib;
 
 //https://github.com/thujohn/pdf-l4
+use UTI\Core\AppException;
+//todo
+
 class Pdf
 {
+    public function __construct()
+    {
 
+    }
+
+    public function create($html)
+    {
+    }
+
+    public function merge(array $pdf)
+    {
+    }
 }
