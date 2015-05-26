@@ -63,8 +63,12 @@ class View
 
     /**
      * Load page template and set page blocks
+     *
+     * @param array $options
+     *  minify  true|false Override minimisation
+     *  cache   true|false Override caching
      */
-    public function render($options = [])
+    public function render(array $options = [])
     {
         $compress = isset($options['minify']) ? $options['minify'] : true;
         $html = $this->load($this->template . '.php');
@@ -110,27 +114,14 @@ class View
     {
         $path = $this->dir . $file;
 
-        if (! is_file($path)) {
+        if (! is_file($path) && ! is_readable($path)) {
             throw new AppException('Failed to load ' . $path);
         }
-        //inject variables used in template files
+        // Inject variables used in template files
         $data = $this->data;
         ob_start();
         include $path;
 
         return ob_get_clean();
-    }
-
-    /**
-     * todo see later
-     */
-    protected function populate($data, array $citizens)
-    {
-        $populated = '';
-        foreach ($citizens as $key => $val) {
-            $populated = str_replace('{{' . $key . '}}', $val, $data);
-        }
-
-        return $populated;
     }
 }
