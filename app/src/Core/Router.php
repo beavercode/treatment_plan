@@ -71,7 +71,7 @@ class Router
                 'action'     => 'index'
             ]);
 
-        $this->router->add('plan.get', $this->uriBase . 'get{/hash}')
+        $this->router->add('plan.get', $this->uriBase . 'get{/pdf}')
             ->addValues([
                 'controller' => 'Plan',
                 'action'     => 'get'
