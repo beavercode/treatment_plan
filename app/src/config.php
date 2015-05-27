@@ -16,7 +16,7 @@
  *          pass    todo
  *
  *****************
-  * App options *
+ * App options *
  *****************
  *
  * app.env Mode in which application runs
@@ -33,10 +33,13 @@ return [
         'env'      => 'dev',
         'uri_base' => '/',
         'html'     => 'min',
-        'tpl'      => 'storage/tpl/',
         'session'  => [
             'dir'      => 'storage/sessions/',
             'duration' => 32400
+        ],
+        'tpl'      => [
+            'pdf'  => 'storage/tpl/pdf/',
+            'view' => 'storage/tpl/view/'
         ],
         'log'      => 'storage/logs/',
         'docx'     => 'storage/docx/',

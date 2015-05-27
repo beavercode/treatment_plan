@@ -32,7 +32,7 @@ abstract class Controller
     public function __construct($router)
     {
         $this->router = $router;
-        $this->view = new View(APP_TPL, HTML_TYPE);
+        $this->view = new View(APP_TPL_VIEW, HTML_TYPE);
         $this->data = new Data(URI_BASE);
     }
 }
