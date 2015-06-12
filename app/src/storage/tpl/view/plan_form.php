@@ -63,9 +63,18 @@ $form = $data('plan.form');
 
     <!-- Save plan -->
     <div class="form-group col-sm-5 col-sm-offset-2">
-        <button type="submit" class="btn btn-success btn-lg">Сохранить план лечения</button>
+        <button type="submit" id="plan-send" class="btn btn-success btn-lg">Сохранить план лечения</button>
     </div>
     <?= $this->block('plan_form_result') ?>
     <!-- /Save plan -->
+
+    <!-- todel -->
+    <div class="clearfix"></div>
+    <?php echo 'POST';
+    var_dump($_POST) ?>
+    <?php echo 'SESSION';
+    var_dump($_SESSION) ?>
+    <!-- /todel -->
+
 </form>
 <!-- /Plan form -->

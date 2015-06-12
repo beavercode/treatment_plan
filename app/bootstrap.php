@@ -19,7 +19,8 @@ try {
     System::loadConf(APP_DIR . 'config.php');
     define('APP_ENV', System::getConfig('app.env'));
     define('URI_BASE', System::getConfig('app.uri_base'));
-    define('APP_TPL', APP_DIR . System::getConfig('app.tpl'));
+    define('APP_TPL_VIEW', APP_DIR . System::getConfig('app.tpl.view'));
+    define('APP_TPL_PDF', APP_DIR . System::getConfig('app.tpl.pdf'));
     define('APP_SES', APP_DIR . System::getConfig('app.session.dir'));
     define('APP_SES_DUR', System::getConfig('app.session.duration'));
     define('APP_LOG', APP_DIR . System::getConfig('app.log'));

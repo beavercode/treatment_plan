@@ -3,7 +3,7 @@
 /** @var \UTI\Lib\Form $form */
 $form = $data('plan.form');
 ?>
-<div id="stage<?= $data('plan.form.stageID') ?>">
+<div id="stage<?= $data('plan.form.stageID') ?>" class="stage">
     <div class="form-group col-sm-5">
         <label for="stage<?= $data('plan.form.stageID') ?>" class="col-sm-4 control-label">Название</label>
 

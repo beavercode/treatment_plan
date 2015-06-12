@@ -19,6 +19,29 @@
     <title><?= $data('title') ?></title>
 </head>
 <body>
+<div class="wait-src js-wait-scr">
+    <div class="jumbotron">
+        <div id="spinningSquaresG">
+            <div id="spinningSquaresG_1" class="spinningSquaresG">
+            </div>
+            <div id="spinningSquaresG_2" class="spinningSquaresG">
+            </div>
+            <div id="spinningSquaresG_3" class="spinningSquaresG">
+            </div>
+            <div id="spinningSquaresG_4" class="spinningSquaresG">
+            </div>
+            <div id="spinningSquaresG_5" class="spinningSquaresG">
+            </div>
+            <div id="spinningSquaresG_6" class="spinningSquaresG">
+            </div>
+            <div id="spinningSquaresG_7" class="spinningSquaresG">
+            </div>
+            <div id="spinningSquaresG_8" class="spinningSquaresG">
+            </div>
+        </div>
+        <!--<span>Подождите пожалуйста...</span>-->
+    </div>
+</div>
 <div class="container">
     <div class="row">
         <div class="plan col-lg-8 col-lg-offset-2">
@@ -72,7 +95,7 @@
             <!-- /header -->
 
             <noscript>
-                <div class="alert alert-danger">Необходимо включить JavaScript для нормальной работы страницы!</div>
+                <div class="alert alert-danger text-center lead">Необходимо включить JavaScript для нормальной работы страницы!</div>
             </noscript>
 
             <?= $this->block('plan_form') ?>
