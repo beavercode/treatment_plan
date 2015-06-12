@@ -70,11 +70,12 @@ class View
      */
     public function render(array $options = [])
     {
+        // last point to disable minimization
         $compress = isset($options['minify']) ? $options['minify'] : true;
-        $html = $this->load($this->template . '.php');
 
         //todo caching
 
+        $html = $this->load($this->template . '.php');
         // minify html base on setting in config.php and $options['minify']
         if (! empty($this->compressor) && $compress) {
             $html = $this->compressor->minify($html);
