@@ -68,11 +68,11 @@ class Form
     /**
      * Load form data from SESSION to method array ($_POST, $_GET)
      *
-     * @param false|array $formData
+     * @param null|array $formData
      */
-    public function load($formData)
+    public function load(array $formData)
     {
-        if (false !== $formData) {
+        if ($formData) {
             $this->method[$this->getName()] = $formData;
         }
     }
@@ -146,11 +146,9 @@ class Form
     {
         if ($value && ($find = array_search($value, $array, true))) {
             $this->method[$this->getName()][$field] = $find;
+        } else { //gets fist val of result array returned from db; really need this?
+            list(, $this->method[$this->getName()][$field]) = each($array);
         }
-        //gets fist val of result array returned from db; really need this?
-        /* else {
-            list($this->method[$this->getName()][$field]) = each($array);
-        }*/
     }
 
     /**
