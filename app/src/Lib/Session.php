@@ -138,10 +138,6 @@ class Session
     {
     }
 
-    private function __sleep()
-    {
-    }
-
     private function __wakeup()
     {
     }
