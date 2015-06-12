@@ -26,11 +26,14 @@ node_modules/
 
 # app specific
 assets/
-sessions/
-cache/
-docx/
-tools/
-logs/
+app/src/storage/sessions/*
+app/src/storage/cache/*
+app/src/storage/docx/*
+app/src/storage/pdf/*
+#storage/tools/
+app/src/storage/logs/*
+pdf/*
+!placeholder
 
 #php
 php_errors.log
