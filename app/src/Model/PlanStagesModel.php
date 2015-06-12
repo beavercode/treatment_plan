@@ -55,8 +55,6 @@ class PlanStagesModel extends Model
      */
     public function init($callback)
     {
-        //if no stages in session
-        $this->session->set('stage', $this->session->get('stage') ?: $this->min);
         // default values
         $callback($this->session->get('stage'));
         $html = '';
@@ -69,7 +67,6 @@ class PlanStagesModel extends Model
             'maxStage' => $this->max,
             'html'     => $html
         ];
-
         $this->sendJSON($data);
     }
 

@@ -30,7 +30,9 @@ class PlanModel extends Model
     {
         $form = new Form('plan_form');
         $data('plan.form', $form);
-        $data('plan.form.doctors', $this->getFormDoctors());
+        // get doctors name from DB
+        $doctors = $this->getFormDoctors();
+        $data('plan.form.doctors', $doctors);
 
         // forming stages with ajax
         if (isset($_POST['stage'])) {
@@ -38,16 +40,11 @@ class PlanModel extends Model
             $event = $_POST['stage'];
             // get stages names
             $data('plan.form.stages', $this->getFormStages());
-            // init action's specific model
-            $realMinStages = $minStages;
-            if ($this->session->get('stage') && ! $this->isFormProcessed($form)) {
-                $realMinStages = $this->session->get('stage');
-            }
             //form default for stages template
             $form->load($this->session->get($form->getName()));
 
             //todo view generation outside of the model
-            $stages = new PlanStagesModel($data, $view, $maxStages, $realMinStages);
+            $stages = new PlanStagesModel($data, $view, $maxStages);
             // default values for stages
             $stages->$event(function ($stage) use ($form) {
                 $stageMSG = [
@@ -60,16 +57,23 @@ class PlanModel extends Model
                     2 => '2nddd',
                     3 => 'one more period'
                 ];
-                //todo situation when stage got from DB has fixed limit, e.g. 'Whitening' => '3 hours'
-                if ($form->isPost()) {
-                    for ($N = 1; $N <= $stage; $N++) {
-                        // if there are the field value in method than no set defaults
-                        if (! isset($_POST[$form->getName()]['stage' . $N])) {
-                            $form->setArrayValue('stage' . $N, $this->getFormStages(), isset($stageMSG[$N]) ? $stageMSG[$N] : '');
-                        }
-                        if (! isset($_POST[$form->getName()]['period' . $N])) {
-                            $form->setValue('period' . $N, isset($periodMSG[$N]) ? $periodMSG[$N] : $N . 'month(s)');
-                        }
+
+                //todo 1. when form submited, than added new stages and pushed "refresh page" button, an error occurs
+                //todo 2. situation when stage got from DB has period limit, e.g. 'Whitening' => '3 hours'
+                for ($N = 1; $N <= $stage; $N++) {
+                    // if there are the field value in method than no set defaults
+                    if (! isset($_POST[$form->getName()]['stage' . $N])) {
+                        $form->setArrayValue(
+                            'stage' . $N,
+                            $this->getFormStages(),
+                            isset($stageMSG[$N]) ? $stageMSG[$N] : ''
+                        );
+                    }
+                    if (! isset($_POST[$form->getName()]['period' . $N])) {
+                        $form->setValue(
+                            'period' . $N,
+                            isset($periodMSG[$N]) ? $periodMSG[$N] : $N . 'month(s)'
+                        );
                     }
                 }
             });
@@ -91,11 +95,13 @@ class PlanModel extends Model
                 );
             }
             // Period check for stages
+            //todo form resubmit problem when adding and deleting stage after form submit, $this->session->get('stage') changed but not the $_POST
             for ($N = 1; $N <= $this->session->get('stage'); $N++) {
+                //if ((! $form->getValue('period' . $N) || mb_strlen($form->getValue('period' . $N)) < $periodLength) && isset($_POST['period' . $N]) {
                 if (! $form->getValue('period' . $N) || mb_strlen($form->getValue('period' . $N)) < $periodLength) {
                     $form->setInvalid(
-                        'period',
-                        'Введите "Период лечения", пожалуйста. Длинна поля не менее ' . $periodLength . ' символов.'
+                        'period' . $N,
+                        'Введите "Период лечения"#' . $N . ', пожалуйста. Длинна поля не менее ' . $periodLength . ' символов.'
                     );
                 }
             }
@@ -117,11 +123,12 @@ class PlanModel extends Model
                 $this->session->set('form_processed', []);
             }
         } else {
-            //form default values
             $this->session->set('form_processed', []);
+            //set min stages
             $this->session->set('stage', $minStages);
+            //form default values
             $form->setValue('fio', 'default_name');
-            $form->setArrayValue('doctor', $data('plan.form.doctors'), '');
+            $form->setArrayValue('doctor', $doctors, '');
         }
         $this->session->set($form->getName(), $form->save($_POST));
 
@@ -136,7 +143,8 @@ class PlanModel extends Model
      */
     public function isFormProcessed(Form $form)
     {
-        return $this->session->get('form_processed') && in_array($form->getName(), $this->session->get('form_processed'), true);
+        return ($this->session->get('form_processed')
+            && in_array($form->getName(), $this->session->get('form_processed'), true));
     }
 
     /**
@@ -155,8 +163,12 @@ class PlanModel extends Model
     {
         //todo list in doc block(upper)
         $pdf = new PlanPdfModel($this->session->get($form->getName()));
-
-        //process pdf
+        //todo
+        $pdf->formToHtml();
+        //todo
+        $pdf->htmlToPdf();
+        //todo
+        $pdf->mergePdf([]);
 
         return $pdf->getPdfName();
     }
@@ -197,12 +209,10 @@ class PlanModel extends Model
         header('Content-Length: ' . filesize($file)); // provide file size
         header('Content-Transfer-Encoding: binary');
         header('Accept-Ranges: bytes');
+
         //header('Connection: close');
 
-        ob_start();
-        readfile($file);
-
-        return ob_get_clean();
+        return file_get_contents($file);
     }
 
 
