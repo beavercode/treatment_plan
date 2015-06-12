@@ -1,12 +1,17 @@
 @import "common";
+@import "wait-screen";
 
 /* -------- */
-
+//todo check all styles
 .plan {
+    // centering wait screen #spinningSquaresG
+    //todo see later
+    position: relative;
+
     .header .title {
         font-size: $font_xl;
     }
-    .form {
+    .plan-form {
         .title {
             font-size: $font_l;
         }
@@ -17,13 +22,9 @@
             //display: none;
         }
         .btnRemove {
-            //display: none;
+            margin-left: 3px;
         }
     }
-}
-
-#remove-stage {
-    margin-left: 3px;
 }
 
 /* Responsive: Portrait smart-phones and up */
@@ -37,8 +38,11 @@
         .header .nav li:last-of-type {
             margin-left: 20px;
         }
+        /*.stage {
+            padding-top: 15px;
+        }*/
     }
-    #notify-msg {
+    .notify-window {
         margin-top: -3px;
     }
 }

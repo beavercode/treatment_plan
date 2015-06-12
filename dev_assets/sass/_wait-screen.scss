@@ -1,0 +1,104 @@
+.wait-src {
+    //display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.5);
+    //opacity: 0.2;
+    //background: url(../img/dark-transparent.png);
+
+    .jumbotron {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-size: $font_xl;
+        padding: 10px 15px 10px 11px;
+        transform: translate(-50%, -50%);
+        //border: 2px solid #666;
+        //border: 1px solid #AB6979;
+        box-shadow: 0 1px 5px 1px #999;
+        border-radius: 8px;
+        color: #444;
+        background: #FFF;
+        //opacity: 0.9;
+
+        .spinningSquaresG {
+            position: absolute;
+            top: 0;
+            background-color: #AB6979;
+            width: 30px;
+            height: 30px;
+            animation-name: bounce_spinningSquaresG;
+            animation-duration: 1.6s;
+            animation-iteration-count: infinite;
+            animation-direction: normal;
+            transform: scale(.3);
+        }
+    }
+}
+
+//animation
+#spinningSquaresG {
+    position: relative;
+    width: 270px;
+    height: 30px;
+    margin-top: 5px;
+}
+
+#spinningSquaresG_1 {
+    left: 0;
+    animation-delay: 0.64s;
+}
+
+#spinningSquaresG_2 {
+    left: 35px;
+    animation-delay: 0.8s;
+}
+
+#spinningSquaresG_3 {
+    left: 70px;
+    animation-delay: 0.96s;
+}
+
+#spinningSquaresG_4 {
+    left: 105px;
+    animation-delay: 1.12s;
+}
+
+#spinningSquaresG_5 {
+    left: 140px;
+    animation-delay: 1.28s;
+}
+
+#spinningSquaresG_6 {
+    left: 175px;
+    animation-delay: 1.44s;
+}
+
+#spinningSquaresG_7 {
+    left: 210px;
+    animation-delay: 1.6s;
+}
+
+#spinningSquaresG_8 {
+    left: 245px;
+    animation-delay: 1.76s;
+}
+
+@keyframes bounce_spinningSquaresG {
+    0% {
+        transform: scale(1);
+        background-color: #AB6979;
+    }
+
+    100% {
+        transform: scale(.3) rotate(90deg);
+        background-color: #FFFFFF;
+    }
+
+}
+
+//cssload.net/#sthash.C4hcQZh1.dpuf
