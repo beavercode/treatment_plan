@@ -9,6 +9,7 @@ module.exports = function (grunt) {
         browserPrefix: ['last 2 versions', '> 1%', 'ie 8'],
         jsDir: 'js',
         imgDir: 'img',
+        imgExt: 'png,jpg,jpeg,gif,ico',
         serverHost: '0.0.0.0',
         serverPort: 7778,
         serverBase: './../',
@@ -91,7 +92,7 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= conf.imgDir %>/',
-                    src: ['./**/*.{png,jpg,jpeg,gif,ico}'],
+                    src: ['./**/*.{<%= conf.imgExt %>}'],
                     dest: '<%= conf.buildDir %>/img/'
                 }]
             }
@@ -157,7 +158,7 @@ module.exports = function (grunt) {
                 }
             },
             images: {
-                files: ['<%= conf.imgDir %>/**/*.{png,jpg,jpeg,gif}'],
+                files: ['<%= conf.imgDir %>/**/*.{<%= conf.imgExt %>}'],
                 tasks: ['newer:imagemin'],
                 options: {
                     spawn: false,
