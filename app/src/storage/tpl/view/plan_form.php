@@ -67,14 +67,5 @@ $form = $data('plan.form');
     </div>
     <?= $this->block('plan_form_result') ?>
     <!-- /Save plan -->
-
-    <!-- todel -->
-    <div class="clearfix"></div>
-    <?php echo 'POST';
-    var_dump($_POST) ?>
-    <?php echo 'SESSION';
-    var_dump($_SESSION) ?>
-    <!-- /todel -->
-
 </form>
 <!-- /Plan form -->

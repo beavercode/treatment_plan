@@ -44,17 +44,16 @@ class PlanController extends Controller
         if ($this->model->isFormProcessed($form)) {
             if ($pdfName = $this->model->processPdf($form)) {
                 $data('notify.success', $this->router->generate('plan.get', ['pdf' => $pdfName]));
-                //System::redirect2Url($this->router->generate('plan.main', ['time' => time()]), $_SERVER);
+
+                // redirect resets all stages ... =(
+                //System::redirect2Url($this->router->generate('plan.main', ['time' => md5(time())]), $_SERVER);
             } else {
                 //error somewhere above
                 $data('notify.error', 'PDF not processed, retry...');
             }
+            //todo stub for real load
+            //sleep(1);
         }
-
-        /*// get pdf if ready
-        if ($hash = $this->model->isPdfReady()) {
-            System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
-        }*/
 
         $this->view->render();
     }
@@ -77,35 +76,7 @@ class PlanController extends Controller
         $this->view->render(['minify' => false]);
     }
 
-
-
-    // DRAFTS
-    // todo
-    public function main2()
-    {
-        $data = new Data(URI_BASE);
-        $data('plan_form', $this->model->processForm());
-
-        //processPDF
-
-        if ($this->model->isPdfReady()) {
-            $hash = $this->model->getPdfName();
-            System::redirect2Url($this->router->generate('plan.get', ['hash' => $hash]), $_SERVER);
-        }
-        $this->view->render('plan_result.php', 'login_template.php', $data);
-    }
-
-    // todo
-    public function get2($params)
-    {
-        $data = new Data(URI_BASE);
-        $data('pdf', $this->model->getPdf($params['hash']));
-
-        $this->view->render('plan_result.php', 'plan_template.php', $data);
-    }
-
     // -------------- NEXT ACTIONS IS OPTIONAL -------------- //
-
     public function show($params)
     {
         //generating links based on controller and action using aura/router
