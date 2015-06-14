@@ -8,6 +8,7 @@ use UTI\Core\Router;
 use UTI\Core\AppException;
 use UTI\Core\System;
 
+// set directives
 ini_set('display_errors', 1);   //disable for prod
 ini_set('short_open_tag', 1);
 /* Set internal character encoding to UTF-8 */
