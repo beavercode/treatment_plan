@@ -1,9 +1,9 @@
 <?php
+
 namespace UTI\Controller;
 
 use UTI\Core\Controller;
 use UTI\Core\System;
-use UTI\Lib\Data;
 use UTI\Model\PlanModel;
 
 /**
@@ -37,7 +37,7 @@ class PlanController extends Controller
         $data('plan.logout', $this->router->generate('auth.logout'));
         $data('title', 'План лечеиня');
         // working with stages using ajax
-        if (false === ($form = $this->model->processForm($data, $this->view, 10, 1))) {
+        if (false === ($form = $this->model->processForm($data, $this->view, 6, 1))) {
             return;
         }
         // if form processed: all field are right, and files(docx) are loaded
