@@ -149,7 +149,7 @@ class PlanModel extends Model
 
     /**
      *
-     * 1. from data to html template
+     * 1. from form data to html template
      * 2. html template to pdf
      * 3. make list of pdf files needed for result
      * 4. merge pdf files in list
@@ -164,7 +164,7 @@ class PlanModel extends Model
         //todo list in doc block(upper)
         $pdf = new PlanPdfModel($this->session->get($form->getName()));
         //todo
-        $pdf->formToHtml();
+        $pdf->formToHtml($this->session('stage'));
         //todo
         $pdf->htmlToPdf();
         //todo

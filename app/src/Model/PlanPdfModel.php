@@ -5,6 +5,7 @@
 
 namespace UTI\Model;
 
+use UTI\Core\AppException;
 use UTI\Core\Model;
 
 /**
@@ -58,20 +59,17 @@ class PlanPdfModel extends Model
 
     /**
      * Load HTML template for PDF
-     *
-     * @param $fileName
-     * @return string
      */
-    public function loadHtmlTemplate($fileName)
+    private function loadTpl($file, $tpl)
     {
-        //todo se View::load()
-        // content replaced using not only str_replace(), but loops too
+        $path = $this->dirHtml . $file;
 
-        /*        $path = $this->dirHtml . $fileName;
-                if (! is_file($path) && ! is_readable($path)) {
-                    throw new AppException('Failed to load ' . $path);
-                }
+        if (! is_file($path) && ! is_readable($path)) {
+            throw new AppException('Failed to load template ' . $path);
+        }
+        ob_start();
+        include $path;
 
-                return file_get_contents($path);*/
+        return ob_get_clean();
     }
 }
