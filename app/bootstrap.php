@@ -39,5 +39,5 @@ try {
         echo $e->getError();
     }
 } catch (\Exception $e) {
-    die('Exception fired, really?!');
+    die("External exception fired! \nMessage: {$e->getMessage()}\n, {$e->getTraceAsString()}");
 }
