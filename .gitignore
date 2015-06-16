@@ -29,7 +29,7 @@ assets/
 app/src/storage/sessions/*
 app/src/storage/cache/*
 app/src/storage/docx/*
-app/src/storage/pdf/*
+#app/src/storage/pdf/*
 #storage/tools/
 app/src/storage/logs/*
 pdf/*
