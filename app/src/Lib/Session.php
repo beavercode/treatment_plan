@@ -19,8 +19,8 @@ namespace UTI\Lib;
 class Session
 {
     protected static $instance;
-    protected        $session;
-    protected        $duration;
+    protected $session;
+    protected $duration;
 
     /**
      * Run session and return its instance

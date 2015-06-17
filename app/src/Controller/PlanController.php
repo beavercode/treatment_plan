@@ -42,8 +42,8 @@ class PlanController extends Controller
         }
         // if form processed: all field are right, and files(docx) are loaded
         if ($this->model->isFormProcessed($form)) {
-            if ($pdfName = $this->model->processPdf($form)) {
-                $data('notify.success', $this->router->generate('plan.get', ['pdf' => $pdfName]));
+            if ($hash = $this->model->processPdf($form)) {
+                $data('notify.success', $this->router->generate('plan.get', ['pdf' => $hash]));
 
                 // redirect resets all stages ... =(
                 //System::redirect2Url($this->router->generate('plan.main', ['time' => md5(time())]), $_SERVER);
@@ -56,6 +56,7 @@ class PlanController extends Controller
         }
 
         $this->view->render();
+        var_dump($_POST);
     }
 
     /**
