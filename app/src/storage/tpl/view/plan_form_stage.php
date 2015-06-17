@@ -32,10 +32,9 @@ $form = $data('plan.form');
     </div>
     <div class="form-group col-sm-2">
         <div class="col-sm-12">
-            <!--todo: interactive upload-->
             <input type="file" id="file<?= $data('plan.form.stageID') ?>" class="col-sm-12"
-                   name="<?= $form->getName() ?>[file<?= $data('plan.form.stageID') ?>]"
-                   data-filename-placement="inside" title="Прайс">
+                   name="file<?= $data('plan.form.stageID') ?>"
+                   data-filename-placement="inside" title="Прайс" tabindex="-1">
         </div>
     </div>
 </div>
