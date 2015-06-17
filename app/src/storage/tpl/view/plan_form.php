@@ -14,8 +14,10 @@ $form = $data('plan.form');
         </div>
     <?php endforeach; ?>
 <?php endif; ?>
-<form class="form-horizontal form" role="form" name="<?= $form->getName() ?>" action="" method="post">
+<form class="form-horizontal plan-form" role="form" name="<?= $form->getName() ?>" action="" method="post" enctype="multipart/form-data">
     <!-- Common info -->
+    <!-- MAX_FILE_SIZE must precede the file input field -->
+    <input type="hidden" name="MAX_FILE_SIZE" value="52428800"/> <!-- ~50mb-->
     <div class="form-group col-sm-7">
         <label for="fio" class="col-sm-4 control-label">Введите имя</label>
 
@@ -32,7 +34,7 @@ $form = $data('plan.form');
             <select id="doctor" class="selectpicker show-tick" name="<?= $form->getName() ?>[doctor]" data-width="100%">
                 <?= $form->getArrayValue(
                     'doctor',
-                    '<option {{opt}} value="{{val}}">{{val}}</option>',
+                    '<option {{opt}} value="{{key}}">{{val}}</option>',
                     $data('plan.form.doctors'),
                     'selected'
                 ) ?>
