@@ -83,8 +83,14 @@ $.fn.bootstrapFileInput = function() {
       });
     });
 
-    $('body').on('change', '.file-input-wrapper input[type=file]', function(){
+    //bbr
+        //todo proper popovers handling
+    $('.file-input-wrapper input[type=file]').on('click', function() {
+        $(this).parent().popover('destroy');
+    });
+    //\bbr
 
+    $('body').on('change', '.file-input-wrapper input[type=file]', function(){
       var fileName;
       fileName = $(this).val();
 
@@ -97,6 +103,30 @@ $.fn.bootstrapFileInput = function() {
         fileName = fileName.substring(fileName.lastIndexOf('\\') + 1, fileName.length);
       }
 
+      //bbr
+      var fileExt = fileName.split('.').pop().toLowerCase();
+      //todo proper popovers handling
+      $(this).parent().popover({
+        html: true,
+        content : '<span class="glyphicon glyphicon-file"></span> ' + fileName,
+        placement: 'right',
+        container: 'body',
+        trigger: 'manual'
+      });
+      //fileName = undefined;
+      var fileSign;
+      if ($.inArray(fileExt, ['docx']) === -1) {
+        fileSign = '<span class="glyphicon glyphicon-remove"></span>';
+        $(this).parent().removeClass('btn-default').addClass('btn-danger');
+        $(this).parent().popover('destroy');
+      } else {
+        fileSign = '<span class="glyphicon glyphicon-ok"></span>';
+        $(this).parent().removeClass('btn-default').addClass('btn-success');
+        $(this).parent().removeClass('btn-danger').addClass('btn-success');
+        $(this).parent().popover('show');
+      }
+      //\bbr
+
       // Don't try to show the name if there is none
       if (!fileName) {
         return;
@@ -105,7 +135,7 @@ $.fn.bootstrapFileInput = function() {
       var selectedFileNamePlacement = $(this).data('filename-placement');
       if (selectedFileNamePlacement === 'inside') {
         // Print the fileName inside
-        $(this).siblings('span').html(fileName);
+        $(this).siblings('span').html(fileSign); //new: fileSign, old: fileName
         $(this).attr('title', fileName);
       } else {
         // Print the fileName aside (right after the the button)

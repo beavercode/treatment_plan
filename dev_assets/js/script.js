@@ -106,6 +106,9 @@
                 // hide notify-msg
                 $('#notify-msg').hide();
 
+                //remove popover, see lib/4bootstrap.file-input.js
+                $('#stage' + data.stage + ' .file-input-wrapper').popover('destroy');
+
                 //debug:
                 console.log('Remove stage#' + data.stage);
             });

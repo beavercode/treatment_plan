@@ -11,20 +11,24 @@
     .header .title {
         font-size: $font_xl;
     }
-    .plan-form {
-        .title {
-            font-size: $font_l;
-        }
-        .control-label {
-            text-align: center;
-        }
-        .brnAdd {
-            //display: none;
-        }
-        .btnRemove {
-            margin-left: 3px;
-        }
+}
+.plan-form {
+    .title {
+        font-size: $font_l;
     }
+    .control-label {
+        //text-align: center;
+    }
+    .brnAdd {
+        //display: none;
+    }
+    .btnRemove {
+        margin-left: 3px;
+    }
+}
+//todo make more granular styles for file popups
+.popover-content {
+    padding: 6px 8px;
 }
 
 /* Responsive: Portrait smart-phones and up */
