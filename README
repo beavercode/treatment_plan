@@ -1,0 +1,14 @@
+# Treatment user information (UTI)
+
+##Intention
+Create stable and useful system...
+
+##TODO
+1. Prevent form resubmitting, but allow user to see fully filled form for further correction (BE)
+
+##Bugs
+1. Form: input[file] popover do not changes when selection same file (FE)
+2. Form: adding/deleting stages no recognized and leads to errors
+3. Form: input[file] do not saves state after submitting a form
+
+ps. FE - front-end, BE - back-end.
