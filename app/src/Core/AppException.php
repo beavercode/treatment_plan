@@ -14,6 +14,6 @@ class AppException extends \RuntimeException
      */
     public function getError()
     {
-        return parent::getTraceAsString() . PHP_EOL . parent::getMessage() . PHP_EOL;
+        return parent::getMessage() . PHP_EOL . parent::getTraceAsString() . PHP_EOL;
     }
 }
