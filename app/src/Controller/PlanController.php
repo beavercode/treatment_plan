@@ -37,7 +37,7 @@ class PlanController extends Controller
         $data('plan.logout', $this->router->generate('auth.logout'));
         $data('title', 'План лечеиня');
         // working with stages using ajax
-        if (false === ($form = $this->model->processForm($data, $this->view, 6, 1))) {
+        if (false === ($form = $this->model->processForm($data, $this->view, APP_STAGES_MAX, APP_STAGES_MIN))) {
             return;
         }
         // if form processed: all field are right, and files(docx) are loaded
@@ -71,7 +71,7 @@ class PlanController extends Controller
         // Set view templates
         $this->view->set('plan_pdf_result', $data);
 
-        $data('pdf', $this->model->getPdfData($params['pdf'], 'show'));
+        $data('pdf', $this->model->showPdf($params['pdf'], 'show'));
 
         // DO NOT USE COMPRESSION FOR PDF!!!!!
         $this->view->render(['minify' => false]);

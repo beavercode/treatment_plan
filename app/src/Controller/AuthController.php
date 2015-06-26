@@ -3,7 +3,6 @@ namespace UTI\Controller;
 
 use UTI\Core\Controller;
 use UTI\Core\System;
-use UTI\Lib\Data;
 use UTI\Model\AuthModel;
 
 /**

@@ -33,6 +33,10 @@ abstract class Controller
     {
         $this->router = $router;
         $this->view = new View(APP_TPL_VIEW, HTML_TYPE);
-        $this->data = new Data(URI_BASE);
+
+        //todo find nice looking way to handle Data object
+        $data = new Data(URI_BASE);
+        $data('base', URI_BASE);
+        $this->data = $data;
     }
 }

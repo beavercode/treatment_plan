@@ -80,6 +80,7 @@
             font-weight: normal;
             color: #8d2f48;
         }
+
         .title-b .extra {
             font-size: 18px;
         }
@@ -104,6 +105,11 @@
             /*width: 435px;*/
             width: 460px;
             overflow: hidden;
+        }
+
+        .customer-data .desc .name {
+            font-size: 18px;
+            font-weight: 600;
         }
 
         .customer-data .desc > p {
@@ -174,6 +180,7 @@
             height: 100%;
             margin: 115px auto 0;
         }
+
         .l-stage-col {
             float: left;
             width: 362px;
@@ -220,60 +227,40 @@
     </div>
 
     <div class="customer-stages">
-        <div class="l-stage-col">
-            <div class="stage">
-                <div class="fig">
-                    <span class="lesser9">1</span>
-                </div>
-                <div class="info">
-                    <div><span>1 этап</span><b> – {{stage_name}}</b></div>
-                    <!--<p>(вручную печатаем, что входит в этап)</p>-->
-                    <p><span>длительность</span><b> – </b>{{period}}</p>
-                </div>
-                <div class="clearfix"></div>
+        <div class="stage l-stage-col">
+            <div class="fig">
+                <span class="lesser9">1</span>
             </div>
-
-            <div class="stage">
-                <div class="fig"><span class="lesser9">2</span></div>
-                <div class="info">
-                    <div><span>2 этап</span><b> – ортодонтия</b></div>
-
-                    <p><span>длительность</span><b> – </b>X мес.</p>
-                </div>
-                <div class="clearfix"></div>
+            <div class="info">
+                <div><span>1 этап</span><b> – {{stage_name}}</b></div>
+                <!--<p>(вручную печатаем, что входит в этап)</p>-->
+                <p><span>длительность</span><b> – </b>{{period}}</p>
             </div>
-
-            <div class="stage">
-                <div class="fig"><span class="lesser9">3</span></div>
-                <div class="info">
-                    <div><span>3 этап</span><b> – имплантация</b></div>
-
-                    <p><span>длительность</span><b> – </b>X мес.</p>
-                </div>
-                <div class="clearfix"></div>
-            </div>
+            <div class="clearfix"></div>
         </div>
-        <div class="l-stage-col">
-            <div class="stage">
-                <div class="fig"><span class="lesser9">4</span></div>
-                <div class="info">
-                    <div><span>4 этап</span><b> – эндо-лечение</b></div>
-
-                    <p><span>длительность</span><b> – </b>X мес.</p>
-                </div>
-                <div class="clearfix"></div>
+        <div class="stage l-stage-col">
+            <div class="fig">
+                <span class="lesser9">1</span>
             </div>
-
-            <div class="stage">
-                <div class="fig"><span class="lesser9">5</span></div>
-                <div class="info">
-                    <div><span>5 этап</span><b> – протезирование</b></div>
-
-                    <p><span>длительность</span><b> – </b>X мес.</p>
-                </div>
-                <div class="clearfix"></div>
+            <div class="info">
+                <div><span>1 этап</span><b> – {{stage_name}}</b></div>
+                <!--<p>(вручную печатаем, что входит в этап)</p>-->
+                <p><span>длительность</span><b> – </b>{{period}}</p>
             </div>
+            <div class="clearfix"></div>
         </div>
+        <div class="stage l-stage-col">
+            <div class="fig">
+                <span class="lesser9">1</span>
+            </div>
+            <div class="info">
+                <div><span>1 этап</span><b> – {{stage_name}}</b></div>
+                <!--<p>(вручную печатаем, что входит в этап)</p>-->
+                <p><span>длительность</span><b> – </b>{{period}}</p>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
         <div class="clearfix"></div>
     </div>
 </div>

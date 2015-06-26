@@ -30,6 +30,10 @@
 
 return [
     'app' => [
+        'stages'   => [
+            'min' => 10,
+            'max' => 10
+        ],
         'env'      => 'dev',
         'uri_base' => '/',
         'html'     => 'min',
@@ -44,7 +48,12 @@ return [
         'log'      => 'storage/logs/',
         'docx'     => 'storage/docx/',
         'pdf_in'   => 'storage/pdf/',
-        'pdf_out'  => './../../pdf/'
+        'pdf_out'  => './../../pdf/',
+        'img'      => [
+            'doctors' => '../../doctors/',
+            /*'common'  => 'storage/img/common/'*/
+        ],
+        'tmp'      => 'storage/tmp/'
     ]
 ];
 

@@ -58,7 +58,7 @@
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
                             </button>
-                            <a class="navbar-brand title" href="<?= $data() ?>">План лечения</a>
+                            <a class="navbar-brand title" href="<?= $data('base') ?>">План лечения</a>
                         </div>
 
                         <!-- navbar-collapse -->

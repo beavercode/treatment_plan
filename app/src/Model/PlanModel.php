@@ -4,6 +4,7 @@ namespace UTI\Model;
 
 use UTI\Core\AppException;
 use UTI\Core\Model;
+use UTI\Lib\File;
 use UTI\Lib\Form;
 
 /**
@@ -28,10 +29,10 @@ class PlanModel extends Model
      */
     public function processForm($data, $view, $maxStages, $minStages = 1)
     {
-        $form = new Form('plan_form');
+        $form = new Form('plan_form', APP_DOCX);
         $data('plan.form', $form);
         // get doctors name from DB
-        $doctors = $this->getFormDoctors();
+        $doctors = $this->getDoctors();
         $data('plan.form.doctors', $doctors);
 
         // forming stages with ajax
@@ -39,7 +40,7 @@ class PlanModel extends Model
             // get an event
             $event = $_POST['stage'];
             // get stages names
-            $data('plan.form.stages', $this->getFormStages());
+            $data('plan.form.stages', $this->getStages());
             //form default for stages template
             $form->load($this->session->get($form->getName()));
 
@@ -48,24 +49,22 @@ class PlanModel extends Model
             // default values for stages
             $stages->$event(function ($stage) use ($form) {
                 $stageMSG = [
-                    1 => 'Отбеливание',
                     2 => 'Ортодонтия',
                     3 => 'Имплантация'
                 ];
                 $periodMSG = [
-                    1 => 'First period',
-                    2 => '2nddd',
-                    3 => 'one more period'
+                    1 => '1 месяц',
+                    2 => '2 недели'
                 ];
 
-                //todo 1. when form submited, than added new stages and pushed "refresh page" button, an error occurs
+                //todo 1. when form submitted, than added new stages and pushed "refresh page" button, an error occurs
                 //todo 2. situation when stage got from DB has period limit, e.g. 'Whitening' => '3 hours'
                 for ($N = 1; $N <= $stage; $N++) {
                     // if there are the field value in method than no set defaults
                     if (! isset($_POST[$form->getName()]['stage' . $N])) {
                         $form->setArrayValue(
                             'stage' . $N,
-                            $this->getFormStages(),
+                            $this->getStages(),
                             isset($stageMSG[$N]) ? $stageMSG[$N] : ''
                         );
                     }
@@ -85,7 +84,15 @@ class PlanModel extends Model
         if ($form->isSubmit()) {
             $fioLength = 5;
             $periodLength = 5;
-            $fileExt = ['docx'];
+            $uploadOptions = [
+                'ext'  => ['docx'],
+                'mime' => [
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // php finfo class
+                    'application/msword',   // "file --mime-type -b fName.docx" on ubuntu 12.04
+                    'application/zip'       // "file --mime-type -b fName".docx on freeBsd8.2
+                ],
+                'size' => 52428800 //50Mb = 52428800 bytes
+            ];
 
             // FIO check
             if (! $form->getValue('fio') || mb_strlen($form->getValue('fio')) < $fioLength) {
@@ -97,6 +104,7 @@ class PlanModel extends Model
             // Period check for stages
             //todo form resubmit problem when adding and deleting stage after form submit, $this->session->get('stage') changed but not the $_POST
             for ($N = 1; $N <= $this->session->get('stage'); $N++) {
+                //period check
                 //if ((! $form->getValue('period' . $N) || mb_strlen($form->getValue('period' . $N)) < $periodLength) && isset($_POST['period' . $N]) {
                 if (! $form->getValue('period' . $N) || mb_strlen($form->getValue('period' . $N)) < $periodLength) {
                     $form->setInvalid(
@@ -104,17 +112,16 @@ class PlanModel extends Model
                         'Введите "Период лечения"#' . $N . ', пожалуйста. Длинна поля не менее ' . $periodLength . ' символов.'
                     );
                 }
-            }
-            // Load file(s)
-            //todo handle file loading
-            /*for ($N = 1; $N <= $this->session->get('stage'); $N++) {
-                if (! $form->loadFile('period' . $N, $fileExt)) {
+                //file upload
+                //todo save and display saved files to user in form
+                if (! $form->uploadFile('file' . $N, $uploadOptions)) {
                     $form->setInvalid(
-                        'file',
-                        'Файл должен быть типа: "' . implode(',', $fileExt) . '"'
+                        'file' . $N,
+                        $form->fileUploadError()
                     );
                 }
-            }*/
+            }
+
             // No errors there, check form as processed
             if (! $form->isInvalid()) {
                 // reset form data in session
@@ -127,8 +134,8 @@ class PlanModel extends Model
             //set min stages
             $this->session->set('stage', $minStages);
             //form default values
-            $form->setValue('fio', 'default_name');
-            $form->setArrayValue('doctor', $doctors, '');
+            $form->setValue('fio', 'Арсений Петрович');
+            $form->setArrayValue('doctor', $doctors, '');   //e.g. Воронин М. В.  Катаева В. Р.
         }
         $this->session->set($form->getName(), $form->save($_POST));
 
@@ -158,19 +165,63 @@ class PlanModel extends Model
      *
      * @param Form $form
      * @return string
+     * @throws \iio\libmergepdf\Exception
+     * @throws AppException
      */
+
     public function processPdf(Form $form)
     {
-        //todo list in doc block(upper)
-        $pdf = new PlanPdfModel($this->session->get($form->getName()));
-        //todo
-        $pdf->formToHtml($this->session('stage'));
-        //todo
-        $pdf->htmlToPdf();
-        //todo
-        $pdf->mergePdf([]);
+        $pdf = new PlanPdfModel($this);
+        $formData = $this->session->get($form->getName());
+        $toDel = [];
 
-        return $pdf->getPdfName();
+        //make html/pdf for Summary
+        $summaryHtml = $pdf->summaryToHtml($formData, 'pdf_summary_tpl.php');
+        $toDel[] = $summaryPdfName = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)) . '.pdf');
+
+        //populate merge array
+        $pdf->pdfMergeList('title', 'pdf_title.pdf');
+        $pdf->pdfMergeList('summary', $summaryPdfName);
+        $pdf->pdfMergeList('tooth_map', 'pdf_tooth_map.pdf');
+
+        //convert doc to data array
+        //todo parse docx or excel to get price table data for arbitrary number of stages, number if row in template limited by 17 rows (procedures)
+        //$doc = new Docx();
+        //$docData = $doc->getPriceTable($formData['fileName']);
+        $docData = [];
+        //make html for stage price (stage's price)
+        $stagePriceHtmlArray = $pdf->stagePriceToHtml($formData, $docData, 'pdf_stage-price_tpl.php');
+
+        //todo associate stage name with pdf of stage terms
+        //$this->getStagesForMerge();
+        /*if prices is uploaded for each of them make pdfPricePage with corresponding terminology*/
+        for ($i = 1, $s = $this->session->get('stage'); $i <= $s; ++$i) {
+            $toDel[] = $testPricePage = $pdf->htmlToPdf($stagePriceHtmlArray[$i -1], md5(microtime(true)) . '.pdf');
+
+            //todo generate price for each stage
+            if (! ($stagePdf = $this->getStagePdfById($formData['stage' . $i]))) {
+                continue;
+            }
+            $pdf->pdfMergeList('stage' . $i . '_price', $testPricePage);
+            $pdf->pdfMergeList('stage' . $i . '_term', $stagePdf);
+        }
+        unset($stagePdf, $i, $s);
+
+        //$pdf->pdfMergeList('stage1_price', $testPricePage);
+        //$pdf->pdfMergeList('stage1_term', 'pdf_term_implantation.pdf');
+        //$pdf->setMergeList('stage2_price', 'generated from form data');
+        //$pdf->pdfMergeList('stage2_term', 'pdf_term_orthodontics.pdf');
+
+        $pdf->pdfMergeList('faq', 'pdf_faq.pdf');
+        $pdf->pdfMergeList('extra', 'pdf_extra.pdf');
+        $pdfOutName = $pdf->mergePdf();
+
+        //delete tmp pdf
+        $pdf->removePdf($toDel);
+
+        //todo save treatment plan parts to DB for recovering later
+
+        return $pdfOutName;
     }
 
     /**
@@ -179,16 +230,14 @@ class PlanModel extends Model
      * @param        $hash
      * @param string $action
      * @return string
+     * @throws AppException
      */
-    public function getPdfData($hash, $action = 'show')
+    public function showPdf($hash, $action = 'show')
     {
         $name = $hash . '.pdf';
         $file = APP_PDF_OUT . $name;
 
-        if (! is_file($file) && ! is_readable($file)) {
-            throw new AppException('Failed to load pdf ' . $file);
-        }
-
+        $fileData = File::read($file);
         //todo re-check for proper HTTP  headers
         header('Content-type: application/pdf');
         //header('Content-Type: application/octet-stream');
@@ -212,10 +261,8 @@ class PlanModel extends Model
 
         //header('Connection: close');
 
-        return file_get_contents($file);
+        return $fileData;
     }
-
-
 
 
 
@@ -223,33 +270,99 @@ class PlanModel extends Model
 
     /**
      * Get form stages from DB
-     * @state stub
      *
+     * @state stub
      * @return array
      */
-    public function getFormStages()
+    public function getStages()
     {
         //todo get from DB, using stub for now
         return [
-            1  => 'Имплантация',
-            10 => 'Ортодонтия',
-            25 => 'Отбеливание'
+            2  => 'Имплантация',
+            10 => 'Ортодонтия'
         ];
     }
 
     /**
-     * Get form stages from DB
-     * @state stub
+     * Get stage name from db by id
      *
+     * @stub
+     * @param $stageId
+     * @return null
+     */
+    public function getStageById($stageId)
+    {
+        //todo get from DB, using stub for now
+        $dbResult = [
+            2  => 'Имплантация',
+            10 => 'Ортодонтия'];
+
+        return isset($dbResult[$stageId]) ? $dbResult[$stageId] : null;
+    }
+
+    /**
+     * Get stage's pdf for merge
+     *
+     * @state stub
+     * @param $stageId
+     * @return null
+     */
+    public function getStagePdfById($stageId)
+    {
+        //todo get from DB, using stub for now
+        $dbResult = [
+            2  => 'pdf_term_implantation.pdf',
+            10 => 'pdf_term_orthodontics.pdf'];
+
+        return isset($dbResult[$stageId]) ? $dbResult[$stageId] : null;
+    }
+
+    /**
+     * Get full list of doctors from DB
+     *
+     * @state stub
      * @return array
      */
-    public function getFormDoctors()
+    public function getDoctors()
     {
         //todo get from DB, using stub for now
         return [
             5  => 'Катаева В. Р.',
-            24 => 'Воронин М. В.',
-            31 => 'Павленко Я. И.'
+            24 => 'Воронин М. В.'
         ];
+    }
+
+    /**
+     * Get doctor name from db by id
+     *
+     * @state stub
+     * @param $doctorId
+     * @return array
+     */
+    public function getDoctorById($doctorId)
+    {
+        //todo get from DB, using stub for now
+        $dbResult = [
+            5  => 'Катаева В. Р.',
+            24 => 'Воронин М. В.'];
+
+        return isset($dbResult[$doctorId]) ? $dbResult[$doctorId] : null;
+    }
+
+    /**
+     * Get doctor photo from db by id
+     *
+     * @state stub
+     * @param $doctorId
+     * @return array
+     */
+    public function getDoctorPhotoById($doctorId)
+    {
+        //todo get from DB, using stub for now
+        $dbResult = [
+            5  => 'kataeva.jpg',
+            24 => 'voronin.jpg'];
+
+        return isset($dbResult[$doctorId]) ? $dbResult[$doctorId] : null;
     }
 }
