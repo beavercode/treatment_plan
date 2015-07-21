@@ -5,6 +5,7 @@
  * These libraries maybe useful only for development.
  */
 
+version_compare(phpversion(), '5.4.0', '>=') ?: die('PHP 5.4.0+ required.');
 //anti favicon.ico without apache
 ($_SERVER['REQUEST_URI'] !== '/favicon.ico')
     ? require 'app/bootstrap.php'
