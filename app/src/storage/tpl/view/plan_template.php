@@ -1,5 +1,6 @@
 <?php
 /** @var \UTI\Lib\Data $data */
+/** @var \UTI\Core\View $view */
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -98,7 +99,7 @@
                 <div class="alert alert-danger text-center lead">Необходимо включить JavaScript для нормальной работы страницы!</div>
             </noscript>
 
-            <?= $this->block('plan_form') ?>
+            <?= $view->block('plan_form') ?>
         </div>
     </div>
 </div>

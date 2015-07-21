@@ -1,7 +1,11 @@
 <?php
+/**
+ * UTI
+ */
 
 namespace UTI\Core;
 
+use UTI\Lib\File\File;
 use UTI\Lib\MinifyHTML;
 
 /**
@@ -11,7 +15,7 @@ use UTI\Lib\MinifyHTML;
 class View
 {
     /**
-     * Stores absolute path to file
+     * Stores Path to the directory with templates
      * @var string
      */
     protected $dir;
@@ -40,10 +44,12 @@ class View
     protected $compressor;
 
     /**
-     * @param string $dir
-     * @param string $compression Flag for minimisation:
-     * 'min': minify HTMLs
-     * 'raw': not, default
+     * Init
+     *
+     * @param string $dir Path to template's directory
+     * @param string $compression Add compression, flags:
+     *      'min' - minify HTMLs
+     *      'raw' - not, default
      */
     public function __construct($dir, $compression = 'raw')
     {
@@ -54,6 +60,13 @@ class View
         }
     }
 
+    /**
+     * Set main template, view data and addition block for view
+     *
+     * @param string        $template Name of main template
+     * @param \UTI\Lib\Data $data Object that stores view data
+     * @param array         $blocks List of block which would used later
+     */
     public function set($template, $data, array $blocks = [])
     {
         $this->data = $data;
@@ -64,9 +77,10 @@ class View
     /**
      * Load page template and set page blocks
      *
-     * @param array $options
-     *  minify  true|false Override minimisation
-     *  cache   true|false Override caching
+     * @param array $options Additional options applied before send page
+     *      'minify' - true|false Override minimisation
+     *      'cache'  - true|false Override caching
+     * @throws AppException
      */
     public function render(array $options = [])
     {
@@ -87,9 +101,10 @@ class View
     /**
      * Load block with name what is in blocks
      *
-     * @param string $name Block name
-     * @param array  $additionalData
-     * @return null|string
+     * @param string $name Block name that was introduces at View::set() method
+     * @param array  $additionalData Add additional view data to view data
+     * @return string Content of the block
+     * @throws AppException
      */
     public function block($name, array $additionalData = [])
     {
@@ -106,23 +121,16 @@ class View
     }
 
     /**
-     * Load file
+     * Load file and inject data and view into it
      *
-     * @param string $file
-     * @return string
+     * @param string $file Path to the file
+     * @return string Content of the file
+     * @throws AppException
      */
     protected function load($file)
     {
         $path = $this->dir . $file;
 
-        if (! is_file($path) && ! is_readable($path)) {
-            throw new AppException('Failed to load ' . $path);
-        }
-        // Inject variables used in template files
-        $data = $this->data;
-        ob_start();
-        include $path;
-
-        return ob_get_clean();
+        return File::inc($path, ['data' => $this->data, 'view' => $this], true);
     }
 }

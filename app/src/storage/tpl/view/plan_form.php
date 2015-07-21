@@ -1,6 +1,7 @@
 <?php
 /** @var \UTI\Lib\Data $data */
 /** @var \UTI\Lib\Form $form */
+/** @var \UTI\Core\View $view */
 $form = $data('plan.form');
 ?>
 <!-- Plan form -->
@@ -67,7 +68,7 @@ $form = $data('plan.form');
     <div class="form-group col-sm-5 col-sm-offset-2">
         <button type="submit" id="plan-send" class="btn btn-success btn-lg">Сохранить план лечения</button>
     </div>
-    <?= $this->block('plan_form_result') ?>
+    <?= $view->block('plan_form_result') ?>
     <!-- /Save plan -->
 </form>
 <!-- /Plan form -->
