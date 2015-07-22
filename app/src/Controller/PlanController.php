@@ -2,6 +2,8 @@
 
 namespace UTI\Controller;
 
+use Aura\Router\Exception\RouteNotFound;
+use UTI\Core\AppException;
 use UTI\Core\Controller;
 use UTI\Core\System;
 use UTI\Model\PlanModel;
@@ -14,6 +16,7 @@ class PlanController extends Controller
 {
     /**
      * @param $router
+     * @throws AppException
      */
     public function __construct($router)
     {
@@ -21,7 +24,13 @@ class PlanController extends Controller
         $this->model = new PlanModel();
 
         if (! $this->model->isLogged()) {
-            System::redirect2Url($this->router->generate('auth.login'), $_SERVER);
+            // re-throw to own exception
+            try {
+                System::redirect2Url($this->router->generate('auth.login'), $_SERVER);
+            } catch (RouteNotFound $e) {
+                throw new AppException($e->getMessage() . '; rethrow from "Aura\Router\Exception\RouteNotFound;
+:"', 911, $e);
+            }
         }
     }
 
@@ -51,8 +60,6 @@ class PlanController extends Controller
                 //error somewhere above
                 $data('notify.error', 'PDF not processed, retry...');
             }
-            //todo stub for real load
-            //sleep(1);
         }
 
         $this->view->render();

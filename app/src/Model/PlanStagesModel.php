@@ -2,6 +2,7 @@
 
 namespace UTI\Model;
 
+use UTI\Core\AppException;
 use UTI\Core\Model;
 
 /**
@@ -52,6 +53,7 @@ class PlanStagesModel extends Model
 
     /**
      * Init stage value with min
+     * @throws AppException
      */
     public function init($callback)
     {
@@ -72,6 +74,7 @@ class PlanStagesModel extends Model
 
     /**
      * Handle stage number and echo html data
+     * @throws AppException
      */
     public function add($callback)
     {
