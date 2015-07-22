@@ -7,15 +7,7 @@ require('vendor/autoload.php');
 use UTI\Core\Router;
 use UTI\Core\AppException;
 use UTI\Core\System;
-use UTI\Lib\MemoryUsageInformation;
-
-//debug, memory usage
-$memoryDebug = true;
-if ($memoryDebug && ! isset($_POST['stage'])) {
-    $memory = new MemoryUsageInformation();
-// Set start
-    $memory->setStart();
-}
+use UTI\Lib\Memory\Memory;
 
 try {
     define('APP_DIR', __DIR__ . '/src/');
@@ -23,6 +15,14 @@ try {
     define('APP_ENV', System::getConfig('app.env'));
     if (APP_ENV === 'dev') {
         ini_set('display_errors', 1);
+        //debug, memory usage
+        Memory::start([
+            function () { // do not check for stage ajax requests
+                if (! isset($_POST['stage'])) {
+                    return true;
+                }
+            }
+        ]);
     }
     set_time_limit(180); // http://php.net/manual/en/function.set-time-limit.php
     //ini_set('memory_limit', 512); // http://php.net/manual/en/ini.core.php#ini.memory-limit
@@ -57,11 +57,4 @@ try {
 }
 
 //debug, memory usage
-if ($memoryDebug && ! isset($_POST['stage']) && isset($memory) && $memory instanceof MemoryUsageInformation) {
-// Set end
-    $memory->setEnd();
-// Print memory usage statistics
-    echo '<pre>';
-    $memory->printMemoryUsageInformation();
-    echo '</pre>';
-}
+Memory::finish();
