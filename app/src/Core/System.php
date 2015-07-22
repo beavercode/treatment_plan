@@ -1,91 +1,62 @@
 <?php
+/**
+ * UTI
+ */
 
 namespace UTI\Core;
 
-use UTI\Lib\File;
+use UTI\Lib\File\File;
 
 /**
- * System wide functions
- *
  * Class System
- * @package UTI\Lib
+ * @package UTI\Core
  */
 class System
 {
+    /**
+     * @var array Stores config array
+     */
     protected static $conf;
 
     /**
      * Write data to log file
      *
-     * @param  string $fileName
-     * @param  string $data
-     * @return int
+     * @param  string $file Path to the file
+     * @param  string $data Message to log
+     * @return int|bool Bytes that were written to the file, or false on failure
+     * @throws AppException
      */
-    public static function log($fileName, $data)
+    public static function log($file, $data)
     {
+        //todo Implement own package using PSR-3 or use Monolog
         $timeSeparator = ' | ';
         $lineSeparator = "\n";
-        $data = date('Y-m-d H:i:s O') . " {$timeSeparator} " . (string) $data;
+        $data = date('Y-m-d H:i:s O') . " {$timeSeparator} " . (string)$data;
 
-        return File::write($fileName, $data . $lineSeparator);
+        return File::write($file, $data . $lineSeparator);
     }
 
     /**
      * Load file data
      *
-     * @param $fileName
-     * @return mixed
+     * @param string $fileName Path to the file
      * @throws AppException
      */
     public static function loadConf($fileName)
     {
-        if (! $data = include "$fileName") {
-            throw new AppException('Can\'t load file "' . $fileName . '""');
-        }
-        self::$conf = $data;
+        self::$conf = File::inc($fileName);
     }
 
     /**
      * Redirect to url
      *
-     * @param        $uri
-     * @param        $server
-     * @param string $schema
+     * @param string $uri URI where to redirect
+     * @param string $server Super-global $_SERVER variable
+     * @param string $schema Transfer schema, e.g. HTTP, HTTPS
      */
     public static function redirect2Url($uri, $server, $schema = 'http://')
     {
         header('Location: ' . $schema . $server['HTTP_HOST'] . $uri);
-    }
-
-    /**
-     * Rid of base path in URI string, e.g.:
-     * example.com/base/path/controller/action/id   =>  example.com/controller/action/id
-     *
-     * @param  string $uri where to find
-     * @param  string $uriBase what to find
-     * @param  string $baseReplace replacement string, default ''
-     * @return string
-     */
-    public static function getRealUri($uri, $uriBase = '/', $baseReplace = '')
-    {
-        if ($uriBase === '/' || $uriBase === '') {
-            return self::removeSlashes($uri);
-        }
-        $uri = self::removeSlashes($uri);
-        $realUri = '/' . substr_replace($uri, $baseReplace, strpos($uri, $uriBase), strlen($uriBase));
-
-        return self::removeSlashes($realUri);
-    }
-
-    /**
-     * Remove slashes duplicates
-     *
-     * @param $str
-     * @return mixed
-     */
-    public static function removeSlashes($str)
-    {
-        return preg_replace('~/+~', '/', $str);
     }
 
     /**
@@ -94,9 +65,9 @@ class System
      * This function is named fold in functional programming languages such as
      * lisp, ocaml, haskell, and erlang. Python just calls it reduce.
      *
-     * @param  string $key
-     * @param  mixed  $default
-     * @return mixed
+     * @param  string $key Dictionary key
+     * @param  mixed  $default Default value if key doesn't exists
+     * @return mixed Returns key value
      */
     public static function getConfig($key, $default = null)
     {

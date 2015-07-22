@@ -1,5 +1,6 @@
 <?php
 /** @var \UTI\Lib\Data $data */
+/** @var \UTI\Core\View $view */
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -19,6 +20,6 @@
     <title><?= $data('title') ?></title>
 </head>
 <body>
-<?= $this->block('login_form') ?>
+<?= $view->block('login_form') ?>
 </body>
 </html>

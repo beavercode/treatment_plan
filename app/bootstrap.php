@@ -1,44 +1,38 @@
 <?php
+/**
+ * UTI
+ */
 
 namespace UTI;
 
-require_once 'vendor/autoload.php';
+require('vendor/autoload.php');
 
 use UTI\Core\Router;
 use UTI\Core\AppException;
 use UTI\Core\System;
-use UTI\Lib\MemoryUsageInformation;
-
-$memoryDebug = true;
-
-//debug memory usage
-if ($memoryDebug && ! isset($_POST['stage'])) {
-    $memory = new MemoryUsageInformation();
-// Set start
-    $memory->setStart();
-}
-
-// set directives
-ini_set('display_errors', 1);   //disable for prod
-ini_set('short_open_tag', 1);
-
-//todo timelimit
-//http://php.net/manual/en/function.set-time-limit.php
-set_time_limit(180);
-
-//todo memory limit
-//http://php.net/manual/en/ini.core.php#ini.memory-limit
-//ini_set('memory_limit', 512);
-
-/* Set internal character encoding to UTF-8 */
-mb_internal_encoding('UTF-8');
+use UTI\Lib\Memory\Memory;
 
 try {
     define('APP_DIR', __DIR__ . '/src/');
-
     System::loadConf(APP_DIR . 'config.php');
-
     define('APP_ENV', System::getConfig('app.env'));
+    // dev options
+    if (APP_ENV === 'dev') {
+        ini_set('display_errors', 1);
+        //debug, memory usage
+        Memory::start([
+            function () {
+                // do not check for stage ajax requests
+                if (! isset($_POST['stage'])) {
+                    return true;
+                }
+            }
+        ]);
+    }
+    set_time_limit(180); // http://php.net/manual/en/function.set-time-limit.php
+    //ini_set('memory_limit', 512); // http://php.net/manual/en/ini.core.php#ini.memory-limit
+    mb_internal_encoding('UTF-8');
+
     define('URI_BASE', System::getConfig('app.uri_base'));
     define('APP_TMP', APP_DIR . System::getConfig('app.tmp'));
     define('APP_TPL_VIEW', APP_DIR . System::getConfig('app.tpl.view'));
@@ -67,12 +61,5 @@ try {
     die("External exception fired! \nMessage: {$e->getMessage()}\n, {$e->getTraceAsString()}");
 }
 
-//debug memory usage
-if ($memoryDebug && ! isset($_POST['stage']) && isset($memory) && $memory instanceof MemoryUsageInformation) {
-// Set end
-    $memory->setEnd();
-// Print memory usage statistics
-    echo '<pre>';
-    $memory->printMemoryUsageInformation();
-    echo '</pre>';
-}
+//debug, memory usage
+Memory::finish();

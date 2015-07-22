@@ -23,9 +23,8 @@ Create stable and useful system...
 
 ##Bugs
 
-1. Form: input[file] popover do not changes when selection same file (FE)
-2. Form: adding/deleting stages no recognized and leads to errors
-3. Form: input[file] do not saves state after submitting a form
-4. Form: input[file] modified be BS File input has bug with focus when tabbing
+1. Form: input[file] popover do not changes for same file (FE)
+2. Form: input[file] do not saves state after submitting a form (BE)
+3. Form: input[file] modified be BS File input has bug with focus when tabbing (FE)
 
 ps. FE - front-end, BE - back-end.
