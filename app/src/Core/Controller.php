@@ -35,7 +35,7 @@ abstract class Controller
         $this->view = new View(APP_TPL_VIEW, HTML_TYPE);
 
         //todo find nice looking way to handle Data object
-        $data = new Data(URI_BASE);
+        $data = new Data();
         $data('base', URI_BASE);
         $this->data = $data;
     }
