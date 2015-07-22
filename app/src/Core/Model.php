@@ -1,4 +1,8 @@
 <?php
+/**
+ * UTI
+ */
+
 namespace UTI\Core;
 
 use UTI\Lib\Session;
@@ -14,6 +18,9 @@ abstract class Model
      */
     protected $session;
 
+    /**
+     * Init
+     */
     public function __construct()
     {
         $this->session = Session::run(APP_SES, APP_SES_DUR);

@@ -1,7 +1,6 @@
 <?php
-
 /**
- * Model used to work with pdf
+ * UTI, Model used to work with pdf
  */
 
 namespace UTI\Model;
@@ -11,24 +10,34 @@ use iio\libmergepdf\Merger;
 use UTI\Core\AppException;
 use UTI\Core\Model;
 use UTI\Lib\Data;
-use UTI\Lib\File;
+use UTI\Lib\File\File;
 
 /**
  * Plan PDF handling
  *
- * Class FormStages
- * @package UTI\Lib
+ * Class PlanPdfModel
+ * @package UTI\Model
  */
 class PlanPdfModel extends Model
 {
     /**
-     * @var array
+     * @var string Directory with html templates which would converted to pdf
      */
-    protected $formData;
-
     protected $dirHtml;
+
+    /**
+     * @var string Directory with pdf templates
+     */
     protected $dirPdfIn;
+
+    /**
+     * @var string Directory with ready-to-print pdf files
+     */
     protected $dirPdfOut;
+
+    /**
+     * @var string Temporary files, like html templates converted to pdf
+     */
     protected $dirTmp;
 
     /**
@@ -37,9 +46,7 @@ class PlanPdfModel extends Model
     protected $mergeList = [];
 
     /**
-     * Inherit from class which creates current
-     *
-     * @var PlanModel
+     * @var PlanModel Inherit from class which creates current
      */
     protected $caller;
 
@@ -52,16 +59,15 @@ class PlanPdfModel extends Model
         $this->dirHtml = APP_TPL_PDF;
         $this->dirPdfIn = APP_PDF_IN;
         $this->dirPdfOut = APP_PDF_OUT;
-        //$this->dirImgDoc = URI_BASE . APP_IMG_DOC; //for web
-        $this->dirImgDoc = APP_IMG_DOC; //for internal usage
+        $this->dirImgDoc = APP_IMG_DOC;
         $this->caller = $caller;
     }
 
     /**
-     * Load template and insert form data into
+     * Load template and insert form data into for summary page
      *
-     * @param $formData
-     * @param $template
+     * @param array $formData Form data from POST
+     * @param       $template
      * @return string
      * @throws AppException
      */
@@ -106,35 +112,6 @@ class PlanPdfModel extends Model
         return $html;
     }
 
-    // works with css very bad, use mPdf instead
-    public function domPdfHtmlToPdf($html)
-    {
-        //@src http://pxd.me/dompdf/www/setup.php
-        define('DOMPDF_ENABLE_AUTOLOAD', false);
-        define('DOMPDF_ENABLE_CSS_FLOAT', true);    // 	Enable CSS float support (experimental)
-        define('DOMPDF_ENABLE_HTML5PARSER', true);  // 	Enable the HTML5 parser (experimental)
-        require_once APP_DIR . '../vendor/dompdf/dompdf/dompdf_config.inc.php';
-
-        //  PDF settings
-        $paperSize = 'A4';
-        $orientation = 'portrait';
-
-        //  Create PDF
-        $domPdf = new \DOMPDF();
-        $domPdf->set_paper(strtolower($paperSize), $orientation);
-
-//        $html =
-//            '<html><body>'.
-//            '<p>Put your html here, or generate it with your favourite '.
-//            'templating system.</p>'.
-//            '</body></html>';
-
-        $domPdf->load_html($html);
-        $domPdf->render();
-        //todo save pdf to file tmp file, which should delete after all operations
-        $domPdf->stream('sample.pdf', ['Attachment' => 0]);
-    }
-
     /**
      * Get html as string, convert to pdf(using mPdf) and show or save it to a file in temp dir
      *
@@ -155,6 +132,7 @@ class PlanPdfModel extends Model
      *      'L'    This attribute specifies the default page orientation of the new document if format is defined as
      *             an array. This value will be ignored if format is a string value. Default 'P'
      * @return string
+     * @throws AppException
      */
     public function htmlToPdf($html, $file = null, array $options = [])
     {
@@ -172,7 +150,7 @@ class PlanPdfModel extends Model
             'orientation' => 'P'
         ];
         $options = array_merge($defaults, $options);
-        extract($options); //slower 20-80% that foreach
+        //extract($options); //slower 20-80% than foreach
         foreach ($options as $varName => $value) {
             $$varName = $value;
         }
@@ -207,9 +185,9 @@ class PlanPdfModel extends Model
      * Accepts array of pdf files, add correct FS paths and merge them.
      * Result stored in file which name generated from current timestamp.
      *
-     * @return array
      * @throws \iio\libmergepdf\Exception
      * @throws AppException
+     * @return string
      */
     public function mergePdf()
     {
@@ -220,14 +198,12 @@ class PlanPdfModel extends Model
             }
             $merged = $merger->merge();
         } catch (Exception $e) {
-            throw new AppException($e->getMessage() . '; rethrow from "\iio\libmergepdf\Exception:"', 911, $e);
+            throw new AppException($e->getMessage() . '; re-throw from "\iio\libmergepdf\Exception:"', 911, $e);
         }
 
         $hash = md5(time());
         $path = $this->dirPdfOut . $hash . '.pdf';
-        if (! file_put_contents($path, $merged)) {
-            throw new AppException('Pdf out dir not writable!');
-        }
+        File::write($path, $merged, 'w');
 
         return $hash;
     }
@@ -235,10 +211,10 @@ class PlanPdfModel extends Model
     /**
      * Delete files listed in array
      *
-     * @param array $pdf
+     * @param array $pdf List of file to remove
      * @throws AppException
      */
-    public function removePdf(array $pdf)
+    public function removePdfList(array $pdf)
     {
         foreach ($pdf as $item) {
             File::remove($item);
@@ -255,21 +231,15 @@ class PlanPdfModel extends Model
      */
     private function loadTpl($file, $data)
     {
-        $path = $this->dirHtml . $file;
+        $path = $this->dirHtml . $file . '.php';
 
-        if (! is_file($path) && ! is_readable($path)) {
-            throw new AppException('Failed to load template ' . $path);
-        }
-        ob_start();
-        include($path);
-
-        return ob_get_clean();
+        return File::inc($path, ['data' => $data], true);
     }
 
     /**
      * Get list of files to merge
      *
-     * @return array
+     * @return array Array of pdf files to merge
      */
     public function getMergeList()
     {
@@ -278,6 +248,7 @@ class PlanPdfModel extends Model
 
     /**
      * Populate dictionary for merge
+     *
      * @src http://stackoverflow.com/a/3322641
      * @param $key
      * @param $value
