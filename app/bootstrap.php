@@ -1,4 +1,7 @@
 <?php
+/**
+ * UTI
+ */
 
 namespace UTI;
 
@@ -13,11 +16,13 @@ try {
     define('APP_DIR', __DIR__ . '/src/');
     System::loadConf(APP_DIR . 'config.php');
     define('APP_ENV', System::getConfig('app.env'));
+    // dev options
     if (APP_ENV === 'dev') {
         ini_set('display_errors', 1);
         //debug, memory usage
         Memory::start([
-            function () { // do not check for stage ajax requests
+            function () {
+                // do not check for stage ajax requests
                 if (! isset($_POST['stage'])) {
                     return true;
                 }

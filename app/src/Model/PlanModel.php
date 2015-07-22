@@ -4,7 +4,7 @@ namespace UTI\Model;
 
 use UTI\Core\AppException;
 use UTI\Core\Model;
-use UTI\Lib\File;
+use UTI\Lib\File\File;
 use UTI\Lib\Form;
 
 /**
@@ -14,6 +14,30 @@ use UTI\Lib\Form;
 class PlanModel extends Model
 {
     /**
+     * @var string Uploaded docx files are store here
+     */
+    protected $dirDocx;
+
+    /**
+     * @var string Directory with ready-to-print pdf files
+     */
+    protected $dirPdfOut;
+
+    /**
+     * Init
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->dirDocx = APP_DOCX;
+        $this->dirPdfOut = APP_PDF_OUT;
+    }
+
+    /**
+     * Process form
+     *
+     * old:
      * 1. Name check
      * 2. get doc photo and name
      * Stage
@@ -26,10 +50,24 @@ class PlanModel extends Model
      * 8. get proper pdf info pages using stage name
      * 9. concatenate pdf together
      * 10. return pdf file or link?
+     *
+     * todo:
+     *  1. doing to much: process form, process form stage's ajax
+     *  2. code not simple and hard to maintain
+     *  3. when form submitted, than added new stages and pushed "refresh page" button, an error occurs because
+     *     $this->session->get('stage') changed but not the $_POST
+     *  4. situation when stage got from DB has period limit, e.g. 'Whitening' => '3 hours'
+     *  5. way to restore saved form (especially uploaded files) into filled form
+     *
+     * @param \UTi\Lib\Data  $data
+     * @param \UTI\Core\View $view
+     * @param int            $maxStages
+     * @param int            $minStages
+     * @return bool|Form False for stage's ajax or Form object for submitted form
      */
     public function processForm($data, $view, $maxStages, $minStages = 1)
     {
-        $form = new Form('plan_form', APP_DOCX);
+        $form = new Form('plan_form', $this->dirDocx);
         $data('plan.form', $form);
         // get doctors name from DB
         $doctors = $this->getDoctors();
@@ -84,6 +122,7 @@ class PlanModel extends Model
         if ($form->isSubmit()) {
             $fioLength = 5;
             $periodLength = 5;
+            //todo move options to config.php
             $uploadOptions = [
                 'ext'  => ['docx'],
                 'mime' => [
@@ -155,6 +194,7 @@ class PlanModel extends Model
     }
 
     /**
+     * Process pdf
      *
      * 1. from form data to html template
      * 2. html template to pdf
@@ -176,10 +216,10 @@ class PlanModel extends Model
         $toDel = [];
 
         //make html/pdf for Summary
-        $summaryHtml = $pdf->summaryToHtml($formData, 'pdf_summary_tpl.php');
+        $summaryHtml = $pdf->summaryToHtml($formData, 'pdf_summary_tpl');
         $toDel[] = $summaryPdfName = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)) . '.pdf');
 
-        //populate merge array
+        // make pdf list to merge
         $pdf->pdfMergeList('title', 'pdf_title.pdf');
         $pdf->pdfMergeList('summary', $summaryPdfName);
         $pdf->pdfMergeList('tooth_map', 'pdf_tooth_map.pdf');
@@ -190,13 +230,14 @@ class PlanModel extends Model
         //$docData = $doc->getPriceTable($formData['fileName']);
         $docData = [];
         //make html for stage price (stage's price)
-        $stagePriceHtmlArray = $pdf->stagePriceToHtml($formData, $docData, 'pdf_stage-price_tpl.php');
+        //todo dynamically stage data
+        $stagePriceHtmlArray = $pdf->stagePriceToHtml($formData, $docData, 'pdf_stage-price_tpl');
 
         //todo associate stage name with pdf of stage terms
         //$this->getStagesForMerge();
         /*if prices is uploaded for each of them make pdfPricePage with corresponding terminology*/
         for ($i = 1, $s = $this->session->get('stage'); $i <= $s; ++$i) {
-            $toDel[] = $testPricePage = $pdf->htmlToPdf($stagePriceHtmlArray[$i -1], md5(microtime(true)) . '.pdf');
+            $toDel[] = $testPricePage = $pdf->htmlToPdf($stagePriceHtmlArray[$i - 1], md5(microtime(true)) . '.pdf');
 
             //todo generate price for each stage
             if (! ($stagePdf = $this->getStagePdfById($formData['stage' . $i]))) {
@@ -217,7 +258,7 @@ class PlanModel extends Model
         $pdfOutName = $pdf->mergePdf();
 
         //delete tmp pdf
-        $pdf->removePdf($toDel);
+        $pdf->removePdfList($toDel);
 
         //todo save treatment plan parts to DB for recovering later
 
@@ -227,7 +268,7 @@ class PlanModel extends Model
     /**
      * Get pdf data and show inline or force to download
      *
-     * @param        $hash
+     * @param string $hash
      * @param string $action
      * @return string
      * @throws AppException
@@ -235,7 +276,7 @@ class PlanModel extends Model
     public function showPdf($hash, $action = 'show')
     {
         $name = $hash . '.pdf';
-        $file = APP_PDF_OUT . $name;
+        $file = $this->dirPdfOut . $name;
 
         $fileData = File::read($file);
         //todo re-check for proper HTTP  headers
