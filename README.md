@@ -16,6 +16,7 @@ Create stable and useful system...
     - pdo_sqlite extension
     - Sqlite3 extension
     - MBString extension
+    - xsl extension (for phpDox) 
     - file_uploads = On
     - memory_limit >= 30 MB
 

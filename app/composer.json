@@ -8,7 +8,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3.7",
+        "php": ">=5.4.0",
         "aura/router": "2.2.2",
         "phpoffice/phpword": "0.12.*",
         "iio/libmergepdf": "^2.4",
