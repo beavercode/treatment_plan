@@ -217,11 +217,13 @@ class PlanModel extends Model
 
         //make html/pdf for Summary
         $summaryHtml = $pdf->summaryToHtml($formData, 'pdf_summary_tpl');
-        $toDel[] = $summaryPdfName = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)) . '.pdf');
+        $toDel[] = $summaryPdf = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)) . '.pdf');
+
+//        echo $this->showPdfDev($summaryPdf);die;
 
         // make pdf list to merge
         $pdf->pdfMergeList('title', 'pdf_title.pdf');
-        $pdf->pdfMergeList('summary', $summaryPdfName);
+        $pdf->pdfMergeList('summary', $summaryPdf);
         $pdf->pdfMergeList('tooth_map', 'pdf_tooth_map.pdf');
 
         //convert doc to data array
@@ -305,6 +307,37 @@ class PlanModel extends Model
         return $fileData;
     }
 
+    public function showPdfDev($fileName, $action = 'show')
+    {
+        $name = basename($fileName);
+        $file = $fileName;
+
+        $fileData = File::read($file);
+        //todo re-check for proper HTTP  headers
+        header('Content-type: application/pdf');
+        //header('Content-Type: application/octet-stream');
+        //header('Content-Description: File Transfer');
+        switch ($action) {
+            case 'download':
+                header('Content-Disposition: attachment; filename=' . urlencode($name));
+                //todo proper HTTP caching
+                header('Pragma: public');
+                header('Expires: 0');
+                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                header('Cache-Control: private', false); //use this to open files directly
+                break;
+            case 'show':
+            default:
+                header('Content-Disposition: inline; filename="' . urlencode($name) . '"');
+        }
+        header('Content-Length: ' . filesize($file)); // provide file size
+        header('Content-Transfer-Encoding: binary');
+        header('Accept-Ranges: bytes');
+
+        //header('Connection: close');
+
+        return $fileData;
+    }
 
 
     // ------------------ STUBS ------------------

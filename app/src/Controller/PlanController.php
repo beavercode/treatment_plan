@@ -44,7 +44,7 @@ class PlanController extends Controller
         $this->view->set('plan_template', $data, ['plan_form', 'plan_form_stage', 'plan_form_result']);
         // Make page
         $data('plan.logout', $this->router->generate('auth.logout'));
-        $data('title', 'План лечеиня');
+        $data('title', 'План лечения');
         // working with stages using ajax
         if (false === ($form = $this->model->processForm($data, $this->view, APP_STAGES_MAX, APP_STAGES_MIN))) {
             return;
