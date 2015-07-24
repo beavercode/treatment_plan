@@ -26,6 +26,14 @@
  * app.html Get HTML as is (comments, whitespaces etc) or
  *  - raw
  *  - min
+ *
+ * app.result Get result pdf file
+ *  - show
+ *  - download
+ *
+ * app.stages Minimum and maximum number of stages in the treatment plan
+ *  - min: 1..10
+ *  - max: 1..10
  */
 
 return [
@@ -53,7 +61,8 @@ return [
             'doctors' => '../../doctors/',
             /*'common'  => 'storage/img/common/'*/
         ],
-        'tmp'      => 'storage/tmp/'
+        'tmp'      => 'storage/tmp/',
+        'result'   => 'show'
     ]
 ];
 

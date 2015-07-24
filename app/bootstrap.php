@@ -48,6 +48,7 @@ try {
     define('HTML_TYPE', System::getConfig('app.html'));
     define('APP_STAGES_MIN', System::getConfig('app.stages.min'));
     define('APP_STAGES_MAX', System::getConfig('app.stages.max'));
+    define('APP_RESULT', System::getConfig('app.result'));
 
     $router = new Router($_SERVER, URI_BASE);
     $router->run();
