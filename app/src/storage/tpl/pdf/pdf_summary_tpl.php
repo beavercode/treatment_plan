@@ -13,7 +13,7 @@
     <title>Summary</title>
     <style>
         body {
-            font-family: 'arial-narrow', Arial, sans-serif;
+            font-family: 'pt-serif', Arial, sans-serif;
         }
 
         /* page */
@@ -38,13 +38,20 @@
         }
 
         .header__title {
-            font-size: 46px;
+            font-family: 'helveticaneuecyr-thin', Helvetica, Arial, sans-serif;
+            font-size: 48px;
             font-weight: bold;
             color: #8d2f48;
         }
 
         .header__subtitle {
+            font-family: 'arial-narrow', Arial, sans-serif;
             font-size: 20px;
+            font-weight: normal;
+        }
+
+        .header__light {
+            font-family: 'helveticaneuecyr-light', Helvetica, Arial, sans-serif;
         }
 
         /* customer */
@@ -100,6 +107,7 @@
         }
 
         .stage__number {
+            font-family: 'helveticaneuecyr-thin', Helvetica, Arial, sans-serif;
             font-size: 50px;
             font-weight: normal;
             color: #8d2f48;
@@ -108,6 +116,7 @@
         .stage__content {
             margin: 15px 0 0 10px;
             padding: 0 0 10px 10px;
+            font-family: 'arial-narrow', Arial, sans-serif;
             font-size: 16px;
             font-weight: 100;
             vertical-align: middle;
@@ -185,13 +194,13 @@
         <div class="customer__content">
             <p><span class="customer__name"><?= $data->esc('customer.name') ?></span>,</p>
 
-            <p style="hyphens: auto">Как мы обсуждали с Вами на консультации, я подготовил
+            <p>Как мы обсуждали с Вами на консультации, я подготовил
                 детальный план лечения, в котором расписаны подробно
                 все этапы лечения, виды работ, сроки, а также профессиональные
                 термины и возможные вопросы, которые могут
                 у Вас возникнуть.</p>
 
-            <p style="hyphens: auto">По любым вопросам или пожеланиям Вы можете обращаться ко
+            <p>По любым вопросам или пожеланиям Вы можете обращаться ко
                 мне по тел. ... или нашему клиент менеджеру
                 Анастасии Гутянской по тел. ...</p>
 
@@ -205,7 +214,7 @@
 
     <div class="header">
         <div class="header__title">Этапы лечения</div>
-        <p class="header__subtitle"><strong>Общая длительность лечения:</strong> (вручную печатаем)</p>
+        <p class="header__subtitle"><strong>Общая длительность лечения:</strong> <span class="header__light">(вручную печатаем)</span></p>
     </div>
 
     <table class="table stage">
@@ -234,7 +243,7 @@
                             <div class="stage__name"><span class="emit"><?= $data('number' . $num) ?> этап</span>
                                 – <?= $data('name' . $num) ?></div>
                             <!--<p>(вручную печатаем, что входит в этап)</p>-->
-                            <p><span class="stage__period emit">длительность</span> –
+                            <p class="stage__period"><span class="emit">длительность</span> –
                                 <?= $data->esc('period' . $num)->cut(null, 25) ?></p>
 
                         </td>
