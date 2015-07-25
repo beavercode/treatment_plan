@@ -10,27 +10,32 @@ Create stable and useful system...
 
 1. Php
     - 5.4 and above
-    - DOM extension
-    - GD extension
-    - Pdo extension
-    - pdo_sqlite extension
-    - Sqlite3 extension
-    - MBString extension
-    - xsl extension (for phpDox) 
-    - file_uploads = On
-    - memory_limit >= 30 MB
+    - php extensions
+        - dom
+        - gd
+        - pdo
+        - pdo_sqlite
+        - sqlite3
+        - mbstring
+        - xsl
+    - php directives
+        - file_uploads = On
+        - memory_limit >= 30MB
 
-2. Browsers
+2. Web-server: Apache2, Nginx
+
+3. Browsers
     - Internet Explorer 9 and above
 
 
 ##TODO
-1. Prevent form resubmitting, but allow user to see fully filled form for further correction (BE)
+1. Prevent form resubmitting, but allow user to see fully filled form for further correction (BE).
 2. Save doctors photo to DB instead of "<web_root>/doctors"?
+3. Make transliterate package for resulting pdf names (BE). 
 
 ##Bugs
 1. Form: input[file] popover do not changes for same file (FE)
 2. Form: input[file] do not saves state after submitting a form (BE)
 3. Form: input[file] modified be BS File input has bug with focus when tabbing (FE)
 
-ps. FE - front-end, BE - back-end.
+*Legend*: FE - front-end, BE - back-end.
