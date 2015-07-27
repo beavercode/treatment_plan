@@ -1,7 +1,9 @@
 <?php
 /**
- * @var \UTI\Lib\Data $data
+ * UTI
  */
+
+/** @var \UTI\Lib\Data $data */
 // Max period length is 109 for string like below:
 // '2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2';
 // With string where are no white spaces this value might be lower
@@ -12,6 +14,7 @@
     <meta charset="UTF-8">
     <title>Summary</title>
     <style>
+        /* common */
         body {
             font-family: 'pt-serif', Arial, sans-serif;
         }
@@ -33,8 +36,18 @@
         /* header */
         .header {
             margin: 0;
-            padding: 2px 0 3px 80px;
-            background: url(data:image/gif;base64,R0lGODdhPQABAPAAAI0vSAAAACH/C1hNUCBEYXRhWE1QPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QjEzRDhGMzMxMjk4MTFFNUI5RUFEN0MyNTc0MTQ4NUMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QjEzRDhGMzQxMjk4MTFFNUI5RUFEN0MyNTc0MTQ4NUMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpCMTNEOEYzMTEyOTgxMUU1QjlFQUQ3QzI1NzQxNDg1QyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpCMTNEOEYzMjEyOTgxMUU1QjlFQUQ3QzI1NzQxNDg1QyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgH//v38+/r5+Pf29fTz8vHw7+7t7Ovq6ejn5uXk4+Lh4N/e3dzb2tnY19bV1NPS0dDPzs3My8rJyMfGxcTDwsHAv769vLu6ubi3trW0s7KxsK+urayrqqmop6alpKOioaCfnp2cm5qZmJeWlZSTkpGQj46NjIuKiYiHhoWEg4KBgH9+fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5ODc2NTQzMjEwLy4tLCsqKSgnJiUkIyIhIB8eHRwbGhkYFxYVFBMSERAPDg0MCwoJCAcGBQQDAgEAACwAAAAAPQABAEACBoSPqcvtWgA7) repeat-y;
+            padding: 0;
+            /*padding: 2px 0 3px 80px;*/
+            /*background: url(data:image/gif;base64,R0lGODdhPQABAPAAAI0vSAAAACH/C1hNUCBEYXRhWE1QPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QjEzRDhGMzMxMjk4MTFFNUI5RUFEN0MyNTc0MTQ4NUMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QjEzRDhGMzQxMjk4MTFFNUI5RUFEN0MyNTc0MTQ4NUMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpCMTNEOEYzMTEyOTgxMUU1QjlFQUQ3QzI1NzQxNDg1QyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpCMTNEOEYzMjEyOTgxMUU1QjlFQUQ3QzI1NzQxNDg1QyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgH//v38+/r5+Pf29fTz8vHw7+7t7Ovq6ejn5uXk4+Lh4N/e3dzb2tnY19bV1NPS0dDPzs3My8rJyMfGxcTDwsHAv769vLu6ubi3trW0s7KxsK+urayrqqmop6alpKOioaCfnp2cm5qZmJeWlZSTkpGQj46NjIuKiYiHhoWEg4KBgH9+fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5ODc2NTQzMjEwLy4tLCsqKSgnJiUkIyIhIB8eHRwbGhkYFxYVFBMSERAPDg0MCwoJCAcGBQQDAgEAACwAAAAAPQABAEACBoSPqcvtWgA7) repeat-y;*/
+        }
+
+        .header__square {
+            width: 61px;
+            background-color: #8D2F48;
+        }
+
+        .header__gutter {
+            padding-left: 25px;
         }
 
         .header__title {
@@ -182,10 +195,19 @@
 </head>
 <body>
 <div class="page">
+    <!-- header -->
     <div class="header">
-        <div class="header__title">Уважаемый</div>
+        <table class="table">
+            <tr>
+                <td class="table__cell header__square"></td>
+                <td class="table__cell header__gutter">
+                    <div class="header__title">Уважаемый</div>
+                </td>
+            </tr>
+        </table>
     </div>
-
+    <!-- /header -->
+    <!-- customer -->
     <div class="customer">
         <div class="customer__photo">
             <img width="140" height="200" src="<?= $data('doctor.photo') ?>" title="<?= $data->esc('doctor.name') ?>">
@@ -203,7 +225,6 @@
             <p>По любым вопросам или пожеланиям Вы можете обращаться ко
                 мне по тел. ... или нашему клиент менеджеру
                 Анастасии Гутянской по тел. ...</p>
-
             <br><br>
 
             <p><em>С уважением, <?= $data->esc('doctor.name') ?>,
@@ -211,12 +232,22 @@
         </div>
         <div class="clear"></div>
     </div>
-
+    <!-- /customer -->
+    <!-- header -->
     <div class="header">
-        <div class="header__title">Этапы лечения</div>
-        <p class="header__subtitle"><strong>Общая длительность лечения:</strong> <span class="header__light">(вручную печатаем)</span></p>
+        <table class="table">
+            <tr>
+                <td class="table__cell header__square"></td>
+                <td class="table__cell header__gutter">
+                    <div class="header__title">Этапы лечения</div>
+                    <p class="header__subtitle"><strong>Общая длительность лечения:</strong> <span
+                            class="header__light">(вручную печатаем)</span></p>
+                </td>
+            </tr>
+        </table>
     </div>
-
+    <!-- /header -->
+    <!-- stage -->
     <table class="table stage">
         <?php
         $num = 1;
@@ -264,6 +295,7 @@
             }
         endwhile; ?>
     </table>
+    <!-- /stage -->
 </div>
 </body>
 </html>
