@@ -1,11 +1,11 @@
 <?php
 /**
- * UTI, Model used to work with pdf
+ * (c) Lex Kachan <lex.kachan@gmail.com>
  */
 
 namespace UTI\Model;
 
-use iio\libmergepdf\Exception;
+use iio\libmergepdf\Exception as MergeException;
 use iio\libmergepdf\Merger;
 use UTI\Core\AppException;
 use UTI\Core\Model;
@@ -13,46 +13,52 @@ use UTI\Lib\Data;
 use UTI\Lib\File\File;
 
 /**
- * Plan PDF handling
+ * Plan PDF handling.
  *
- * Class PlanPdfModel
- * @package UTI\Model
+ * @package UTI
  */
 class PlanPdfModel extends Model
 {
     /**
-     * @var string Directory with html templates which would converted to pdf
+     * @var string Directory with html templates which would converted to pdf.
      */
     protected $dirHtml;
 
     /**
-     * @var string Directory with pdf templates
+     * @var string Directory with pdf templates.
      */
     protected $dirPdfIn;
 
     /**
-     * @var string Directory with ready-to-print pdf files
+     * @var string Directory with ready-to-print pdf files.
      */
     protected $dirPdfOut;
 
     /**
-     * @var string Temporary files, like html templates converted to pdf
+     * @var string Temporary files, like html templates converted to pdf.
      */
     protected $dirTmp;
 
     /**
-     * @var array List of block_name => file_name.pdf to merge
+     * @var array List of block_name => file_name.pdf to merge.
      */
     protected $mergeList = [];
 
     /**
-     * @var PlanModel Inherit from class which creates current
+     * @var PlanModel Inherit from class which creates current.
      */
     protected $caller;
 
-    //todo Think about db!!!
+    /**
+     * Init.
+     *
+     * Uses parent constructor.
+     *
+     * @param Model $caller Caller class.
+     */
     public function __construct($caller)
     {
+        //todo Think about db!!!
         parent::__construct();
 
         $this->dirTmp = APP_TMP;
@@ -64,11 +70,13 @@ class PlanPdfModel extends Model
     }
 
     /**
-     * Load template and insert form data into for summary page
+     * Load template and insert form data into for summary page.
      *
-     * @param array $formData Form data from POST
-     * @param       $template
-     * @return string
+     * @param array  $formData Form data from POST.
+     * @param string $template HTML template for pdf generating.
+     *
+     * @return string Generated HTML.
+     *
      * @throws AppException
      */
     public function summaryToHtml($formData, $template)
@@ -76,12 +84,12 @@ class PlanPdfModel extends Model
         $data = new Data();
         $data('customer.name', $formData['fio']);
         $data('doctor.name', $this->caller->getDoctorById($formData['doctor']));
-        $data('doctor.photo', $this->dirImgDoc . $this->caller->getDoctorPhotoById($formData['doctor']));
+        $data('doctor.photo', $this->dirImgDoc.$this->caller->getDoctorPhotoById($formData['doctor']));
 
         for ($i = 1, $s = $this->session->get('stage'); $i <= $s; $i++) {
-            $data('name' . $i, $this->caller->getStageById($formData['stage' . $i]));
-            $data('number' . $i, $i);
-            $data('period' . $i, $formData['period' . $i]);
+            $data('name'.$i, $this->caller->getStageById($formData['stage'.$i]));
+            $data('number'.$i, $i);
+            $data('period'.$i, $formData['period'.$i]);
         }
         $data('stages.number', $i - 1);
 
@@ -90,19 +98,29 @@ class PlanPdfModel extends Model
         return $html;
     }
 
-    // Load template and insert price file data into
-    public function stagePriceToHtml($formData, $docData, $template)
+    /**
+     * Load template and insert price file data into
+     *
+     * @param $formData
+     * @param array $price Array of prices parsed from file.
+     * @param string $template HTML template for pdf generating.
+     *
+     * @return array
+     *
+     * @throws AppException
+     */
+    public function stagePriceToHtml($formData, $price, $template)
     {
         $html = [];
 
         for ($i = 1, $s = $this->session->get('stage'); $i <= $s; $i++) {
             $data = [];
             $data['number'] = $i;
-            $data['name'] = $this->caller->getStageById($formData['stage' . $i]);
-            $data['period'] = $formData['period' . $i];
+            $data['name'] = $this->caller->getStageById($formData['stage'.$i]);
+            $data['period'] = $formData['period'.$i];
 
             //todo real doc/excel data
-            $data['price'] = $docData;
+            $data['price'] = $price;
             //todo fixed number of row of fixed height, separate page accordingly oth their length,
             //todo name pdf pages of the same stage as: stage_num - stage_name: page_num
 
@@ -113,9 +131,10 @@ class PlanPdfModel extends Model
     }
 
     /**
-     * Get html as string, convert to pdf(using mPdf) and show or save it to a file in temp dir
+     * Get html as string, convert to pdf(using mPdf) and show or save it to a file in temp dir.
      *
      * @src http://mpdf1.com/manual/index.php?tid=184
+     *
      * @param string $html HTML with css
      * @param null   $file File save to
      * @param array  $options Options for mPdf
@@ -131,7 +150,9 @@ class PlanPdfModel extends Model
      *       9,    Footer margin for the document, value should be specified in millimetres, default 9
      *      'L'    This attribute specifies the default page orientation of the new document if format is defined as
      *             an array. This value will be ignored if format is a string value. Default 'P'
+     *
      * @return string
+     *
      * @throws AppException
      */
     public function htmlToPdf($html, $file = null, array $options = [])
@@ -175,7 +196,7 @@ class PlanPdfModel extends Model
         }
         $content = $mPdf->Output('', 'S');
 
-        $path = $this->dirTmp . $file;
+        $path = $this->dirTmp.$file;
         File::write($path, $content, 'w');
 
         return $path;
@@ -183,10 +204,11 @@ class PlanPdfModel extends Model
 
     /**
      * Accepts array of pdf files, add correct FS paths and merge them.
+     *
      * Result stored in file which name generated from current timestamp.
      *
-     * @throws \iio\libmergepdf\Exception
      * @throws AppException
+     *
      * @return string
      */
     public function mergePdf()
@@ -197,21 +219,22 @@ class PlanPdfModel extends Model
                 $merger->addFromFile($item);
             }
             $merged = $merger->merge();
-        } catch (Exception $e) {
-            throw new AppException($e->getMessage() . '; re-throw from "\iio\libmergepdf\Exception:"', 911, $e);
+        } catch (MergeException $e) {
+            throw new AppException($e->getMessage().'; re-throw from "\iio\libmergepdf\Exception:"', 911, $e);
         }
 
         $hash = md5(time());
-        $path = $this->dirPdfOut . $hash . '.pdf';
+        $path = $this->dirPdfOut.$hash.'.pdf';
         File::write($path, $merged, 'w');
 
         return $hash;
     }
 
     /**
-     * Delete files listed in array
+     * Delete files listed in array.
      *
-     * @param array $pdf List of file to remove
+     * @param array $pdf List of file to remove.
+     *
      * @throws AppException
      */
     public function removePdfList(array $pdf)
@@ -222,16 +245,18 @@ class PlanPdfModel extends Model
     }
 
     /**
-     * Load HTML template for PDF
+     * Load HTML template for PDF.
      *
      * @param $file
      * @param $data
+     *
      * @return string
+     *
      * @throws AppException
      */
     private function loadTpl($file, $data)
     {
-        $path = $this->dirHtml . $file . '.php';
+        $path = $this->dirHtml.$file.'.php';
 
         return File::inc($path, ['data' => $data], true);
     }
@@ -257,11 +282,11 @@ class PlanPdfModel extends Model
     public function pdfMergeList($key, $value)
     {
         if (! preg_match("#\.pdf$#i", $value)) {
-            throw new AppException('File "' . $value . '" not a PDF file.');
+            throw new AppException('File "'.$value.'" not a PDF file.');
         }
         // $value is a basename of a file, e.g. is a pdf template stored in $this->dirPdfIn dikrectory
         if (basename($value) === $value) {
-            $value = $this->dirPdfIn . $value;
+            $value = $this->dirPdfIn.$value;
         }
 
         $this->mergeList[$key] = $value;

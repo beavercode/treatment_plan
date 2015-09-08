@@ -1,14 +1,21 @@
 <?php
+/**
+ * (c) Lex Kachan <lex.kachan@gmail.com>
+ */
+
 namespace UTI\Core;
 
 /**
- * Class AppException
- * @package UTI\Core
+ * Common application exception.
+ *
+ * todo: Proper exception(s) extended from SPL exceptions
+ *
+ * @package UTI
  */
-class AppException extends \RuntimeException
+class AppException extends \Exception
 {
     /**
-     * Returns exceptions message prepended with stack trace string
+     * Returns exceptions message prepended with stack trace string.
      *
      * @return string
      */

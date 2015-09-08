@@ -1,14 +1,25 @@
 <?php
+/**
+ * (c) Lex Kachan <lex.kachan@gmail.com>
+ */
+
 namespace UTI\Model;
 
 use UTI\Core\Model;
-use UTI\Lib\Form;
+use UTI\Lib\Form\Form;
 
+/**
+ * Class AuthModel used for user authentication and authorisation.
+ *
+ * @package UTI
+ */
 class AuthModel extends Model
 {
     /**
      * Process form and set flag auth=in(logged in) if all is OK
      * Otherwise set error message for field
+     *
+     * todo Need secure mechanism with ACL for authentication and authorisation.
      *
      * @return Form
      */
@@ -44,7 +55,7 @@ class AuthModel extends Model
     }
 
     /**
-     * Log out
+     * Log out.
      */
     public function logOut()
     {
@@ -52,7 +63,9 @@ class AuthModel extends Model
     }
 
     /**
-     * DB stub, get user data
+     * DB stub, get user data.
+     *
+     * todo Need secure mechanism with ACL for authentication and authorisation.
      *
      * @return array
      */

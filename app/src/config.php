@@ -1,5 +1,10 @@
 <?php
 /**
+ * (c) Lex Kachan <lex.kachan@gmail.com>
+ */
+
+/**
+ * todo <start>
  * Config file
  * vars values:
  *      required    boolean
@@ -7,6 +12,7 @@
  *      function    simple php functions like trim, htmlspecialchars with 3 params max, e.g.:
  *          ['htmlspecialchars', ENT_COMPAT, 'utf-8')
  *
+ * todo Is common config file is good enough for validation?
  *      validation  validate var
  *          min     minimal number value
  *          max     maximal number value
@@ -14,55 +20,82 @@
  *          url     todo
  *          pattern todo
  *          pass    todo
+ * todo <end>
  *
  *****************
  * App options *
  *****************
  *
- * app.env Mode in which application runs
+ * app.stages - Minimum and maximum number of stages in the treatment plan
+ *  - min: 1..10
+ *  - max: 1..10
+ *
+ * app.env - Mode in which application runs
  *  - dev
  *  - prod
+ *
+ * app.uri_bas - Relative path to app
+ *  - '/' = example.com/
+ *  - 'app/' = example.com/app/
  *
  * app.html Get HTML as is (comments, whitespaces etc) or
  *  - raw
  *  - min
  *
- * app.result Get result pdf file
- *  - show
- *  - download
+ * app.session Session parameters
+ *  - app.session.dir - place where are session files saved
+ *  - app.session.duration - session's time to live, 32400 sec = 9 hours
  *
- * app.stages Minimum and maximum number of stages in the treatment plan
- *  - min: 1..10
- *  - max: 1..10
+ * app.tpl Application templates are saved here
+ *  - app.tpl.view - view templates
+ *  - app.tpl.pdf - html templates for pdf generation
+ *
+ * app.result How to handle resulting pdf
+ *  - download
+ *  - show
+ *
+ * app.log Application log's dir.
+ *
+ * app.upload_dir Directory for uploaded files.
+ *
+ * app.tmp Directory for temporary files, e.g. templates converted to pdf.
+ *
+ * app.pdf_in Place for merge-ready pdf files.
+ *
+ * app.pdf_out Place for resulting pdf files.
+ *
+ * app.img.doctors Filesystem path Where doctors avatars are stored.
+ *
  */
 
 return [
     'app' => [
-        'stages'   => [
+        'env'        => 'dev',
+        'uri_base'   => '/',
+        'html'       => 'min',
+        'result'     => 'download',
+        'stages'     => [
             'min' => 1,
             'max' => 5
         ],
-        'env'      => 'dev',
-        'uri_base' => '/',
-        'html'     => 'min',
-        'session'  => [
+        'session'    => [
             'dir'      => 'storage/sessions/',
-            'duration' => 32400
+            'duration' => 32400,
         ],
-        'tpl'      => [
+        'tpl'        => [
+            'view' => 'storage/tpl/view/',
             'pdf'  => 'storage/tpl/pdf/',
-            'view' => 'storage/tpl/view/'
+
         ],
-        'log'      => 'storage/logs/',
-        'docx'     => 'storage/docx/',
-        'pdf_in'   => 'storage/pdf/',
-        'pdf_out'  => './../../pdf/',
-        'img'      => [
+        'log'        => 'storage/logs/',
+        'upload_dir' => 'storage/upload_dir/',
+        'tmp'        => 'storage/tmp/',
+        'pdf_in'     => 'storage/pdf/',
+        'pdf_out'    => './../../pdf/',
+        'img'        => [
             'doctors' => '../../doctors/',
             /*'common'  => 'storage/img/common/'*/
         ],
-        'tmp'      => 'storage/tmp/',
-        'result'   => 'show'
     ]
 ];
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * UTI
+ * (c) Lex Kachan <lex.kachan@gmail.com>
  */
 
 namespace UTI\Core;
@@ -8,8 +8,9 @@ namespace UTI\Core;
 use UTI\Lib\Session;
 
 /**
- * Class Model
- * @package UTI\Core
+ * Abstract Class Model.
+ *
+ * @package UTI
  */
 abstract class Model
 {
@@ -19,7 +20,9 @@ abstract class Model
     protected $session;
 
     /**
-     * Init
+     * Init.
+     *
+     * Runs session.
      */
     public function __construct()
     {

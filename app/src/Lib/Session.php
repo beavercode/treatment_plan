@@ -1,4 +1,8 @@
 <?php
+/**
+ * (c) Lex Kachan <lex.kachan@gmail.com>
+ */
+
 namespace UTI\Lib;
 
 /**
@@ -40,9 +44,10 @@ class Session
     }
 
     /**
-     * Get session values by key
+     * Get session values by key.
      *
      * @param string $key Key to search in SESSION array
+     *
      * @return mixed Result, null if not exists
      */
     public function get($key = '')

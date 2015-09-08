@@ -18,6 +18,7 @@ Create stable and useful system...
         - sqlite3
         - mbstring
         - xsl
+        - zip
     - php directives
         - file_uploads = On
         - memory_limit >= 30MB
@@ -29,9 +30,15 @@ Create stable and useful system...
 
 
 ##TODO
-1. Prevent form resubmitting, but allow user to see fully filled form for further correction (BE).
-2. Save doctors photo to DB instead of "<web_root>/doctors"?
-3. Make transliterate package for resulting pdf names (BE). 
+0. Posibility to save and restore form state. (BE)
+1. Prevent form resubmitting, but allow user to see fully filled form for further correction (BE). Related to 0. (BE)
+1. Universal package for working with DB(sqlite,mysql,etc.). (BE)
+2. Add posibility to add/edit/remove doctors and their info(name, photo, position). (BE)
+3. Save doctors photo to DB instead of "<web_root>/doctors"? (BE, FE)
+4. Add posibility add/edit/remove stages(name, pdf_info_files, default_duration). Only for admins? Uses ACL? (BE)
+5. Add ACL for better user managment. Roles: supper, usual (BE).
+6. Make transliterate package for resulting pdf names (BE). 
+7. Replace progress bar with percents(%) (BE, FE).
 
 ##Bugs
 1. Form: input[file] popover do not changes for same file (FE)

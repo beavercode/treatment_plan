@@ -4,7 +4,7 @@
     "authors": [
         {
             "name": "bbr",
-            "email": "erobober@gmail.com"
+            "email": "lex.kachan@gmail.com"
         }
     ],
     "require": {
@@ -13,7 +13,8 @@
         "phpoffice/phpword": "0.12.*",
         "iio/libmergepdf": "^2.4",
         "symfony/finder": "^2.7",
-        "mpdf/mpdf": "^6.0"
+        "mpdf/mpdf": "^6.0",
+        "phpoffice/phpexcel": "^1.8"
     },
     "require-dev": {
         "phpmd/phpmd" : "@stable",

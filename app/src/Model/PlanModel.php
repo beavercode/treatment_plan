@@ -1,41 +1,45 @@
 <?php
+/**
+ * (c) Lex Kachan <lex.kachan@gmail.com>
+ */
 
 namespace UTI\Model;
 
 use UTI\Core\AppException;
 use UTI\Core\Model;
 use UTI\Lib\File\File;
-use UTI\Lib\Form;
+use UTI\Lib\Form\Form;
 
 /**
- * Class PlanModel
- * @package UTI\Model
+ * Model for plan page.
+ *
+ * @package UTI
  */
 class PlanModel extends Model
 {
     /**
-     * @var string Uploaded docx files are store here
+     * @var string Uploaded files are store here.
      */
-    protected $dirDocx;
+    protected $dirUpload;
 
     /**
-     * @var string Directory with ready-to-print pdf files
+     * @var string Directory with ready-to-print pdf files.
      */
     protected $dirPdfOut;
 
     /**
-     * Init
+     * Init.
      */
     public function __construct()
     {
         parent::__construct();
 
-        $this->dirDocx = APP_DOCX;
+        $this->dirUpload = APP_UPLOAD_DIR;
         $this->dirPdfOut = APP_PDF_OUT;
     }
 
     /**
-     * Process form
+     * Process form,
      *
      * old:
      * 1. Name check
@@ -63,11 +67,12 @@ class PlanModel extends Model
      * @param \UTI\Core\View $view
      * @param int            $maxStages
      * @param int            $minStages
+     *
      * @return bool|Form False for stage's ajax or Form object for submitted form
      */
     public function processForm($data, $view, $maxStages, $minStages = 1)
     {
-        $form = new Form('plan_form', $this->dirDocx);
+        $form = new Form('plan_form', $this->dirUpload);
         $data('plan.form', $form);
         // get doctors name from DB
         $doctors = $this->getDoctors();
@@ -99,17 +104,17 @@ class PlanModel extends Model
                 //todo 2. situation when stage got from DB has period limit, e.g. 'Whitening' => '3 hours'
                 for ($N = 1; $N <= $stage; $N++) {
                     // if there are the field value in method than no set defaults
-                    if (! isset($_POST[$form->getName()]['stage' . $N])) {
+                    if (! isset($_POST[$form->getName()]['stage'.$N])) {
                         $form->setArrayValue(
-                            'stage' . $N,
+                            'stage'.$N,
                             $this->getStages(),
                             isset($stageMSG[$N]) ? $stageMSG[$N] : ''
                         );
                     }
-                    if (! isset($_POST[$form->getName()]['period' . $N])) {
+                    if (! isset($_POST[$form->getName()]['period'.$N])) {
                         $form->setValue(
-                            'period' . $N,
-                            isset($periodMSG[$N]) ? $periodMSG[$N] : $N . 'month(s)'
+                            'period'.$N,
+                            isset($periodMSG[$N]) ? $periodMSG[$N] : $N.'month(s)'
                         );
                     }
                 }
@@ -137,7 +142,7 @@ class PlanModel extends Model
             if (! $form->getValue('fio') || mb_strlen($form->getValue('fio')) < $fioLength) {
                 $form->setInvalid(
                     'fio',
-                    'Введите "ФИО", пожалуйста. Длинна поля не менее ' . $fioLength . ' символов.'
+                    'Введите "ФИО", пожалуйста. Длинна поля не менее '.$fioLength.' символов.'
                 );
             }
             // Period check for stages
@@ -145,17 +150,17 @@ class PlanModel extends Model
             for ($N = 1; $N <= $this->session->get('stage'); $N++) {
                 //period check
                 //if ((! $form->getValue('period' . $N) || mb_strlen($form->getValue('period' . $N)) < $periodLength) && isset($_POST['period' . $N]) {
-                if (! $form->getValue('period' . $N) || mb_strlen($form->getValue('period' . $N)) < $periodLength) {
+                if (! $form->getValue('period'.$N) || mb_strlen($form->getValue('period'.$N)) < $periodLength) {
                     $form->setInvalid(
-                        'period' . $N,
-                        'Введите "Период лечения"#' . $N . ', пожалуйста. Длинна поля не менее ' . $periodLength . ' символов.'
+                        'period'.$N,
+                        'Введите "Период лечения"#'.$N.', пожалуйста. Длинна поля не менее '.$periodLength.' символов.'
                     );
                 }
                 //file upload
                 //todo save and display saved files to user in form
-                if (! $form->uploadFile('file' . $N, $uploadOptions)) {
+                if (! $form->uploadFile('file'.$N, $uploadOptions)) {
                     $form->setInvalid(
-                        'file' . $N,
+                        'file'.$N,
                         $form->fileUploadError()
                     );
                 }
@@ -182,9 +187,10 @@ class PlanModel extends Model
     }
 
     /**
-     * Check if form processed
+     * Check if form processed.
      *
      * @param Form $form
+     *
      * @return bool
      */
     public function isFormProcessed(Form $form)
@@ -204,11 +210,11 @@ class PlanModel extends Model
      * 6. out pdf file to browser
      *
      * @param Form $form
+     *
      * @return string
-     * @throws \iio\libmergepdf\Exception
+     *
      * @throws AppException
      */
-
     public function processPdf(Form $form)
     {
         $pdf = new PlanPdfModel($this);
@@ -217,8 +223,9 @@ class PlanModel extends Model
 
         //make html/pdf for Summary
         $summaryHtml = $pdf->summaryToHtml($formData, 'pdf_summary_tpl');
-        $toDel[] = $summaryPdf = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)) . '.pdf');
+        $toDel[] = $summaryPdf = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)).'.pdf');
 
+        //todo debug, toDel
 //        echo $this->showPdfDev($summaryPdf);die;
 
         // make pdf list to merge
@@ -239,14 +246,14 @@ class PlanModel extends Model
         //$this->getStagesForMerge();
         /*if prices is uploaded for each of them make pdfPricePage with corresponding terminology*/
         for ($i = 1, $s = $this->session->get('stage'); $i <= $s; ++$i) {
-            $toDel[] = $testPricePage = $pdf->htmlToPdf($stagePriceHtmlArray[$i - 1], md5(microtime(true)) . '.pdf');
+            $toDel[] = $testPricePage = $pdf->htmlToPdf($stagePriceHtmlArray[$i - 1], md5(microtime(true)).'.pdf');
 
             //todo generate price for each stage
-            if (! ($stagePdf = $this->getStagePdfById($formData['stage' . $i]))) {
+            if (! ($stagePdf = $this->getStagePdfById($formData['stage'.$i]))) {
                 continue;
             }
-            $pdf->pdfMergeList('stage' . $i . '_price', $testPricePage);
-            $pdf->pdfMergeList('stage' . $i . '_term', $stagePdf);
+            $pdf->pdfMergeList('stage'.$i.'_price', $testPricePage);
+            $pdf->pdfMergeList('stage'.$i.'_term', $stagePdf);
         }
         unset($stagePdf, $i, $s);
 
@@ -268,17 +275,23 @@ class PlanModel extends Model
     }
 
     /**
-     * Get pdf data and show inline or force to download
+     * Get pdf data and show inline or force to download.
+     *
+     * Another way how to show pdf({* @link http://mozilla.github.io/pdf.js/ })
      *
      * @param string $hash
-     * @param string $action
+     * @param string $action How to handle resulting pdf
+     *  - show
+     *  - download
+     *
      * @return string
+     *
      * @throws AppException
      */
     public function showPdf($hash, $action = 'show')
     {
-        $name = $hash . '.pdf';
-        $file = $this->dirPdfOut . $name;
+        $name = $hash.'.pdf';
+        $file = $this->dirPdfOut.$name;
 
         $fileData = File::read($file);
         //todo re-check for proper HTTP  headers
@@ -287,7 +300,7 @@ class PlanModel extends Model
         //header('Content-Description: File Transfer');
         switch ($action) {
             case 'download':
-                header('Content-Disposition: attachment; filename=' . urlencode($name));
+                header('Content-Disposition: attachment; filename='.urlencode($name));
                 //todo proper HTTP caching
                 header('Pragma: public');
                 header('Expires: 0');
@@ -296,9 +309,9 @@ class PlanModel extends Model
                 break;
             case 'show':
             default:
-                header('Content-Disposition: inline; filename="' . urlencode($name) . '"');
+                header('Content-Disposition: inline; filename="'.urlencode($name).'"');
         }
-        header('Content-Length: ' . filesize($file)); // provide file size
+        header('Content-Length: '.filesize($file)); // provide file size
         header('Content-Transfer-Encoding: binary');
         header('Accept-Ranges: bytes');
 
@@ -307,6 +320,16 @@ class PlanModel extends Model
         return $fileData;
     }
 
+    /**
+     * Show pdf file in dev purposes.
+     *
+     * todo improve
+     *
+     * @param string $fileName
+     * @param string $action
+     *
+     * @return bool|string
+     */
     public function showPdfDev($fileName, $action = 'show')
     {
         $name = basename($fileName);
@@ -319,7 +342,7 @@ class PlanModel extends Model
         //header('Content-Description: File Transfer');
         switch ($action) {
             case 'download':
-                header('Content-Disposition: attachment; filename=' . urlencode($name));
+                header('Content-Disposition: attachment; filename='.urlencode($name));
                 //todo proper HTTP caching
                 header('Pragma: public');
                 header('Expires: 0');
@@ -328,9 +351,9 @@ class PlanModel extends Model
                 break;
             case 'show':
             default:
-                header('Content-Disposition: inline; filename="' . urlencode($name) . '"');
+                header('Content-Disposition: inline; filename="'.urlencode($name).'"');
         }
-        header('Content-Length: ' . filesize($file)); // provide file size
+        header('Content-Length: '.filesize($file)); // provide file size
         header('Content-Transfer-Encoding: binary');
         header('Accept-Ranges: bytes');
 
@@ -343,9 +366,10 @@ class PlanModel extends Model
     // ------------------ STUBS ------------------
 
     /**
-     * Get form stages from DB
+     * Get form stages from DB.
      *
      * @state stub
+     *
      * @return array
      */
     public function getStages()
@@ -358,11 +382,13 @@ class PlanModel extends Model
     }
 
     /**
-     * Get stage name from db by id
+     * Get stage name from DB by id.
      *
      * @stub
+     *
      * @param $stageId
-     * @return null
+     *
+     * @return mixed
      */
     public function getStageById($stageId)
     {
@@ -377,9 +403,11 @@ class PlanModel extends Model
     /**
      * Get stage's pdf for merge
      *
-     * @state stub
+     * @stub
+     *
      * @param $stageId
-     * @return null
+     *
+     * @return string|null
      */
     public function getStagePdfById($stageId)
     {
@@ -392,9 +420,10 @@ class PlanModel extends Model
     }
 
     /**
-     * Get full list of doctors from DB
+     * Get full list of doctors from DB.
      *
-     * @state stub
+     * @stub
+     *
      * @return array
      */
     public function getDoctors()
@@ -407,11 +436,13 @@ class PlanModel extends Model
     }
 
     /**
-     * Get doctor name from db by id
+     * Get doctor name from db by id.
      *
      * @state stub
+     *
      * @param $doctorId
-     * @return array
+     *
+     * @return string|null
      */
     public function getDoctorById($doctorId)
     {
@@ -424,11 +455,13 @@ class PlanModel extends Model
     }
 
     /**
-     * Get doctor photo from db by id
+     * Get doctor photo from db by id.
      *
      * @state stub
+     *
      * @param $doctorId
-     * @return array
+     *
+     * @return string|null
      */
     public function getDoctorPhotoById($doctorId)
     {
