@@ -72,8 +72,11 @@ return [
     'app' => [
         'env'        => 'dev',
         'uri_base'   => '/',
+        'db' => [
+            'sqlite' => 'storage/sqlite/uti.sl3'
+        ],
         'html'       => 'min',
-        'result'     => 'download',
+        'result'     => 'show',
         'stages'     => [
             'min' => 1,
             'max' => 5
