@@ -32,6 +32,7 @@ app/src/storage/upload_dir/*
 #app/src/storage/pdf/*
 #storage/tools/
 app/src/storage/logs/*
+app/src/storage/tmp/*
 pdf/*
 !placeholder
 

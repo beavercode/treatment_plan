@@ -5,7 +5,7 @@
 
 namespace UTI\Model;
 
-use UTI\Core\Model;
+use UTI\Core\AbstractModel;
 use UTI\Lib\Form\Form;
 
 /**
@@ -13,7 +13,7 @@ use UTI\Lib\Form\Form;
  *
  * @package UTI
  */
-class AuthModel extends Model
+class AuthModel extends AbstractModel
 {
     /**
      * Process form and set flag auth=in(logged in) if all is OK

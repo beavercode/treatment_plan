@@ -1,6 +1,6 @@
 <?php
 /**
- * UTI
+ * (c) Lex Kachan <lex.kachan@gmail.com>
  */
 
 namespace UTI\Core;
@@ -9,14 +9,14 @@ use UTI\Lib\File\File;
 use UTI\Lib\MinifyHTML;
 
 /**
- * Class View
- * @package UTI\Core
- */
+ * Used to show html with data.
+ *
+ * @package UTI
+s */
 class View
 {
     /**
-     * Stores Path to the directory with templates
-     * @var string
+     * @var string Stores Path to the directory with templates
      */
     protected $dir;
 
@@ -26,25 +26,22 @@ class View
     protected $template;
 
     /**
-     * Data to inject into loaded file
-     * @var \UTI\Lib\Data
+     * @var \UTI\Lib\Data Data to inject into loaded file
      */
     protected $data;
 
     /**
-     * Array's pairs what looks like: "blockName" => "path"
-     * @var array
+     * @var array Array's pairs what looks like: "blockName" => "path"
      */
     protected $blocks;
 
     /**
-     * Class used for minimisation of HTML
-     * @var MinifyHTML
+     * @var MinifyHTML Class used for minimisation of HTML
      */
     protected $compressor;
 
     /**
-     * Init
+     * Init.
      *
      * @param string $dir Path to template's directory
      * @param string $compression Add compression, flags:
@@ -61,7 +58,7 @@ class View
     }
 
     /**
-     * Set main template, view data and addition block for view
+     * Set main template, view data and addition block for view.
      *
      * @param string        $template Name of main template
      * @param \UTI\Lib\Data $data Object that stores view data
@@ -75,11 +72,12 @@ class View
     }
 
     /**
-     * Load page template and set page blocks
+     * Load page template and set page blocks.
      *
      * @param array $options Additional options applied before send page
      *      'minify' - true|false Override minimisation
      *      'cache'  - true|false Override caching
+     *
      * @throws AppException
      */
     public function render(array $options = [])
@@ -89,7 +87,7 @@ class View
 
         //todo caching
 
-        $html = $this->load($this->template . '.php');
+        $html = $this->load($this->template.'.php');
         // minify html base on setting in config.php and $options['minify']
         if (! empty($this->compressor) && $compress) {
             $html = $this->compressor->minify($html);
@@ -99,11 +97,13 @@ class View
     }
 
     /**
-     * Load block with name what is in blocks
+     * Load block with name what is in blocks.
      *
      * @param string $name Block name that was introduces at View::set() method
      * @param array  $additionalData Add additional view data to view data
+     *
      * @return string Content of the block
+     *
      * @throws AppException
      */
     public function block($name, array $additionalData = [])
@@ -114,22 +114,24 @@ class View
         }
 
         if (! in_array($name, $this->blocks, true)) {
-            throw new AppException('No such block "' . $name . '""');
+            throw new AppException('No such block "'.$name.'""');
         }
 
-        return $this->load($name . '.php');
+        return $this->load($name.'.php');
     }
 
     /**
-     * Load file and inject data and view into it
+     * Load file and inject data and view into it.
      *
      * @param string $file Path to the file
+     *
      * @return string Content of the file
+     *
      * @throws AppException
      */
     protected function load($file)
     {
-        $path = $this->dir . $file;
+        $path = $this->dir.$file;
 
         return File::inc($path, ['data' => $this->data, 'view' => $this], true);
     }

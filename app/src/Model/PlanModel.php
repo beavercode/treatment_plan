@@ -6,7 +6,7 @@
 namespace UTI\Model;
 
 use UTI\Core\AppException;
-use UTI\Core\Model;
+use UTI\Core\AbstractModel;
 use UTI\Lib\File\File;
 use UTI\Lib\Form\Form;
 
@@ -15,7 +15,7 @@ use UTI\Lib\Form\Form;
  *
  * @package UTI
  */
-class PlanModel extends Model
+class PlanModel extends AbstractModel
 {
     /**
      * @var string Uploaded files are store here.
@@ -29,6 +29,8 @@ class PlanModel extends Model
 
     /**
      * Init.
+     *
+     * Uses parent ctor.
      */
     public function __construct()
     {
@@ -39,7 +41,7 @@ class PlanModel extends Model
     }
 
     /**
-     * Process form,
+     * Process form.
      *
      * old:
      * 1. Name check
@@ -145,6 +147,7 @@ class PlanModel extends Model
                     'Введите "ФИО", пожалуйста. Длинна поля не менее '.$fioLength.' символов.'
                 );
             }
+
             // Period check for stages
             //todo form resubmit problem when adding and deleting stage after form submit, $this->session->get('stage') changed but not the $_POST
             for ($N = 1; $N <= $this->session->get('stage'); $N++) {
@@ -200,7 +203,7 @@ class PlanModel extends Model
     }
 
     /**
-     * Process pdf
+     * Process pdf.
      *
      * 1. from form data to html template
      * 2. html template to pdf
@@ -219,57 +222,40 @@ class PlanModel extends Model
     {
         $pdf = new PlanPdfModel($this);
         $formData = $this->session->get($form->getName());
-        $toDel = [];
 
-        //make html/pdf for Summary
-        $summaryHtml = $pdf->summaryToHtml($formData, 'pdf_summary_tpl');
-        $toDel[] = $summaryPdf = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)).'.pdf');
-
-        //todo debug, toDel
-//        echo $this->showPdfDev($summaryPdf);die;
-
-        // make pdf list to merge
-        $pdf->pdfMergeList('title', 'pdf_title.pdf');
-        $pdf->pdfMergeList('summary', $summaryPdf);
-        $pdf->pdfMergeList('tooth_map', 'pdf_tooth_map.pdf');
-
+        // Parse uploaded files.
         //convert doc to data array
-        //todo parse docx or excel to get price table data for arbitrary number of stages, number if row in template limited by 17 rows (procedures)
+        //todo parse docx or excel to get price table data for arbitrary number of stages,
+        //todo number if row in template limited by 17 rows (treatment procedures)
         //$doc = new Docx();
+        //      or
+        //$doc = new Excel();
         //$docData = $doc->getPriceTable($formData['fileName']);
-        $docData = [];
-        //make html for stage price (stage's price)
-        //todo dynamically stage data
+        $docData = []; //resulting data array, empty for now.
+
+        // Make html.
+        $summaryHtml = $pdf->summaryToHtml($formData, 'pdf_summary_tpl');
         $stagePriceHtmlArray = $pdf->stagePriceToHtml($formData, $docData, 'pdf_stage-price_tpl');
 
-        //todo associate stage name with pdf of stage terms
-        //$this->getStagesForMerge();
-        /*if prices is uploaded for each of them make pdfPricePage with corresponding terminology*/
-        for ($i = 1, $s = $this->session->get('stage'); $i <= $s; ++$i) {
-            $toDel[] = $testPricePage = $pdf->htmlToPdf($stagePriceHtmlArray[$i - 1], md5(microtime(true)).'.pdf');
+        // Make pdf from html.
+        $toDel = [];
+        $toDel[] = $summaryPdf = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)).'.pdf');
+        //todo debug, toDel
+        /*echo $this->showPdfDev($summaryPdf);die;*/
+        $stagesPdfArray = $pdf->stagePriceToPdf($formData, $stagePriceHtmlArray, $toDel);
 
-            //todo generate price for each stage
-            if (! ($stagePdf = $this->getStagePdfById($formData['stage'.$i]))) {
-                continue;
-            }
-            $pdf->pdfMergeList('stage'.$i.'_price', $testPricePage);
-            $pdf->pdfMergeList('stage'.$i.'_term', $stagePdf);
-        }
-        unset($stagePdf, $i, $s);
+        // List for merge. @stub@ is place for pdfs of stage pages
+        $pdfOutName = $pdf->mergeList([
+            'title'     => 'pdf_title.pdf',
+            'summary'   => $summaryPdf,
+            'tooth_map' => 'pdf_tooth_map.pdf',
+            '@stub@'    => $stagesPdfArray,
+            'faq'       => 'pdf_faq.pdf',
+            'extra'     => 'pdf_extra.pdf'
+        ]);
 
-        //$pdf->pdfMergeList('stage1_price', $testPricePage);
-        //$pdf->pdfMergeList('stage1_term', 'pdf_term_implantation.pdf');
-        //$pdf->setMergeList('stage2_price', 'generated from form data');
-        //$pdf->pdfMergeList('stage2_term', 'pdf_term_orthodontics.pdf');
-
-        $pdf->pdfMergeList('faq', 'pdf_faq.pdf');
-        $pdf->pdfMergeList('extra', 'pdf_extra.pdf');
-        $pdfOutName = $pdf->mergePdf();
-
-        //delete tmp pdf
+        // Delete temporary pdf files.
         $pdf->removePdfList($toDel);
-
-        //todo save treatment plan parts to DB for recovering later
 
         return $pdfOutName;
     }
@@ -277,7 +263,7 @@ class PlanModel extends Model
     /**
      * Get pdf data and show inline or force to download.
      *
-     * Another way how to show pdf({* @link http://mozilla.github.io/pdf.js/ })
+     * Another way how to show pdf({@link http://mozilla.github.io/pdf.js/ })
      *
      * @param string $hash
      * @param string $action How to handle resulting pdf
@@ -401,7 +387,7 @@ class PlanModel extends Model
     }
 
     /**
-     * Get stage's pdf for merge
+     * Get stage's pdf for merge.
      *
      * @stub
      *
@@ -414,7 +400,8 @@ class PlanModel extends Model
         //todo get from DB, using stub for now
         $dbResult = [
             2  => 'pdf_term_implantation.pdf',
-            10 => 'pdf_term_orthodontics.pdf'];
+            10 => 'pdf_term_orthodontics.pdf'
+        ];
 
         return isset($dbResult[$stageId]) ? $dbResult[$stageId] : null;
     }

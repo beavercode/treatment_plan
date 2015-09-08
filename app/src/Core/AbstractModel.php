@@ -12,7 +12,7 @@ use UTI\Lib\Session;
  *
  * @package UTI
  */
-abstract class Model
+abstract class AbstractModel
 {
     /**
      * @var \UTI\Lib\Session
@@ -30,7 +30,7 @@ abstract class Model
     }
 
     /**
-     * Check logged or not
+     * Check logged or not.
      *
      * @return bool
      */

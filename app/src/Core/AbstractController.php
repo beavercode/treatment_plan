@@ -14,7 +14,7 @@ use UTI\Lib\Data;
  *
  * @package UTI
  */
-abstract class Controller
+abstract class AbstractController
 {
     /**
      * @var Router
@@ -26,7 +26,7 @@ abstract class Controller
     protected $view;
 
     /**
-     * @var Model
+     * @var AbstractModel
      */
     protected $model;
 
