@@ -1,13 +1,16 @@
 <?php
 /**
- * UTI, Memory usage information
+ * (c) Lex Kachan <lex.kachan@gmail.com>
  */
 
 namespace UTI\Lib\Memory;
 
 /**
  * Class MemoryUsageInformation
- * @package UTI\Lib\Memory
+ *
+ * todo Decouple data from it's presentation.
+ *
+ * @package Memory
  */
 class MemoryUsageInformation
 {
@@ -15,7 +18,7 @@ class MemoryUsageInformation
     private $statistics = [];
 
     /**
-     * Memory Usage Information constructor
+     * Init.
      *
      * @param bool|false $realUsage
      */
@@ -25,9 +28,10 @@ class MemoryUsageInformation
     }
 
     /**
-     * Returns current memory usage with or without styling
+     * Returns current memory usage with or without styling.
      *
      * @param bool|true $styled
+     *
      * @return int|string
      */
     public function getCurrentMemoryUsage($styled = true)
@@ -38,9 +42,10 @@ class MemoryUsageInformation
     }
 
     /**
-     * Returns peak of memory usage
+     * Returns peak of memory usage.
      *
      * @param bool|true $styled
+     *
      * @return int|string
      */
     public function getPeakMemoryUsage($styled = true)
@@ -71,14 +76,14 @@ class MemoryUsageInformation
     {
         $elapsed = 0;
         foreach ($this->statistics as $statistic) {
-            echo 'Time: ' . $statistic['time'] .
-                ' | Memory Usage: ' . $statistic['memory_usage'] .
-                ' | Info: ' . $statistic['info'];
+            echo 'Time: '.$statistic['time'].
+                ' | Memory Usage: '.$statistic['memory_usage'].
+                ' | Info: '.$statistic['info'];
             echo "\n";
             $elapsed = $statistic['time'] - $elapsed;
         }
-        echo "\n\n", 'Peak of memory usage: ' . $this->getPeakMemoryUsage(), "\n\n";
-        echo 'Execution time: ' . $elapsed . ' sec';
+        echo "\n\n", 'Peak of memory usage: '.$this->getPeakMemoryUsage(), "\n\n";
+        echo 'Execution time: '.$elapsed.' sec';
     }
 
     /**
@@ -143,6 +148,6 @@ class MemoryUsageInformation
         }
 
         // Format output
-        return sprintf('%.' . $decimals . 'f ' . $unit, $value);
+        return sprintf('%.'.$decimals.'f '.$unit, $value);
     }
 }
