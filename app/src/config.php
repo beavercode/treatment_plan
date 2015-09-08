@@ -34,9 +34,11 @@
  *  - dev
  *  - prod
  *
- * app.uri_bas - Relative path to app
+ * app.uri_base - Relative path to app
  *  - '/' = example.com/
  *  - 'app/' = example.com/app/
+ *
+ * app.db.sqlite Place where sqlite db file situated
  *
  * app.html Get HTML as is (comments, whitespaces etc) or
  *  - raw
@@ -72,7 +74,7 @@ return [
     'app' => [
         'env'        => 'dev',
         'uri_base'   => '/',
-        'db' => [
+        'db'         => [
             'sqlite' => 'storage/sqlite/uti.sl3'
         ],
         'html'       => 'min',
