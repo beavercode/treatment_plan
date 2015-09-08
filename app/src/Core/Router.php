@@ -48,8 +48,7 @@ class Router
         $this->server = $server;
         $this->uriBase = $uriBase;
         $this->schema = $schema;
-        $routerFactory = new RouterFactory;
-        $this->auraRouter = $routerFactory->newInstance();
+        $this->auraRouter = (new RouterFactory)->newInstance();
     }
 
     /**
