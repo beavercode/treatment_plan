@@ -40,40 +40,4 @@ class System
 
         return File::write($file, $data.$lineSeparator);
     }
-
-    /**
-     * Load file data.
-     *
-     * @param string $fileName Path to the file
-     *
-     * @throws AppException
-     */
-    public static function loadConf($fileName)
-    {
-        //todo move to Config class
-        self::$conf = File::inc($fileName);
-    }
-
-    /**
-     * Using array_reduce function (no user loops).
-     *
-     * This function is named fold in functional programming languages such as
-     * lisp, ocaml, haskell, and erlang. Python just calls it reduce.
-     *
-     * @param  string $key Dictionary key
-     * @param  mixed  $default Default value if key doesn't exists
-     *
-     * @return mixed Returns key value
-     */
-    public static function getConfig($key, $default = null)
-    {
-        //todo move to Config class
-        return array_reduce(
-            explode('.', $key),
-            function ($result, $item) use ($default) {
-                return array_key_exists($item, $result) ? $result[$item] : $default;
-            },
-            self::$conf
-        );
-    }
 }
