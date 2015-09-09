@@ -5,19 +5,19 @@
 
 namespace UTI\Model;
 
-use iio\libmergepdf\Exception as MergeException;
+use iio\libmergepdf\Exception as LibMergePdfException;
 use iio\libmergepdf\Merger;
 use UTI\Core\AppException;
-use UTI\Core\Model;
+use UTI\Core\AbstractModel;
 use UTI\Lib\Data;
 use UTI\Lib\File\File;
 
 /**
- * Plan PDF handling.
+ * Plan model PDF handling.
  *
  * @package UTI
  */
-class PlanPdfModel extends Model
+class PlanPdfModel extends AbstractModel
 {
     /**
      * @var string Directory with html templates which would converted to pdf.
@@ -40,11 +40,6 @@ class PlanPdfModel extends Model
     protected $dirTmp;
 
     /**
-     * @var array List of block_name => file_name.pdf to merge.
-     */
-    protected $mergeList = [];
-
-    /**
      * @var PlanModel Inherit from class which creates current.
      */
     protected $caller;
@@ -54,7 +49,7 @@ class PlanPdfModel extends Model
      *
      * Uses parent constructor.
      *
-     * @param Model $caller Caller class.
+     * @param AbstractModel $caller Caller class.
      */
     public function __construct($caller)
     {
@@ -72,10 +67,10 @@ class PlanPdfModel extends Model
     /**
      * Load template and insert form data into for summary page.
      *
-     * @param array  $formData Form data from POST.
-     * @param string $template HTML template for pdf generating.
+     * @param array  $formData Form data from POST
+     * @param string $template HTML template for pdf generating
      *
-     * @return string Generated HTML.
+     * @return string Generated HTML
      *
      * @throws AppException
      */
@@ -99,10 +94,10 @@ class PlanPdfModel extends Model
     }
 
     /**
-     * Load template and insert price file data into
+     * Load template and insert price file data into.
      *
-     * @param $formData
-     * @param array $price Array of prices parsed from file.
+     * @param array  $formData
+     * @param array  $price Array of prices parsed from file.
      * @param string $template HTML template for pdf generating.
      *
      * @return array
@@ -133,7 +128,7 @@ class PlanPdfModel extends Model
     /**
      * Get html as string, convert to pdf(using mPdf) and show or save it to a file in temp dir.
      *
-     * @src http://mpdf1.com/manual/index.php?tid=184
+     * @link http://mpdf1.com/manual/index.php?tid=184
      *
      * @param string $html HTML with css
      * @param null   $file File save to
@@ -171,10 +166,12 @@ class PlanPdfModel extends Model
             'orientation' => 'P'
         ];
         $options = array_merge($defaults, $options);
-        //extract($options); //slower 20-80% than foreach
+
+        // Make variables from assoc array; extract($options) is slower on 20-80% than foreach
         foreach ($options as $varName => $value) {
             $$varName = $value;
         }
+
         /**
          * @var string $mode
          * @var string $pageFormat
@@ -200,34 +197,6 @@ class PlanPdfModel extends Model
         File::write($path, $content, 'w');
 
         return $path;
-    }
-
-    /**
-     * Accepts array of pdf files, add correct FS paths and merge them.
-     *
-     * Result stored in file which name generated from current timestamp.
-     *
-     * @throws AppException
-     *
-     * @return string
-     */
-    public function mergePdf()
-    {
-        try {
-            $merger = new Merger();
-            foreach ($this->mergeList as $item) {
-                $merger->addFromFile($item);
-            }
-            $merged = $merger->merge();
-        } catch (MergeException $e) {
-            throw new AppException($e->getMessage().'; re-throw from "\iio\libmergepdf\Exception:"', 911, $e);
-        }
-
-        $hash = md5(time());
-        $path = $this->dirPdfOut.$hash.'.pdf';
-        File::write($path, $merged, 'w');
-
-        return $hash;
     }
 
     /**
@@ -262,33 +231,117 @@ class PlanPdfModel extends Model
     }
 
     /**
-     * Get list of files to merge
+     * Convert html items to pdf.
      *
-     * @return array Array of pdf files to merge
+     * Pdf files temporary resides on hdd and be deleted later.
+     *
+     * @param array $formData Form items
+     * @param array $htmls Items for conversion
+     * @param array $toDel Files what will be deleted
+     *
+     * @return array List of stage_price/_term => converted_file.pdf
      */
-    public function getMergeList()
+    public function stagePriceToPdf($formData, array $htmls, &$toDel)
     {
-        return $this->mergeList;
+        $ret = [];
+        //todo associate stage name with pdf of stage terms
+        /*if prices is uploaded for each of them make pdfPricePage with corresponding terminology*/
+        for ($i = 1, $s = $this->session->get('stage'); $i <= $s; ++$i) {
+            $toDel[] = $testPricePage = $this->htmlToPdf($htmls[$i - 1], md5(microtime(true)).'.pdf');
+
+            //todo generate price for each stage
+            if (! ($stagePdf = $this->caller->getStagePdfById($formData['stage'.$i]))) {
+                continue;
+            }
+
+            $ret['stage'.$i.'_price'] = $testPricePage;
+            $ret['stage'.$i.'_term'] = $stagePdf;
+        }
+
+        return $ret;
     }
 
     /**
-     * Populate dictionary for merge
+     * Populate dictionary for merge.
      *
-     * @src http://stackoverflow.com/a/3322641
-     * @param $key
-     * @param $value
+     * @link http://stackoverflow.com/a/3322641
+     *
+     * @param array $list Array of values for merge
+     *
+     * @returns string
+     *
      * @throws AppException
      */
-    public function pdfMergeList($key, $value)
+    public function mergeList(array $list)
     {
-        if (! preg_match("#\.pdf$#i", $value)) {
-            throw new AppException('File "'.$value.'" not a PDF file.');
-        }
-        // $value is a basename of a file, e.g. is a pdf template stored in $this->dirPdfIn dikrectory
-        if (basename($value) === $value) {
-            $value = $this->dirPdfIn.$value;
+        $mergeList = [];
+
+        foreach ($list as $key => $value) {
+            if ('@stub@' === $key && is_array($value)) {
+                foreach ($value as $k => $v) {
+                    $this->preMerge($mergeList, $k, $v);
+                }
+                continue;
+            }
+            $this->preMerge($mergeList, $key, $value);
         }
 
-        $this->mergeList[$key] = $value;
+        return $this->mergePdf($mergeList);
+    }
+
+    /**
+     * Check file extension and make file's absolute path.
+     *
+     * @param $array
+     * @param $key
+     * @param $val
+     *
+     * @throws AppException
+     */
+    private function preMerge(&$array, $key, $val)
+    {
+        // Check if file has '.pdf' extension.
+        if (! preg_match("#\.pdf$#i", $val)) {
+            throw new AppException('File "'.$val.'" not a PDF file.');
+        }
+        // Make an absolute path to store a file.
+        if (basename($val) === $val) {
+            $val = $this->dirPdfIn.$val;
+        }
+        $array[$key] = $val;
+    }
+
+    /**
+     * Accepts array of pdf files, add correct paths and merge them.
+     *
+     * Result stored in file which name generated from current timestamp.
+     *
+     * @param array $list List of block_name => file_name.pdf to merge
+     *
+     * @return string
+     *
+     * @throws AppException
+     */
+    private function mergePdf(array $list)
+    {
+        try {
+            $merger = new Merger();
+            foreach ($list as $item) {
+                $merger->addFromFile($item);
+            }
+            $merged = $merger->merge();
+        } catch (LibMergePdfException $e) {
+            throw new AppException(
+                sprintf('%s; re-throw from "\iio\libmergepdf\Exception:"', $e->getMessage()),
+                911,
+                $e
+            );
+        }
+
+        $hash = md5(time());
+        $path = $this->dirPdfOut.$hash.'.pdf';
+        File::write($path, $merged, 'w');
+
+        return $hash;
     }
 }

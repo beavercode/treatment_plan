@@ -6,7 +6,7 @@
 namespace UTI\Controller;
 
 use UTI\Core\AppException;
-use UTI\Core\Controller;
+use UTI\Core\AbstractController;
 use UTI\Model\PlanModel;
 
 /**
@@ -14,7 +14,7 @@ use UTI\Model\PlanModel;
  *
  * @package UTI
  */
-class PlanController extends Controller
+class PlanController extends AbstractController
 {
     /**
      * Init.

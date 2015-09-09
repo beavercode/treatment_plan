@@ -1,19 +1,20 @@
 <?php
+/**
+ * (c) Lex Kachan <lex.kachan@gmail.com>
+ */
 
 namespace UTI\Model;
 
 use UTI\Core\AppException;
-use UTI\Core\Model;
+use UTI\Core\AbstractModel;
 
 /**
- * Plan form stages handling
+ * Plan form stages handling.
  *
- * Class PlanStagesModel
- * @package UTI\Model
+ * @package UTI
  */
-class PlanStagesModel extends Model
+class PlanStagesModel extends AbstractModel
 {
-
     /**
      * @var \UTI\Core\View
      */
@@ -23,7 +24,14 @@ class PlanStagesModel extends Model
     protected $template;
 
     /**
-     * Init variables
+     * Init.
+     *
+     * Uses parent ctor.
+     *
+     * @param     $data
+     * @param     $view
+     * @param     $max
+     * @param int $min
      */
     public function __construct($data, $view, $max, $min = 1)
     {
@@ -36,10 +44,11 @@ class PlanStagesModel extends Model
     }
 
     /**
-     * Triggered when invoking inaccessible methods
+     * Triggered when invoking inaccessible methods.
      *
      * @param $methodName
      * @param $args
+     *
      * @return null
      */
     public function __call($methodName, $args)
@@ -48,11 +57,14 @@ class PlanStagesModel extends Model
             return $this->$methodName($args);
         }
 
-        return null;
+        return;
     }
 
     /**
-     * Init stage value with min
+     * Init stage value with min.
+     *
+     * @param $callback
+     *
      * @throws AppException
      */
     public function init($callback)
@@ -73,7 +85,10 @@ class PlanStagesModel extends Model
     }
 
     /**
-     * Handle stage number and echo html data
+     * Handle stage number and echo html data.
+     *
+     * @param $callback
+     *
      * @throws AppException
      */
     public function add($callback)
@@ -97,7 +112,7 @@ class PlanStagesModel extends Model
     }
 
     /**
-     * Handle stage number
+     * Handle stage number.
      */
     public function delete()
     {
@@ -115,7 +130,7 @@ class PlanStagesModel extends Model
     }
 
     /**
-     * Stage greater than min
+     * Stage greater than min.
      *
      * @return bool
      */
@@ -125,7 +140,7 @@ class PlanStagesModel extends Model
     }
 
     /**
-     * Stage lesser than max
+     * Stage lesser than max.
      *
      * @return bool
      */
@@ -135,7 +150,7 @@ class PlanStagesModel extends Model
     }
 
     /**
-     * Send data as json
+     * Send data as json.
      *
      * @param $data
      */

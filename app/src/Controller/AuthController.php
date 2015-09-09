@@ -5,7 +5,7 @@
 
 namespace UTI\Controller;
 
-use UTI\Core\Controller;
+use UTI\Core\AbstractController;
 use UTI\Model\AuthModel;
 use Uti\Core\AppException;
 
@@ -14,7 +14,7 @@ use Uti\Core\AppException;
  *
  * @package UTI
  */
-class AuthController extends Controller
+class AuthController extends AbstractController
 {
     /**
      * Init.
