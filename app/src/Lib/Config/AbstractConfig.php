@@ -10,26 +10,24 @@ use UTI\Core\AppException;
 /**
  * Common.
  *
- * ::load() can be used as fabric if more than one realisation.
- *
+ * @package UTI\Lib\Config
  */
 abstract class AbstractConfig
 {
-    protected $conf;
-
     /**
      * Creates an instance of AbstractConfig type.
      *
-     * @param string $file Absolute path to file
+     * @param string $srcDir Root dir for sources
+     * @param string $dsn Data source name to get configuration
      *
      * @return AbstractConfig
      *
      * @throws AppException
      */
-    public static function init($file)
+    public static function init($srcDir, $dsn)
     {
         // May add more config classes and use as alternatives in if.
-        return new PhpConfig($file);
+        return new PhpConfig($srcDir, $dsn);
     }
 
     /**
@@ -41,4 +39,11 @@ abstract class AbstractConfig
      * @return mixed Returns key value
      */
     abstract public function get($key, $default = null);
+
+    /**
+     * Generate Config class.
+     *
+     * @returns Config
+     */
+    abstract protected function generate();
 }

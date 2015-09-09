@@ -47,7 +47,7 @@ try {
     define('APP_TPL_PDF', APP_DIR.$config->get('app.tpl.pdf'));
     define('APP_SES', APP_DIR.$config->get('app.session.dir'));
     define('APP_SES_DUR', $config->get('app.session.duration'));
-    define('APP_LOG', APP_DIR.$config->get('app.log'));
+    define('APP_LOG_EXC', APP_DIR.$config->get('app.log.exceptions'));
     define('APP_PDF_IN', APP_DIR.$config->get('app.pdf_in'));
     define('APP_PDF_OUT', APP_DIR.$config->get('app.pdf_out'));
     define('APP_UPLOAD_DIR', APP_DIR.$config->get('app.upload_dir'));

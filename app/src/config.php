@@ -92,7 +92,9 @@ return [
             'pdf'  => 'storage/tpl/pdf/',
 
         ],
-        'log'        => 'storage/logs/',
+        'log'        => [
+            'exceptions' => 'storage/logs/exceptions.log'
+        ],
         'upload_dir' => 'storage/upload_dir/',
         'tmp'        => 'storage/tmp/',
         'pdf_in'     => 'storage/pdf/',

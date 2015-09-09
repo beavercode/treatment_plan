@@ -12,7 +12,7 @@ use UTI\Lib\MinifyHTML;
  * Used to show html with data.
  *
  * @package UTI
-s */
+ */
 class View
 {
     /**
@@ -21,7 +21,7 @@ class View
     protected $dir;
 
     /**
-     * @var string
+     * @var string Main template name
      */
     protected $template;
 
@@ -89,7 +89,7 @@ class View
 
         $html = $this->load($this->template.'.php');
         // minify html base on setting in config.php and $options['minify']
-        if (! empty($this->compressor) && $compress) {
+        if (!empty($this->compressor) && $compress) {
             $html = $this->compressor->minify($html);
         }
 
@@ -113,7 +113,7 @@ class View
             $data($key, $val);
         }
 
-        if (! in_array($name, $this->blocks, true)) {
+        if (!in_array($name, $this->blocks, true)) {
             throw new AppException('No such block "'.$name.'""');
         }
 

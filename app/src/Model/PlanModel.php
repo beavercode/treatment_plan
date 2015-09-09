@@ -7,6 +7,7 @@ namespace UTI\Model;
 
 use UTI\Core\AppException;
 use UTI\Core\AbstractModel;
+use UTI\Lib\Config\Config;
 use UTI\Lib\File\File;
 use UTI\Lib\Form\Form;
 
@@ -36,8 +37,8 @@ class PlanModel extends AbstractModel
     {
         parent::__construct();
 
-        $this->dirUpload = APP_UPLOAD_DIR;
-        $this->dirPdfOut = APP_PDF_OUT;
+        $this->dirUpload = Config::$APP_UPLOAD_DIR;
+        $this->dirPdfOut = Config::$APP_PDF_OUT;
     }
 
     /**
@@ -270,7 +271,7 @@ class PlanModel extends AbstractModel
      *  - show
      *  - download
      *
-     * @return string
+     * @return string Pdf data string
      *
      * @throws AppException
      */

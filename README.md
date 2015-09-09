@@ -13,10 +13,13 @@ Create stable and useful system...
     - php extensions
         - dom
         - gd
+        - json
+        - pcre
         - pdo
         - pdo_sqlite
         - sqlite3
         - mbstring
+        - session
         - xsl
         - zip
     - php directives

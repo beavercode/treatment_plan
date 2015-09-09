@@ -18,7 +18,7 @@ class Memory
     private static $memory;
 
     /**
-     * Start measure the memory usage.
+s     * Start measure the memory usage.
      *
      * @param array $conditions Array of callback-conditions.
      *  If callback returns true then start collecting memory usage.
@@ -27,7 +27,7 @@ class Memory
     {
         if (count($conditions) > 0) {
             foreach ($conditions as $condition) {
-                if (! is_callable($condition) || ! $condition()) {
+                if (!is_callable($condition) || !$condition()) {
                     return;
                 }
             }

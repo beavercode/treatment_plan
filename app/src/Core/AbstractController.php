@@ -5,6 +5,7 @@
 
 namespace UTI\Core;
 
+use UTI\Lib\Config\Config;
 use UTI\Lib\Data;
 
 /**
@@ -43,11 +44,11 @@ abstract class AbstractController
     public function __construct($router)
     {
         $this->router = $router;
-        $this->view = new View(APP_TPL_VIEW, HTML_TYPE);
+        $this->view = new View(Config::$APP_TPL_VIEW, Config::$HTML_TYPE);
 
         //todo Find nice looking way to handle Data object.
         $data = new Data();
-        $data('base', URI_BASE);
+        $data('base', Config::$URI_BASE);
         $this->data = $data;
     }
 }

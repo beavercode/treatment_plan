@@ -9,6 +9,7 @@ use iio\libmergepdf\Exception as LibMergePdfException;
 use iio\libmergepdf\Merger;
 use UTI\Core\AppException;
 use UTI\Core\AbstractModel;
+use UTI\Lib\Config\Config;
 use UTI\Lib\Data;
 use UTI\Lib\File\File;
 
@@ -56,11 +57,11 @@ class PlanPdfModel extends AbstractModel
         //todo Think about db!!!
         parent::__construct();
 
-        $this->dirTmp = APP_TMP;
-        $this->dirHtml = APP_TPL_PDF;
-        $this->dirPdfIn = APP_PDF_IN;
-        $this->dirPdfOut = APP_PDF_OUT;
-        $this->dirImgDoc = APP_IMG_DOC;
+        $this->dirTmp = Config::$APP_TMP;
+        $this->dirHtml = Config::$APP_TPL_PDF;
+        $this->dirPdfIn = Config::$APP_PDF_IN;
+        $this->dirPdfOut = Config::$APP_PDF_OUT;
+        $this->dirImgDoc = Config::$APP_IMG_DOC;
         $this->caller = $caller;
     }
 
@@ -250,7 +251,7 @@ class PlanPdfModel extends AbstractModel
             $toDel[] = $testPricePage = $this->htmlToPdf($htmls[$i - 1], md5(microtime(true)).'.pdf');
 
             //todo generate price for each stage
-            if (! ($stagePdf = $this->caller->getStagePdfById($formData['stage'.$i]))) {
+            if (!($stagePdf = $this->caller->getStagePdfById($formData['stage'.$i]))) {
                 continue;
             }
 
@@ -301,7 +302,7 @@ class PlanPdfModel extends AbstractModel
     private function preMerge(&$array, $key, $val)
     {
         // Check if file has '.pdf' extension.
-        if (! preg_match("#\.pdf$#i", $val)) {
+        if (!preg_match("#\.pdf$#i", $val)) {
             throw new AppException('File "'.$val.'" not a PDF file.');
         }
         // Make an absolute path to store a file.

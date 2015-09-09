@@ -5,6 +5,7 @@
 
 namespace UTI\Core;
 
+use UTI\Lib\Config\Config;
 use UTI\Lib\Session;
 
 /**
@@ -26,7 +27,7 @@ abstract class AbstractModel
      */
     public function __construct()
     {
-        $this->session = Session::run(APP_SES, APP_SES_DUR);
+        $this->session = Session::run(Config::$APP_SES, Config::$APP_SES_DUR);
     }
 
     /**

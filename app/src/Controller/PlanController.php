@@ -7,6 +7,7 @@ namespace UTI\Controller;
 
 use UTI\Core\AppException;
 use UTI\Core\AbstractController;
+use UTI\Lib\Config\Config;
 use UTI\Model\PlanModel;
 
 /**
@@ -30,7 +31,7 @@ class PlanController extends AbstractController
         parent::__construct($router);
         $this->model = new PlanModel();
 
-        if (! $this->model->isLogged()) {
+        if (!$this->model->isLogged()) {
             $this->router->redirect('auth.login');
         }
     }
@@ -55,7 +56,8 @@ class PlanController extends AbstractController
         $data('notify.error', '');
 
         // Working with stages using ajax.
-        if (false === ($form = $this->model->processForm($data, $this->view, APP_STAGES_MAX, APP_STAGES_MIN))) {
+        $form = $this->model->processForm($data, $this->view, Config::$APP_STAGES_MAX, Config::$APP_STAGES_MIN);
+        if (false === $form) {
             return;
         }
         // If form processed: all field are right, and files(docx,excel) are loaded.
@@ -90,12 +92,12 @@ class PlanController extends AbstractController
         //todo Data::__call() doesn't work on $this-data
         $data = $this->data;
 
-        // Set view templates
+        // Set view template.
         $this->view->set('plan_pdf_result', $data);
 
-        $data('pdf', $this->model->showPdf($params['name'], APP_RESULT));
+        $data('pdf', $this->model->showPdf($params['name'], Config::$APP_RESULT));
 
-        // compression breaks PDF file, do not use it!
+        // Compression breaks PDF file. Thus do not use it!!!
         $this->view->render(['minify' => false]);
     }
 
