@@ -24,87 +24,123 @@
  *
  *****************
  * App options *
- *****************
- *
- * app.stages - Minimum and maximum number of stages in the treatment plan
- *  - min: 1..10
- *  - max: 1..10
- *
- * app.env - Mode in which application runs
- *  - dev
- *  - prod
- *
- * app.uri_base - Relative path to app
- *  - '/' = example.com/
- *  - 'app/' = example.com/app/
- *
- * app.db.sqlite Place where sqlite db file situated
- *
- * app.html Get HTML as is (comments, whitespaces etc) or
- *  - raw
- *  - min
- *
- * app.session Session parameters
- *  - app.session.dir - place where are session files saved
- *  - app.session.duration - session's time to live, 32400 sec = 9 hours
- *
- * app.tpl Application templates are saved here
- *  - app.tpl.view - view templates
- *  - app.tpl.pdf - html templates for pdf generation
- *
- * app.result How to handle resulting pdf
- *  - download
- *  - show
- *
- * app.log Application log's dir.
- *
- * app.upload_dir Directory for uploaded files.
- *
- * app.tmp Directory for temporary files, e.g. templates converted to pdf.
- *
- * app.pdf_in Place for merge-ready pdf files.
- *
- * app.pdf_out Place for resulting pdf files.
- *
- * app.img.doctors Filesystem path Where doctors avatars are stored.
- *
- */
+ *****************/
 
 return [
-    'app' => [
-        'env'        => 'dev',
-        'uri_base'   => '/',
-        'db'         => [
-            'sqlite' => 'storage/sqlite/uti.sl3'
-        ],
-        'html'       => 'min',
-        'result'     => 'show',
-        'stages'     => [
-            'min' => 1,
-            'max' => 5
-        ],
-        'session'    => [
-            'dir'      => 'storage/sessions/',
-            'duration' => 32400,
-        ],
-        'tpl'        => [
+    /* Mode in which application runs:
+        dev - show errors in browser
+        prod - log errors to a log files */
+    'env'        => 'dev',
+
+    /* Relative path to app
+        '/' = example.com/
+        'app/' = example.com/app/ */
+    'uri_base'   => '/',
+
+    'http_schema' => 'http://',
+
+    /* Get HTML as
+        raw (comments, whitespaces etc)
+        min  */
+    'html_type'  => 'min',
+
+    /* How to handle resulting pdf
+        download
+        show */
+    'pdf_result' => 'show',
+
+    /* Session continues until browser is closed or duration expires */
+    'session'    => [
+        'duration' => 32400 // 9 hours
+    ],
+
+    /*  Minimum and maximum number of stages in the treatment plan form. Min - 1, max - 10. */
+    'stages'     => [
+        'min' => 1,
+        'max' => 5
+    ],
+
+    /* Directories */
+    'dir'        => [
+        /* Sqlite database */
+        'sqlite'  => 'storage/sqlite/uti.sl3',
+
+        /* Session's files */
+        'session' => 'storage/sessions/',
+
+        /* Templates
+            view - php pages templates
+            pdf - html template which would generate to pdf and merge after
+        */
+        'tpl'     => [
             'view' => 'storage/tpl/view/',
             'pdf'  => 'storage/tpl/pdf/',
+        ],
 
+        /* Application logs */
+        'log'     => [
+            'exception' => 'storage/logs/exceptions.log'
         ],
-        'log'        => [
-            'exceptions' => 'storage/logs/exceptions.log'
+
+        /* Uploaded files resides here */
+        'upload'  => 'storage/upload_dir/',
+
+        /* Temporary files */
+        'tmp'     => 'storage/tmp/',
+
+        /* Pdf files
+            in - pdf file (templates) ready to merge
+            out - place for resulting pdf files.
+        */
+        'pdf'     => [
+            'in'  => 'storage/pdf/',
+            'out' => './../../pdf/',
         ],
-        'upload_dir' => 'storage/upload_dir/',
-        'tmp'        => 'storage/tmp/',
-        'pdf_in'     => 'storage/pdf/',
-        'pdf_out'    => './../../pdf/',
-        'img'        => [
+
+        /* Path to system images */
+        'img'     => [
             'doctors' => '../../doctors/',
             /*'common'  => 'storage/img/common/'*/
         ],
-    ]
+    ],
 ];
+
+// OLD.
+//return [
+//    'app' => [
+//        'env'        => 'dev',
+//        'uri_base'   => '/',
+//        'db'         => [
+//            'sqlite' => 'storage/sqlite/uti.sl3'
+//        ],
+//        'html'       => 'min',
+//        'result'     => 'show',
+//        'stages'     => [
+//            'min' => 1,
+//            'max' => 5
+//        ],
+//        'session'    => [
+//            'dir'      => 'storage/sessions/',
+//            'duration' => 32400,
+//        ],
+//        'tpl'        => [
+//            'view' => 'storage/tpl/view/',
+//            'pdf'  => 'storage/tpl/pdf/',
+//
+//        ],
+//        'log'        => [
+//            'exceptions' => 'storage/logs/exceptions.log'
+//        ],
+//        'upload_dir' => 'storage/upload_dir/',
+//        'tmp'        => 'storage/tmp/',
+//        'pdf_in'     => 'storage/pdf/',
+//        'pdf_out'    => './../../pdf/',
+//        'img'        => [
+//            'doctors' => '../../doctors/',
+//            /*'common'  => 'storage/img/common/'*/
+//        ],
+//    ]
+//];
 
 /*    'db'   => [
         'host' => 'localhost',

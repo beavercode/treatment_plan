@@ -10,7 +10,7 @@ require('vendor/autoload.php');
 use UTI\Core\AppException;
 use UTI\Core\Router;
 use UTI\Lib\Config\AbstractConfig;
-use UTI\Lib\Config\Config;
+use UTI\Lib\Config\ConfigData;
 use UTI\Lib\Logger\AbstractLogger;
 use UTI\Lib\Memory\Memory;
 
@@ -47,7 +47,7 @@ class App
     private $dir;
 
     /**
-     * @var AbstractConfig
+     * @var ConfigData
      */
     private $conf;
 
@@ -78,14 +78,13 @@ class App
     public function __construct($appDir = 'src/')
     {
         // Deny 'favicon.ico' requests.
-        $this->noFavicon();
+        $this->noFavicon($_SERVER['REQUEST_URI']);
 
         // Version check.
         $this->checkVersion($this->minPhpVersion);
 
-
         //Extension check
-        //todo on first start or ...?
+        //todo on first run or ...?
         $this->checkExtensions($this->extensions);
 
         // Setup php internal environment.
@@ -98,27 +97,27 @@ class App
     /**
      * Run application.
      *
-     * @param string $confDsn Dsn used to get configuration options
+     * @param string $config Dsn used to get configuration options
      *
      * @throws AppException
      */
-    public function start($confDsn = 'config.php')
+    public function start($config = 'config.php')
     {
         try {
-            // Create configuration class Config. Usage: Config::$OPTION.
-            $this->conf = AbstractConfig::init($this->dir, $confDsn);
+            // Create configuration class.
+            $this->conf = AbstractConfig::init($this->dir, $config);
 
             //todo toDel, debug, memory usage
             $this->debugStart();
 
             // Start routing.
-            (new Router($_SERVER, Config::$URI_BASE, 'http://'))->run();
+            (new Router($this->conf, $_SERVER))->run();
 
             //todo toDel, debug, memory usage
             $this->debugEnd();
         } catch (AppException $e) {
             // Log error for production and show for development.
-            AbstractLogger::init(Config::$APP_ENV, Config::$APP_LOG_EXC)->log($e->getError());
+            AbstractLogger::init($this->conf->get('env'), $this->conf->get('dir.log.exception'))->log($e->getError());
         } catch (\Exception $e) {
             // This catch block would never reached. If not - you messed up with exceptions.
             die('Oops! You messed up with exceptions');
@@ -173,12 +172,13 @@ class App
     /**
      * No favicon.
      *
-     * @param bool $restrict
+     * @param string $uri $_SERVER['REQUEST_URI']
+     * @param bool   $restrict
      */
-    private function noFavicon($restrict = false)
+    private function noFavicon($uri, $restrict = false)
     {
         //todo Add more checks like http['SERVER']?
-        if ('/favicon.ico' === $_SERVER['REQUEST_URI']) {
+        if ('/favicon.ico' === $uri) {
             die;
         }
     }
@@ -193,7 +193,7 @@ class App
         Memory::start([
             // Callback: do not check for stage ajax requests
             function () {
-                if ('dev' === Config::$APP_ENV && !isset($_POST['stage'])) {
+                if ('dev' === $this->conf->get('env') && !isset($_POST['stage'])) {
                     return true;
                 }
             }
