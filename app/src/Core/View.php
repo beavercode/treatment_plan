@@ -5,6 +5,7 @@
 
 namespace UTI\Core;
 
+use UTI\Lib\Config\Exceptions\FileException;
 use UTI\Lib\File\File;
 use UTI\Lib\MinifyHTML;
 
@@ -82,13 +83,15 @@ class View
      */
     public function render(array $options = [])
     {
-        // last point to disable minimization
+        // Last point where minimization can be disabled.
         $compress = isset($options['minify']) ? $options['minify'] : true;
 
         //todo caching
 
+        // Load html template.
         $html = $this->load($this->template.'.php');
-        // minify html base on setting in config.php and $options['minify']
+
+        // Check for minify or not.
         if (!empty($this->compressor) && $compress) {
             $html = $this->compressor->minify($html);
         }
@@ -127,7 +130,7 @@ class View
      *
      * @return string Content of the file
      *
-     * @throws AppException
+     * @throws FileException
      */
     protected function load($file)
     {
