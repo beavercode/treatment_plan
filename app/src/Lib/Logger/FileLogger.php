@@ -5,7 +5,8 @@
 
 namespace UTI\Lib\Logger;
 
-use UTI\Core\AppException;
+use UTI\Lib\Config\Exceptions\FileException;
+use UTI\Lib\Logger\Exceptions\LoggerException;
 use UTI\Lib\File\File;
 
 /**
@@ -35,7 +36,7 @@ class FileLogger extends AbstractLogger
     /**
      * @inheritdoc
      *
-     * @throws AppException
+     * @throws LoggerException
      */
     public function log($message)
     {
@@ -43,6 +44,10 @@ class FileLogger extends AbstractLogger
         $lineSeparator = "\n";
 
         $data = date('Y-m-d H:i:s O')." {$timeSeparator} ".(string)$message;
-        File::write($this->path, $data.$lineSeparator);
+        try {
+            File::write($this->path, $data.$lineSeparator);
+        } catch (FileException $e) {
+            throw new LoggerException(sprintf('Cant log to a file "%s"', $this->path), null, $e);
+        }
     }
 }
