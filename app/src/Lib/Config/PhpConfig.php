@@ -25,7 +25,7 @@ class PhpConfig extends AbstractConfig
     /**
      * @var array Configuration assoc array
      */
-    private $conf;
+    private $configRaw;
 
     /**
      * Init.
@@ -42,7 +42,7 @@ class PhpConfig extends AbstractConfig
         $this->dir = $srcDir;
         $file = $srcDir.$dsn;
         try {
-            $this->conf = File::inc($file);
+            $this->configRaw = File::inc($file);
         } catch (FileException $e) {
             throw new ConfigException(sprintf('Cant include configuration file: "%s"', $file), null, $e);
         }
@@ -55,7 +55,7 @@ class PhpConfig extends AbstractConfig
     {
         //todo Generate configuration class on first app run or when config file is changes.
         //todo Automatic config class generation and caching.
-        $flattened = FlattenArrayPreserveKeysHelper::iterate($this->conf);
+        $flattened = FlattenArrayPreserveKeysHelper::iterate($this->configRaw, $this->dir);
 
         return new ConfigData($flattened);
     }
