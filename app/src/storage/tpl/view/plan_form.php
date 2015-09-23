@@ -1,6 +1,6 @@
 <?php
 /** @var \UTI\Lib\Data $data */
-/** @var \UTI\Lib\Form $form */
+/** @var \UTI\Lib\Form\Form $form */
 /** @var \UTI\Core\View $view */
 $form = $data('plan.form');
 ?>
@@ -18,7 +18,7 @@ $form = $data('plan.form');
 <form class="form-horizontal plan-form" role="form" name="<?= $form->getName() ?>" action="" method="post" enctype="multipart/form-data">
     <!-- Common info -->
     <!-- MAX_FILE_SIZE must precede the file input field -->
-    <input type="hidden" name="MAX_FILE_SIZE" value="52428800"/> <!-- ~50mb-->
+    <input type="hidden" name="MAX_FILE_SIZE" value="26214400"/> <!-- 25mb-->
     <div class="form-group col-sm-7">
         <label for="fio" class="col-sm-4 control-label">Введите имя</label>
 
