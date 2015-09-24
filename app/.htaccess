@@ -1,3 +1,6 @@
+#Configs for php as module of apache
+# ...
+
 <IfModule mod_authz_core.c>
     Require all denied
 </IfModule>
