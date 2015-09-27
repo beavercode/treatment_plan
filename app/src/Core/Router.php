@@ -5,9 +5,12 @@
 
 namespace UTI\Core;
 
-use Aura\Router\Exception\RouteNotFound;
-use Aura\Router\RouterFactory;
+use UTI\Core\Exceptions\RoutingException;
+use UTI\Lib\Config\ConfigData;
 use UTI\Controller;
+use Aura\Router\RouterFactory;
+use Aura\Router\Exception\RouteNotFound as AuraRouteNotFound;
+use UTI\Lib\Config\Exceptions\ConfigException;
 
 /**
  * Router using Aura/Router and inline routes.
@@ -16,6 +19,16 @@ use UTI\Controller;
  */
 class Router
 {
+    /**
+     * @var ConfigData Class that stores configuration information
+     */
+    public $conf;
+
+    /**
+     * @var \Aura\Router\Router
+     */
+    protected $auraRouter;
+
     /**
      * @var array Super-global $_SERVER variable.
      */
@@ -27,43 +40,43 @@ class Router
     protected $schema;
 
     /**
-     * @var \Aura\Router\Router
-     */
-    protected $auraRouter;
-
-    /**
-     * @var string Store current application URI base.
+     * @var string Identifies the document containing the URI reference (base URI of the HTML document).
      */
     protected $uriBase;
 
     /**
      * Init.
      *
-     * @param string $server Super-global $_SERVER variable.
-     * @param string $uriBase The base URL/target for all relative URLs.
-     * @param string $schema Protocol schema used for redirect.
+     * @param ConfigData $conf
+     * @param array      $server Super global variable $_SERVER
+     *
+     * @throws RoutingException
      */
-    public function __construct($server, $uriBase = '/', $schema = 'http://')
+    public function __construct(ConfigData $conf, $server)
     {
-        $this->server = $server;
-        $this->uriBase = $uriBase;
-        $this->schema = $schema;
-        $this->auraRouter = (new RouterFactory)->newInstance();
+        try {
+            $this->server = $server;
+            $this->auraRouter = (new RouterFactory)->newInstance();
+            $this->conf = $conf;
+            $this->schema = $this->conf->get('http_schema');
+            $this->uriBase = $this->conf->get('uri_base');
+        } catch (ConfigException $e) {
+            // Catch if config option do not exists (wrong name, misspelling etc.)
+            throw new RoutingException($e->getMessage(), null, $e);
+        }
     }
 
     /**
      * Starts routing.
      *
-     * @throws AppException
+     * @throws RoutingException
      */
     public function run()
     {
         // Set routes.
-        $this->register();
-
+        $this->register($this->uriBase);
         // Matching route.
         $route = $this->match();
-
         // Dispatching route.
         $this->dispatch($route);
     }
@@ -74,7 +87,7 @@ class Router
      * @param string $route Route declared using $this->routerFactory->add().
      * @return false|null Nothing if redirect and false if no route URI.
      *
-     * @throws AppException
+     * @throws RoutingException
      */
     public function redirect($route)
     {
@@ -91,23 +104,170 @@ class Router
      * @param string $route Route name added through aura router.
      * @param array  $data The data to interpolate into the URI; data keys map to param tokens in the path.
      *
-     * @return false|string A URI path string if the route name is found, or boolean false if not.
+     * @return string A URI path string if the route name is found
      *
-     * @throws AppException
+     * @throws RoutingException If route is not found
      */
     public function getUri($route, array $data = [])
     {
         try {
             $routUri = $this->auraRouter->generate($route, $data);
-        } catch (RouteNotFound $e) {
-            throw new AppException($e->getMessage().
-                '; rethrow from "Aura\Router\Exception\RouteNotFound:"', 911, $e);
+        } catch (AuraRouteNotFound $e) {
+            throw new RoutingException($e->getMessage(), null, $e);
         }
 
         return $routUri;
     }
 
     /**
+     * Populate AuraRouter with routes.
+     *
+     * todo Route in separate file?
+     *
+     * @param string $uriBase Base uri for ap[
+     *
+     * @return int Number of routes
+     */
+    private function register($uriBase)
+    {
+        //todo
+//        $this->getRoutes();
+
+        // Auth
+        $this->auraRouter->add('auth.login', $uriBase.'login')
+            ->addValues([
+                'controller' => 'Auth',
+                'action'     => 'login'
+            ]);
+        $this->auraRouter->add('auth.logout', $uriBase.'logout')
+            ->addValues([
+                'controller' => 'Auth',
+                'action'     => 'logout'
+            ]);
+
+        // Plan.
+        //todo way to separate form and ajax stages
+        //catch ajax main first
+        /*$this->router->add('plan.index.ajax', $this->uriBase)
+            ->addValues([
+                'controller' => 'Plan',
+                'action'     => 'indexAjax'
+            ])
+            ->addServer([
+                'HTTP_ACCEPT' => 'application/json(;q=(\*|0\.01|[0\.[1-9]]))?'
+            ]);*/
+        $this->auraRouter->add('plan.index', $uriBase)
+            ->addValues([
+                'controller' => 'Plan',
+                'action'     => 'index'
+            ]);
+        $this->auraRouter->add('plan.get', $uriBase.'get{/name}')
+            ->addValues([
+                'controller' => 'Plan',
+                'action'     => 'get'
+            ]);
+
+        // Show list of plan saved in DB.
+        $this->auraRouter->add('plan.show', $uriBase.'show')
+            ->addValues([
+                'controller' => 'Plan',
+                'action'     => 'show'
+            ]);
+
+        // Show filed form with recovered/submitted form.
+        $this->auraRouter->add('plan.show.name', $uriBase.'show/name')
+            ->addTokens([
+                'name' => '\w+'
+            ])
+            ->addValues([
+                'controller' => 'Plan',
+                'action'     => 'showByName'
+            ]);
+
+        // add doctor name and photo
+        $this->auraRouter->add('doctor.index', $uriBase.'doctor')
+            ->addValues([
+                'controller' => 'Doctor',
+                'action'     => 'index'
+            ]);
+        $this->auraRouter->add('doctor.add', $uriBase.'doctor/add')
+            ->addValues([
+                'controller' => 'Doctor',
+                'action'     => 'add'
+            ]);
+
+        return $this->auraRouter->count();
+    }
+
+    /**
+     * Match current request_uri to declared route.
+     *
+     * @return \Aura\Router\Route|false
+     *
+     * @throws RoutingException
+     */
+    private function match()
+    {
+        // Get incoming request's URL path.
+        //todo  (!) not necessary, because SERVER['REQUEST_URI'] already stands as URI
+        $path = parse_url($this->server['REQUEST_URI'], PHP_URL_PATH);
+
+        // Get route based on the path and server.
+        $route = $this->auraRouter->match($path, $this->server);
+        if (!$route) {
+//            no route object was returned
+            throw new RoutingException('No such route.');
+//            $this->redirect('plan.index');
+        }
+
+        return $route;
+    }
+
+    /**
+     * Dispatch route to specific controller.
+     *
+     * @param \Aura\Router\Route $route
+     */
+    private function dispatch($route)
+    {
+        $params = $route->params;
+        $class = '\\UTI\\Controller\\'.$params['controller'].'Controller';
+        $method = $params['action'];
+        $controller = new $class($this, $this->conf);
+
+        //todo Not all methods need params, what to do in this situation?
+        //todo what about $controller->parameters = $params ?
+        $controller->$method($params);
+    }
+
+    /**
+     * @not_used
+     *
+     * Dispatch route to specific controller.
+     *
+     * //todo This approach of routing limiting controller with concrete model. :(
+     *
+     * @param \Aura\Router\Route $route
+     */
+    private function dispatch_new_experimental($route)
+    {
+        $namespace = '\\UTI';
+        $params = $route->params;
+
+        // Create controller and model.
+        $controller = $namespace.'\\Controller\\'.$params['controller'].'Controller';
+        $model = $namespace.'\\Model\\'.$params['controller'].'Model';
+        $action = $params['action'];
+
+        $controller = new $controller($this, new $model($this->conf), $this->conf);
+        //todo Not all methods need params, what to do in this situation?
+        //todo what about $controller->parameters = $params ?
+        $controller->$action($params);
+    }
+
+    /**
+     * @not_used
+     *
      * Get routes.
      *
      * todo Read routes from config file(xml,yaml)
@@ -131,124 +291,5 @@ class Router
                 'accept' => [],
             ],
         ];
-    }
-
-    /**
-     * Populate AuraRouter with routes.
-     *
-     * todo Route in separate file?
-     *
-     * @return int Number of routes
-     */
-    private function register()
-    {
-        //todo
-//        $this->getRoutes();
-
-        // Auth
-        $this->auraRouter->add('auth.login', $this->uriBase.'login')
-            ->addValues([
-                'controller' => 'Auth',
-                'action'        => 'login'
-            ]);
-        $this->auraRouter->add('auth.logout', $this->uriBase.'logout')
-            ->addValues([
-                'controller' => 'Auth',
-                'action'     => 'logout'
-            ]);
-
-        // Plan.
-        //todo way to separate form and ajax stages
-        //catch ajax main first
-        /*$this->router->add('plan.index.ajax', $this->uriBase)
-            ->addValues([
-                'controller' => 'Plan',
-                'action'     => 'indexAjax'
-            ])
-            ->addServer([
-                'HTTP_ACCEPT' => 'application/json(;q=(\*|0\.01|[0\.[1-9]]))?'
-            ]);*/
-        $this->auraRouter->add('plan.index', $this->uriBase)
-            ->addValues([
-                'controller' => 'Plan',
-                'action'     => 'index'
-            ]);
-        $this->auraRouter->add('plan.get', $this->uriBase.'get{/name}')
-            ->addValues([
-                'controller' => 'Plan',
-                'action'     => 'get'
-            ]);
-
-        // Show list of plan saved in DB.
-        $this->auraRouter->add('plan.show', $this->uriBase.'show')
-            ->addValues([
-                'controller' => 'Plan',
-                'action'     => 'show'
-            ]);
-
-        // Show filed form with recovered/submitted form.
-        $this->auraRouter->add('plan.show.name', $this->uriBase.'show/name')
-            ->addTokens([
-                'name' => '\w+'
-            ])
-            ->addValues([
-                'controller' => 'Plan',
-                'action'     => 'showByName'
-            ]);
-
-        // add doctor name and photo
-        $this->auraRouter->add('doctor.index', $this->uriBase.'doctor')
-            ->addValues([
-                'controller' => 'Doctor',
-                'action'     => 'index'
-            ]);
-        $this->auraRouter->add('doctor.add', $this->uriBase.'doctor/add')
-            ->addValues([
-                'controller' => 'Doctor',
-                'action'     => 'add'
-            ]);
-
-        return $this->auraRouter->count();
-    }
-
-    /**
-     * Match current request_uri to declared route.
-     *
-     * @return \Aura\Router\Route|false
-     *
-     * @throws AppException
-     */
-    private function match()
-    {
-//        get the incoming request URL path
-        //todo  (!) not necessary, because SERVER['REQUEST_URI'] already stands as URI
-        $path = parse_url($this->server['REQUEST_URI'], PHP_URL_PATH);
-
-        // get the route based on the path and server
-        $route = $this->auraRouter->match($path, $this->server);
-        if (! $route) {
-//            no route object was returned
-            throw new AppException('No such routes');
-//            $this->redirect('plan.index');
-        }
-
-        return $route;
-    }
-
-    /**
-     * Dispatch route to specific controller.
-     *
-     * @param \Aura\Router\Route $route
-     */
-    private function dispatch($route)
-    {
-        $params = $route->params;
-        $class = '\\UTI\\Controller\\'.$params['controller'].'Controller';
-        $method = $params['action'];
-        $controller = new $class($this);
-
-        //todo Not all methods need params, what to do in this situation?
-        //todo what about $controller->parameters = $params ?
-        $controller->$method($params);
     }
 }

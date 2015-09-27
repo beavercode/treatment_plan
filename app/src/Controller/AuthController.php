@@ -6,8 +6,8 @@
 namespace UTI\Controller;
 
 use UTI\Core\AbstractController;
-use UTI\Model\AuthModel;
-use Uti\Core\AppException;
+use UTI\Core\Exceptions;
+use UTI\Model\AuthModel\AuthModel;
 
 /**
  * Used to handle auth page actions.
@@ -17,22 +17,25 @@ use Uti\Core\AppException;
 class AuthController extends AbstractController
 {
     /**
-     * Init.
-     *
      * Uses parent ctor.
      *
-     * @param $router {@inherit}
+     * @inheritdoc
+     *
+     * @throws Exceptions\RoutingException
+     * @throws Exceptions\ModelException
      */
     public function __construct($router)
     {
         parent::__construct($router);
-        $this->model = new AuthModel();
+
+        $this->model = new AuthModel($this->conf);
     }
 
     /**
      * Log in into the system and redirect to "plan.index".
      *
-     * @throws AppException
+     * @throws Exceptions\RoutingException
+     * @throws Exceptions\ViewException
      */
     public function login()
     {
@@ -57,13 +60,13 @@ class AuthController extends AbstractController
     /**
      * Log out of the system and redirect to "auth.login".
      *
-     * @throws AppException
+     * @throws Exceptions\RoutingException
      */
     public function logout()
     {
         if ($this->model->isLogged()) {
             $this->model->logOut();
-            $this->router->redirect('auth.login');
         }
+        $this->router->redirect('auth.login');
     }
 }

@@ -3,14 +3,15 @@
  * (c) Lex Kachan <lex.kachan@gmail.com>
  */
 
-namespace UTI\Model;
+namespace UTI\Model\PlanModel;
 
 use iio\libmergepdf\Exception as LibMergePdfException;
 use iio\libmergepdf\Merger;
-use UTI\Core\AppException;
 use UTI\Core\AbstractModel;
-use UTI\Lib\Config\Config;
+use UTI\Core\Exceptions\ModelException;
+use UTI\Lib\Config\Exceptions\ConfigException;
 use UTI\Lib\Data;
+use UTI\Lib\File\Exceptions\FileException;
 use UTI\Lib\File\File;
 
 /**
@@ -41,28 +42,37 @@ class PlanPdfModel extends AbstractModel
     protected $dirTmp;
 
     /**
+     * @var string Images of doctors, can be accessed from from outside
+     */
+    protected $dirImgDoc;
+
+    /**
      * @var PlanModel Inherit from class which creates current.
      */
     protected $caller;
 
     /**
-     * Init.
+     * Set parameters
      *
-     * Uses parent constructor.
+     * todo (!) Temporary decision (!)
      *
      * @param AbstractModel $caller Caller class.
+     *
+     * @throws ModelException
      */
-    public function __construct($caller)
+    public function setParameters($caller)
     {
-        //todo Think about db!!!
-        parent::__construct();
-
-        $this->dirTmp = Config::$APP_TMP;
-        $this->dirHtml = Config::$APP_TPL_PDF;
-        $this->dirPdfIn = Config::$APP_PDF_IN;
-        $this->dirPdfOut = Config::$APP_PDF_OUT;
-        $this->dirImgDoc = Config::$APP_IMG_DOC;
         $this->caller = $caller;
+        try {
+            $this->dirTmp = $this->conf->get('dir.tmp');
+            $this->dirHtml = $this->conf->get('dir.tpl.pdf');
+            $this->dirPdfIn = $this->conf->get('dir.pdf.in');
+            $this->dirPdfOut = $this->conf->get('dir.pdf.out');
+            $this->dirImgDoc = $this->conf->get('dir.img.doctors');
+        } catch (ConfigException $e) {
+            // Catch if config option do not exists (wrong name, misspelling etc.)
+            throw new ModelException($e->getMessage(), null, $e);
+        }
     }
 
     /**
@@ -73,7 +83,7 @@ class PlanPdfModel extends AbstractModel
      *
      * @return string Generated HTML
      *
-     * @throws AppException
+     * @throws ModelException
      */
     public function summaryToHtml($formData, $template)
     {
@@ -103,7 +113,7 @@ class PlanPdfModel extends AbstractModel
      *
      * @return array
      *
-     * @throws AppException
+     * @throws ModelException
      */
     public function stagePriceToHtml($formData, $price, $template)
     {
@@ -149,7 +159,7 @@ class PlanPdfModel extends AbstractModel
      *
      * @return string
      *
-     * @throws AppException
+     * @throws ModelException
      */
     public function htmlToPdf($html, $file = null, array $options = [])
     {
@@ -195,7 +205,12 @@ class PlanPdfModel extends AbstractModel
         $content = $mPdf->Output('', 'S');
 
         $path = $this->dirTmp.$file;
-        File::write($path, $content, 'w');
+
+        try {
+            File::write($path, $content, 'w');
+        } catch (FileException $e) {
+            throw new ModelException($e->getError(), null, $e);
+        }
 
         return $path;
     }
@@ -205,30 +220,17 @@ class PlanPdfModel extends AbstractModel
      *
      * @param array $pdf List of file to remove.
      *
-     * @throws AppException
+     * @throws ModelException
      */
     public function removePdfList(array $pdf)
     {
-        foreach ($pdf as $item) {
-            File::remove($item);
+        try {
+            foreach ($pdf as $item) {
+                File::remove($item);
+            }
+        } catch (FileException $e) {
+            throw new ModelException($e->getError(), null, $e);
         }
-    }
-
-    /**
-     * Load HTML template for PDF.
-     *
-     * @param $file
-     * @param $data
-     *
-     * @return string
-     *
-     * @throws AppException
-     */
-    private function loadTpl($file, $data)
-    {
-        $path = $this->dirHtml.$file.'.php';
-
-        return File::inc($path, ['data' => $data], true);
     }
 
     /**
@@ -240,7 +242,9 @@ class PlanPdfModel extends AbstractModel
      * @param array $htmls Items for conversion
      * @param array $toDel Files what will be deleted
      *
-     * @return array List of stage_price/_term => converted_file.pdf
+     * @return array List of stage_price/stage_term => converted_file.pdf
+     *
+     * @throws ModelException
      */
     public function stagePriceToPdf($formData, array $htmls, &$toDel)
     {
@@ -271,13 +275,14 @@ class PlanPdfModel extends AbstractModel
      *
      * @returns string
      *
-     * @throws AppException
+     * @throws ModelException
      */
     public function mergeList(array $list)
     {
         $mergeList = [];
 
         foreach ($list as $key => $value) {
+            // If '@stub' are present than value is an array; each element of which are processed as separate element.
             if ('@stub@' === $key && is_array($value)) {
                 foreach ($value as $k => $v) {
                     $this->preMerge($mergeList, $k, $v);
@@ -291,19 +296,39 @@ class PlanPdfModel extends AbstractModel
     }
 
     /**
+     * Load HTML template for PDF.
+     *
+     * @param $file
+     * @param $data
+     *
+     * @return string Data of included file
+     *
+     * @throws ModelException
+     */
+    private function loadTpl($file, $data)
+    {
+        $path = $this->dirHtml.$file.'.php';
+        try {
+            return File::inc($path, ['data' => $data], true);
+        } catch (FileException $e) {
+            throw new ModelException($e->getError(), null, $e);
+        }
+    }
+
+    /**
      * Check file extension and make file's absolute path.
      *
      * @param $array
      * @param $key
      * @param $val
      *
-     * @throws AppException
+     * @throws ModelException
      */
     private function preMerge(&$array, $key, $val)
     {
         // Check if file has '.pdf' extension.
         if (!preg_match("#\.pdf$#i", $val)) {
-            throw new AppException('File "'.$val.'" not a PDF file.');
+            throw new ModelException(sprintf('File "%s" not a PDF file', $val));
         }
         // Make an absolute path to store a file.
         if (basename($val) === $val) {
@@ -313,7 +338,7 @@ class PlanPdfModel extends AbstractModel
     }
 
     /**
-     * Accepts array of pdf files, add correct paths and merge them.
+     * Accepts array of pdf files, add correct paths and merge them using libmergepdf.
      *
      * Result stored in file which name generated from current timestamp.
      *
@@ -321,7 +346,7 @@ class PlanPdfModel extends AbstractModel
      *
      * @return string
      *
-     * @throws AppException
+     * @throws ModelException
      */
     private function mergePdf(array $list)
     {
@@ -331,17 +356,19 @@ class PlanPdfModel extends AbstractModel
                 $merger->addFromFile($item);
             }
             $merged = $merger->merge();
+            // Generate a name
+            $hash = md5(time());
+            $path = $this->dirPdfOut.$hash.'.pdf';
+            File::write($path, $merged, 'w');
         } catch (LibMergePdfException $e) {
-            throw new AppException(
-                sprintf('%s; re-throw from "\iio\libmergepdf\Exception:"', $e->getMessage()),
+            throw new ModelException(
+                sprintf('Re-throw from "\iio\libmergepdf\Exception:" - %s', $e->getMessage()),
                 911,
                 $e
             );
+        } catch (FileException $e) {
+            throw new ModelException($e->getError(), null, $e);
         }
-
-        $hash = md5(time());
-        $path = $this->dirPdfOut.$hash.'.pdf';
-        File::write($path, $merged, 'w');
 
         return $hash;
     }

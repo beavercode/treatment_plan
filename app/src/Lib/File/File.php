@@ -5,7 +5,7 @@
 
 namespace UTI\Lib\File;
 
-use UTI\Lib\Config\Exceptions\FileException;
+use UTI\Lib\File\Exceptions\FileException;
 
 /**
  * Class File

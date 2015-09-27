@@ -5,9 +5,7 @@
 
 namespace UTI\Lib\Config;
 
-use UTI\Core\AppException;
 use UTI\Lib\Config\Exceptions\ConfigException;
-use UTI\Lib\Config\Exceptions\FileException;
 
 /**
  * Common.

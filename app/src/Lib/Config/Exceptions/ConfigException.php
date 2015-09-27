@@ -5,12 +5,14 @@
 
 namespace UTI\Lib\Config\Exceptions;
 
-use UTI\Core\AppException;
+use UTI\Core\Exceptions\AppException;
 
 /**
  * Class ConfigException
  *
- * @package Config
+ * todo: Proper exception(s) extended from SPL exceptions
+ *
+ * @package UTI\Lib\Config
  */
 class ConfigException extends AppException
 {

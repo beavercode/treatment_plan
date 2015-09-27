@@ -1,8 +1,11 @@
 <?php
+/**
+ * (c) Lex Kachan <lex.kachan@gmail.com>
+ */
 
 namespace UTI\Lib;
 
-use UTI\Core\AppException;
+use UTI\Core\Exceptions\AppException;
 
 /**
  * Process data in views
@@ -14,7 +17,8 @@ use UTI\Core\AppException;
  *  etc.
  *
  * Class Data
- * @package UTI\Lib
+ *
+ * @package UTI\Lib\Data
  */
 class Data
 {
@@ -34,7 +38,7 @@ class Data
     protected $charset;
 
     /**
-     * Set view and base uri
+     * Set view and base uri.
      *
      * @param string $charset Set character encoding
      */
@@ -44,10 +48,11 @@ class Data
     }
 
     /**
-     * Set and get values
+     * Set and get values.
      *
      * @param null|string $key
      * @param mixed       $value
+     *
      * @return mixed
      */
     //todo real string 'lvl1.lvl2.lvl3' to array and back conversion
@@ -67,7 +72,7 @@ class Data
     }
 
     /**
-     * Return $this->temp for fluent interface
+     * Return $this->temp for fluent interface.
      *
      * @return string
      */
@@ -126,6 +131,7 @@ class Data
      *  > (greater than) becomes '&gt;'
      *
      * @param $key
+     *
      * @return null|string
      */
     public function esc($key = null)
@@ -141,10 +147,12 @@ class Data
     }
 
     /**
-     * Convert all applicable characters to HTML entities
-     * Use get_html_translation_table() to see full list 'characters => entities'
+     * Convert all applicable characters to HTML entities.
+     *
+     * Use get_html_translation_table() to see full list 'characters => entities'.
      *
      * @param $key
+     *
      * @return null|string
      */
     public function escEnt($key = null)
@@ -165,6 +173,7 @@ class Data
      * @param     $key
      * @param     $length
      * @param int $start
+     *
      * @return null|string
      */
     public function cut($key = null, $length = null, $start = 0)

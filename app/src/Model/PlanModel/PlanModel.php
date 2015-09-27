@@ -3,11 +3,13 @@
  * (c) Lex Kachan <lex.kachan@gmail.com>
  */
 
-namespace UTI\Model;
+namespace UTI\Model\PlanModel;
 
-use UTI\Core\AppException;
 use UTI\Core\AbstractModel;
-use UTI\Lib\Config\Config;
+use UTI\Core\Exceptions\ModelException;
+use UTI\Lib\Config\ConfigData;
+use UTI\Lib\Config\Exceptions\ConfigException;
+use UTI\Lib\File\Exceptions\FileException;
 use UTI\Lib\File\File;
 use UTI\Lib\Form\Form;
 
@@ -29,16 +31,20 @@ class PlanModel extends AbstractModel
     protected $dirPdfOut;
 
     /**
-     * Init.
-     *
      * Uses parent ctor.
+     *
+     * @inheritdoc
      */
-    public function __construct()
+    public function __construct(ConfigData $conf)
     {
-        parent::__construct();
+        parent::__construct($conf);
 
-        $this->dirUpload = Config::$APP_UPLOAD_DIR;
-        $this->dirPdfOut = Config::$APP_PDF_OUT;
+        try {
+            $this->dirUpload = $conf->get('dir.upload');
+            $this->dirPdfOut = $conf->get('dir.pdf.out');
+        } catch (ConfigException $e) {
+            throw new ModelException($e->getMessage(), null, $e);
+        }
     }
 
     /**
@@ -72,27 +78,32 @@ class PlanModel extends AbstractModel
      * @param int            $minStages
      *
      * @return bool|Form False for stage's ajax or Form object for submitted form
+     *
+     * @throws ModelException
      */
     public function processForm($data, $view, $maxStages, $minStages = 1)
     {
         $form = new Form('plan_form', $this->dirUpload);
         $data('plan.form', $form);
-        // get doctors name from DB
+        // Get doctor's names from DB.
         $doctors = $this->getDoctors();
         $data('plan.form.doctors', $doctors);
 
         // forming stages with ajax
         if (isset($_POST['stage'])) {
-            // get an event
+            // Get an ajax event.
             $event = $_POST['stage'];
-            // get stages names
+            // Get stage's names from DB.
             $data('plan.form.stages', $this->getStages());
-            //form default for stages template
+            // Previously defined form inputs values.
             $form->load($this->session->get($form->getName()));
 
             //todo view generation outside of the model
-            $stages = new PlanStagesModel($data, $view, $maxStages);
-            // default values for stages
+            $stages = new PlanStagesModel($this->conf);
+            //todo Remaster mechanism instead of this quirk
+            $stages->setParameters($view, $maxStages, $minStages);
+
+            // Default values for each stage of the form.
             $stages->$event(function ($stage) use ($form) {
                 $stageMSG = [
                     2 => 'Ортодонтия',
@@ -107,14 +118,14 @@ class PlanModel extends AbstractModel
                 //todo 2. situation when stage got from DB has period limit, e.g. 'Whitening' => '3 hours'
                 for ($N = 1; $N <= $stage; $N++) {
                     // if there are the field value in method than no set defaults
-                    if (! isset($_POST[$form->getName()]['stage'.$N])) {
+                    if (!isset($_POST[$form->getName()]['stage'.$N])) {
                         $form->setArrayValue(
                             'stage'.$N,
                             $this->getStages(),
                             isset($stageMSG[$N]) ? $stageMSG[$N] : ''
                         );
                     }
-                    if (! isset($_POST[$form->getName()]['period'.$N])) {
+                    if (!isset($_POST[$form->getName()]['period'.$N])) {
                         $form->setValue(
                             'period'.$N,
                             isset($periodMSG[$N]) ? $periodMSG[$N] : $N.'month(s)'
@@ -126,7 +137,7 @@ class PlanModel extends AbstractModel
             return false;
         }
 
-        // form sent but no stage handling
+        // Form data sent but no stage handling.
         if ($form->isSubmit()) {
             $fioLength = 5;
             $periodLength = 5;
@@ -141,20 +152,20 @@ class PlanModel extends AbstractModel
                 'size' => 52428800 //50Mb = 52428800 bytes
             ];
 
-            // FIO check
-            if (! $form->getValue('fio') || mb_strlen($form->getValue('fio')) < $fioLength) {
+            // FIO check.
+            if (!$form->getValue('fio') || mb_strlen($form->getValue('fio')) < $fioLength) {
                 $form->setInvalid(
                     'fio',
                     'Введите "ФИО", пожалуйста. Длинна поля не менее '.$fioLength.' символов.'
                 );
             }
 
-            // Period check for stages
+            // Period check for stages.
             //todo form resubmit problem when adding and deleting stage after form submit, $this->session->get('stage') changed but not the $_POST
             for ($N = 1; $N <= $this->session->get('stage'); $N++) {
                 //period check
                 //if ((! $form->getValue('period' . $N) || mb_strlen($form->getValue('period' . $N)) < $periodLength) && isset($_POST['period' . $N]) {
-                if (! $form->getValue('period'.$N) || mb_strlen($form->getValue('period'.$N)) < $periodLength) {
+                if (!$form->getValue('period'.$N) || mb_strlen($form->getValue('period'.$N)) < $periodLength) {
                     $form->setInvalid(
                         'period'.$N,
                         'Введите "Период лечения"#'.$N.', пожалуйста. Длинна поля не менее '.$periodLength.' символов.'
@@ -162,7 +173,7 @@ class PlanModel extends AbstractModel
                 }
                 //file upload
                 //todo save and display saved files to user in form
-                if (! $form->uploadFile('file'.$N, $uploadOptions)) {
+                if (!$form->uploadFile('file'.$N, $uploadOptions)) {
                     $form->setInvalid(
                         'file'.$N,
                         $form->fileUploadError()
@@ -171,7 +182,7 @@ class PlanModel extends AbstractModel
             }
 
             // No errors there, check form as processed
-            if (! $form->isInvalid()) {
+            if (!$form->isInvalid()) {
                 // reset form data in session
                 $this->session->set('form_processed', [$form->getName()]);
             } else {
@@ -217,12 +228,16 @@ class PlanModel extends AbstractModel
      *
      * @return string
      *
-     * @throws AppException
+     * @throws ModelException
      */
     public function processPdf(Form $form)
     {
-        $pdf = new PlanPdfModel($this);
+        $pdf = new PlanPdfModel($this->conf);
+        //todo Remaster mechanism instead of this quirk
+        $pdf->setParameters($this);
         $formData = $this->session->get($form->getName());
+        // Array of temporary files to delete.
+        $toDel = [];
 
         // Parse uploaded files.
         //convert doc to data array
@@ -239,13 +254,14 @@ class PlanModel extends AbstractModel
         $stagePriceHtmlArray = $pdf->stagePriceToHtml($formData, $docData, 'pdf_stage-price_tpl');
 
         // Make pdf from html.
-        $toDel = [];
-        $toDel[] = $summaryPdf = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)).'.pdf');
-        //todo debug, toDel
-        /*echo $this->showPdfDev($summaryPdf);die;*/
+        // 1. Summary page html->pdf.
+        $summaryPdf = $pdf->htmlToPdf($summaryHtml, md5(microtime(true)).'.pdf');
+        $toDel[] = $summaryPdf;
+        /*echo $this->showPdfDev($summaryPdf);die;*/ //todo debug, toDel
+        // 2. Stage's pages(price, info) html->pdf.
         $stagesPdfArray = $pdf->stagePriceToPdf($formData, $stagePriceHtmlArray, $toDel);
 
-        // List for merge. @stub@ is place for pdfs of stage pages
+        // Form list of pdf and merge them. @stub@ is placeholder for array-element to expand
         $pdfOutName = $pdf->mergeList([
             'title'     => 'pdf_title.pdf',
             'summary'   => $summaryPdf,
@@ -273,14 +289,20 @@ class PlanModel extends AbstractModel
      *
      * @return string Pdf data string
      *
-     * @throws AppException
+     * @throws ModelException
      */
     public function showPdf($hash, $action = 'show')
     {
         $name = $hash.'.pdf';
         $file = $this->dirPdfOut.$name;
+        $data = '';
 
-        $fileData = File::read($file);
+        try {
+            $data = File::read($file);
+        } catch (FileException $e) {
+            new ModelException(sprintf('Cant read pdf file: "%s"', $file), null, $e);
+        }
+
         //todo re-check for proper HTTP  headers
         header('Content-type: application/pdf');
         //header('Content-Type: application/octet-stream');
@@ -304,25 +326,32 @@ class PlanModel extends AbstractModel
 
         //header('Connection: close');
 
-        return $fileData;
+        return $data;
     }
 
     /**
-     * Show pdf file in dev purposes.
+     * @test
      *
-     * todo improve
+     * Show pdf file in dev purposes.
      *
      * @param string $fileName
      * @param string $action
      *
      * @return bool|string
+     *
+     * @throws ModelException
      */
     public function showPdfDev($fileName, $action = 'show')
     {
         $name = basename($fileName);
         $file = $fileName;
+        $data = '';
 
-        $fileData = File::read($file);
+        try {
+            $data = File::read($file);
+        } catch (FileException $e) {
+            new ModelException(sprintf('Cant read pdf file: "%s"', $file), null, $e);
+        }
         //todo re-check for proper HTTP  headers
         header('Content-type: application/pdf');
         //header('Content-Type: application/octet-stream');
@@ -346,7 +375,7 @@ class PlanModel extends AbstractModel
 
         //header('Connection: close');
 
-        return $fileData;
+        return $data;
     }
 
 

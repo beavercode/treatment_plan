@@ -7,12 +7,17 @@ namespace UTI;
 
 require('vendor/autoload.php');
 
-use UTI\Core\AppException;
+use UTI\Core\Exceptions\RoutingException;
 use UTI\Core\Router;
+use UTI\Lib\Memory\Memory;
 use UTI\Lib\Config\AbstractConfig;
 use UTI\Lib\Config\ConfigData;
 use UTI\Lib\Logger\AbstractLogger;
-use UTI\Lib\Memory\Memory;
+use UTI\Lib\Config\Exceptions\ConfigException;
+use UTI\Model\PlanModel\Exceptions\PlanStagesModelException;
+use UTI\Core\Exceptions\ModelException;
+use UTI\Core\Exceptions\ViewException;
+use UTI\Core\Exceptions\AppException;
 
 /**
  * Application runner class.
@@ -71,14 +76,15 @@ class App
     /**
      * Init.
      *
+     * @param array  $server Supper global array $_SERVER
      * @param string $appDir Root directory for sources
-     *
-     * @throws AppException
      */
-    public function __construct($appDir = 'src/')
+    public function __construct($server, $appDir = 'src/')
     {
+        $this->server = $server;
+
         // Deny 'favicon.ico' requests.
-        $this->noFavicon($_SERVER['REQUEST_URI']);
+        $this->noFavicon($this->server['REQUEST_URI']);
 
         // Version check.
         $this->checkVersion($this->minPhpVersion);
@@ -99,7 +105,8 @@ class App
      *
      * @param string $config Dsn used to get configuration options
      *
-     * @throws AppException
+     * @throws ConfigException
+     * @throws RoutingException
      */
     public function start($config = 'config.php')
     {
@@ -107,17 +114,34 @@ class App
             // Create configuration class.
             $this->conf = AbstractConfig::init($this->dir, $config);
 
-            //todo toDel, debug, memory usage
-            $this->debugStart();
+            $this->debugStart();//todo toDel, debug, memory usage
 
             // Start routing.
-            (new Router($this->conf, $_SERVER))->run();
+            $router = new Router($this->conf, $this->server);
+            $router->run();
 
-            //todo toDel, debug, memory usage
-            $this->debugEnd();
+            $this->debugEnd();//todo toDel, debug, memory usage
+        } catch (RoutingException $e) {
+            // Routing level errors.
+            AbstractLogger::init($this->conf->get('env'), $this->conf->get('dir.log').'routing.log')
+                ->log($e->getError());
+        } catch (PlanStagesModelException $e) {
+            // Model level errors.
+            // PlanStageModelException works with Ajax, cant see exception message at browser, must log.
+            AbstractLogger::init('log', $this->conf->get('dir.log').'ajax.model.log')
+                ->log($e->getError());
+        } catch (ModelException $e) {
+            // Model level errors.
+            AbstractLogger::init($this->conf->get('env'), $this->conf->get('dir.log').'model.log')
+                ->log($e->getError());
+        } catch (ViewException $e) {
+            // View level errors.
+            AbstractLogger::init($this->conf->get('env'), $this->conf->get('dir.log').'view.log')
+                ->log($e->getError());
         } catch (AppException $e) {
-            // Log error for production and show for development.
-            AbstractLogger::init($this->conf->get('env'), $this->conf->get('dir.log.exception'))->log($e->getError());
+            // Common app errors.
+            AbstractLogger::init($this->conf->get('env'), $this->conf->get('dir.log').'app.log')
+                ->log($e->getError());
         } catch (\Exception $e) {
             // This catch block would never reached. If not - you messed up with exceptions.
             die('Oops! You messed up with exceptions');

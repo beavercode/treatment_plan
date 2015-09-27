@@ -3,12 +3,14 @@
  * (c) Lex Kachan <lex.kachan@gmail.com>
  */
 
-namespace UTI\Lib\Config\Exceptions;
+namespace UTI\Lib\File\Exceptions;
 
-use UTI\Core\AppException;
+use UTI\Core\Exceptions\AppException;
 
 /**
- * Class FileException
+ * FileException emmit when work with files.
+ *
+ * todo: Proper exception(s) extended from SPL exceptions
  *
  * @package UTI\Lib\File
  */

@@ -5,10 +5,12 @@
 
 namespace UTI\Controller;
 
-use UTI\Core\AppException;
 use UTI\Core\AbstractController;
-use UTI\Lib\Config\Config;
-use UTI\Model\PlanModel;
+use UTI\Core\Exceptions\ViewException;
+use UTI\Lib\Config\Exceptions\ConfigException;
+use UTI\Model\PlanModel\PlanModel;
+use UTI\Core\Exceptions\ModelException;
+use UTI\Core\Exceptions\RoutingException;
 
 /**
  * Used to handle plan page actions.
@@ -18,18 +20,18 @@ use UTI\Model\PlanModel;
 class PlanController extends AbstractController
 {
     /**
-     * Init.
-     *
      * Uses parent ctor.
      *
-     * @param $router {@inherit}
+     * @inheritdoc
      *
-     * @throws AppException
+     * @throws ModelException
+     * @throws RoutingException
      */
     public function __construct($router)
     {
         parent::__construct($router);
-        $this->model = new PlanModel();
+
+        $this->model = new PlanModel($this->conf);
 
         if (!$this->model->isLogged()) {
             $this->router->redirect('auth.login');
@@ -39,12 +41,21 @@ class PlanController extends AbstractController
     /**
      * Process index (default) action.
      *
-     * @throws AppException
+     * @throws RoutingException
+     * @throws ModelException
+     * @throws ViewException
      */
     public function index()
     {
         //todo Data::__call() doesn't work on $this-data
         $data = $this->data;
+        try {
+            $stagesMax = $this->conf->get('stages.max');
+            $stagesMin = $this->conf->get('stages.min');
+        } catch (ConfigException $e) {
+            // Catch if config option do not exists (wrong name, misspelling etc.)
+            throw new RoutingException($e->getMessage(), null, $e);
+        }
 
         // Set view templates.
         $this->view->set('plan_template', $data, ['plan_form', 'plan_form_stage', 'plan_form_result']);
@@ -56,10 +67,16 @@ class PlanController extends AbstractController
         $data('notify.error', '');
 
         // Working with stages using ajax.
-        $form = $this->model->processForm($data, $this->view, Config::$APP_STAGES_MAX, Config::$APP_STAGES_MIN);
+        $form = $this->model->processForm(
+            $data,
+            $this->view,
+            $stagesMax,
+            $stagesMin
+        );
         if (false === $form) {
             return;
         }
+
         // If form processed: all field are right, and files(docx,excel) are loaded.
         if ($this->model->isFormProcessed($form)) {
             if ($hash = $this->model->processPdf($form)) {
@@ -74,10 +91,10 @@ class PlanController extends AbstractController
             }
         }
 
+        // Show page.
         $this->view->render();
 
-        //todo debug, toDel
-        var_dump($_POST);
+        var_dump($_POST);//todo debug, toDel
     }
 
     /**
@@ -85,20 +102,25 @@ class PlanController extends AbstractController
      *
      * @param array $params Data keys map to param tokens in the path.
      *
-     * @throws AppException
+     * @throws RoutingException
+     * @throws ModelException
+     * @throws ViewException
      */
     public function get($params)
     {
         //todo Data::__call() doesn't work on $this-data
         $data = $this->data;
 
-        // Set view template.
-        $this->view->set('plan_pdf_result', $data);
-
-        $data('pdf', $this->model->showPdf($params['name'], Config::$APP_RESULT));
-
-        // Compression breaks PDF file. Thus do not use it!!!
-        $this->view->render(['minify' => false]);
+        try {
+            // Set view template.
+            $this->view->set('plan_pdf_result', $data);
+            // Generate pdf result string.
+            $data('pdf', $this->model->showPdf($params['name'], $this->conf->get('pdf_result')));
+            // Compression breaks PDF file. Thus do not use it!!!
+            $this->view->render(['minify' => false]);
+        } catch (ConfigException $e) {
+            throw new RoutingException($e->getMessage(), null, $e);
+        }
     }
 
     // -------------- NEXT ACTIONS IS OPTIONAL -------------- //
@@ -107,11 +129,12 @@ class PlanController extends AbstractController
      * Show table of the treatment plans with possibility to generate again or
      * open plan in fully filled form with possibility edit it and generate.
      *
-     * todo
+     * todo example.com/plan/show   example.com/plan/show/12
+     * todo show all                show 12 treatment plan
      *
      * @param $params
      *
-     * @throws AppException
+     * @throws RoutingException
      */
     public function show($params)
     {

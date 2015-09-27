@@ -5,14 +5,12 @@
 
 namespace UTI\Lib\Logger;
 
-use UTI\Lib\Config\Exceptions\FileException;
+use UTI\Lib\File\Exceptions\FileException;
 use UTI\Lib\Logger\Exceptions\LoggerException;
 use UTI\Lib\File\File;
 
 /**
  * Writes message to a file.
- *
- * todo Decouple method tu specialized packages: config, log.
  *
  * @package UTI\Lib\Logger
  */
@@ -43,11 +41,11 @@ class FileLogger extends AbstractLogger
         $timeSeparator = ' | ';
         $lineSeparator = "\n";
 
-        $data = date('Y-m-d H:i:s O')." {$timeSeparator} ".(string)$message;
+        $data = date('Y-m-d H:i:s O')."$timeSeparator".(string)$message;
         try {
             File::write($this->path, $data.$lineSeparator);
         } catch (FileException $e) {
-            throw new LoggerException(sprintf('Cant log to a file "%s"', $this->path), null, $e);
+            throw new LoggerException($e->getMessage(), null, $e);
         }
     }
 }

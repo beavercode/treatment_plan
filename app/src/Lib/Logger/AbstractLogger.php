@@ -24,11 +24,16 @@ abstract class AbstractLogger
      */
     public static function init($env, $dsn = null)
     {
-        if ('prod' === $env) {
+        if ('prod' === $env || 'log' === $env) {
             return new FileLogger($dsn);
         } else {
             return new BrowserLogger();
         }
+//        if (in_array($env, ['prod', 'always'])) {
+//            return new FileLogger($dsn);
+//        } else {
+//            return new BrowserLogger();
+//        }
     }
 
     /**

@@ -18,19 +18,23 @@ namespace UTI\Lib;
  * http://stackoverflow.com/questions/3684620/is-possible-to-keep-session-even-after-the-browser-is-closed/3684674#3684674
  *
  * Class Session
+ *
+ * Singleton implementation.
+ *
  * @package UTI\Lib
  */
 class Session
 {
-    protected static $instance;
     protected $session;
     protected $duration;
+    protected static $instance;
 
     /**
-     * Run session and return its instance
+     * Run session and return its instance.
      *
      * @param null $savePath
      * @param int  $duration
+     *
      * @return Session
      */
     public static function run($savePath = null, $duration = 1800)
@@ -52,7 +56,7 @@ class Session
      */
     public function get($key = '')
     {
-        if (! $key) {
+        if (!$key) {
             return $this->session ?: null;
         }
 
@@ -60,10 +64,11 @@ class Session
     }
 
     /**
-     * Set key value in $_SESSION
+     * Set key value in $_SESSION.
      *
      * @param $key
      * @param $value
+     *
      * @return mixed
      */
     public function set($key, $value)
@@ -72,7 +77,7 @@ class Session
     }
 
     /**
-     * Start session
+     * Start session.
      *
      * @return bool
      */
@@ -87,9 +92,7 @@ class Session
     }
 
     /**
-     * Destroy session, empty $_SESSION array, unset cookies
-     *
-     * @return void
+     * Destroy session, empty $_SESSION array, unset cookies.
      */
     public function halt()
     {
@@ -110,7 +113,7 @@ class Session
     }
 
     /**
-     * Custom session duration
+     * Custom session duration.
      *
      * @param $duration
      */
@@ -124,7 +127,7 @@ class Session
     }
 
     /**
-     * Init
+     * Init.
      *
      * @param $savePath
      * @param $duration

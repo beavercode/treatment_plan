@@ -5,9 +5,11 @@
 
 namespace UTI\Core;
 
-use UTI\Lib\Config\Exceptions\FileException;
+use UTI\Lib\Data;
 use UTI\Lib\File\File;
 use UTI\Lib\MinifyHTML;
+use UTI\Lib\File\Exceptions\FileException;
+use UTI\Core\Exceptions\ViewException;
 
 /**
  * Used to show html with data.
@@ -27,7 +29,7 @@ class View
     protected $template;
 
     /**
-     * @var \UTI\Lib\Data Data to inject into loaded file
+     * @var Data Object to inject into loaded file
      */
     protected $data;
 
@@ -61,9 +63,9 @@ class View
     /**
      * Set main template, view data and addition block for view.
      *
-     * @param string        $template Name of main template
-     * @param \UTI\Lib\Data $data Object that stores view data
-     * @param array         $blocks List of block which would used later
+     * @param string $template Name of main template
+     * @param Data   $data Object that stores view data
+     * @param array  $blocks List of block which would used later
      */
     public function set($template, $data, array $blocks = [])
     {
@@ -79,7 +81,7 @@ class View
      *      'minify' - true|false Override minimisation
      *      'cache'  - true|false Override caching
      *
-     * @throws AppException
+     * @throws ViewException
      */
     public function render(array $options = [])
     {
@@ -107,17 +109,13 @@ class View
      *
      * @return string Content of the block
      *
-     * @throws AppException
+     * @throws ViewException
      */
     public function block($name, array $additionalData = [])
     {
         $data = $this->data;
         foreach ($additionalData as $key => $val) {
             $data($key, $val);
-        }
-
-        if (!in_array($name, $this->blocks, true)) {
-            throw new AppException('No such block "'.$name.'""');
         }
 
         return $this->load($name.'.php');
@@ -130,12 +128,15 @@ class View
      *
      * @return string Content of the file
      *
-     * @throws FileException
+     * @throws ViewException
      */
     protected function load($file)
     {
         $path = $this->dir.$file;
-
-        return File::inc($path, ['data' => $this->data, 'view' => $this], true);
+        try {
+            return File::inc($path, ['data' => $this->data, 'view' => $this], true);
+        } catch (FileException $e) {
+            throw new ViewException($e->getMessage(), null, $e);
+        }
     }
 }

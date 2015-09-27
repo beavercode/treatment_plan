@@ -50,6 +50,8 @@ class ConfigData
     }
 
     /**
+     * @not_used
+     *
      * Using array_reduce function (no user loops).
      *
      * This function is named fold in functional programming languages such as

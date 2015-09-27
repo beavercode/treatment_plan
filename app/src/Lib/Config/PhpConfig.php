@@ -5,10 +5,10 @@
 
 namespace UTI\Lib\Config;
 
-use UTI\Lib\Config\Exceptions\ConfigException;
-use UTI\Lib\Config\Exceptions\FileException;
-use UTI\Lib\Config\Helpers\FlattenArrayPreserveKeysHelper;
 use UTI\Lib\File\File;
+use UTI\Lib\Config\Helpers\FlattenArrayPreserveKeysHelper;
+use UTI\Lib\Config\Exceptions\ConfigException;
+use UTI\Lib\File\Exceptions\FileException;
 
 /**
  * Works with php configs.
@@ -44,7 +44,7 @@ class PhpConfig extends AbstractConfig
         try {
             $this->configRaw = File::inc($file);
         } catch (FileException $e) {
-            throw new ConfigException(sprintf('Cant include configuration file: "%s"', $file), null, $e);
+            throw new ConfigException($e->getMessage(), null, $e);
         }
     }
 
