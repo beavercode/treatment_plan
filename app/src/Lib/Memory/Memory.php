@@ -1,6 +1,6 @@
 <?php
 /**
- * UTI, Memory usage information package
+ * (c) Lex Kachan <lex.kachan@gmail.com>
  */
 
 namespace UTI\Lib\Memory;
@@ -8,8 +8,7 @@ namespace UTI\Lib\Memory;
 /**
  * MemoryUsageInformation wrapper
  *
- * Class MemoryWrapper
- * @package UTI\Lib\Memory
+ * @package Memory
  */
 class Memory
 {
@@ -19,29 +18,26 @@ class Memory
     private static $memory;
 
     /**
-     * Start measure the memory usage
+s     * Start measure the memory usage.
      *
-     * @param array $conditions Array of callback-conditions
-     * @return bool
+     * @param array $conditions Array of callback-conditions.
+     *  If callback returns true then start collecting memory usage.
      */
     public static function start(array $conditions = [])
     {
         if (count($conditions) > 0) {
             foreach ($conditions as $condition) {
-                if (! is_callable($condition) || ! $condition()) {
-                    return false;
+                if (!is_callable($condition) || !$condition()) {
+                    return;
                 }
             }
         }
-
         self::$memory = new MemoryUsageInformation();
         self::$memory->setStart();
-
-        return true;
     }
 
     /**
-     * Stop measure the memory usage
+     * Stop the memory usage measuring and show results.
      */
     public static function finish()
     {

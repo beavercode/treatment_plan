@@ -1,8 +1,11 @@
 <?php
+/**
+ * UTI
+ */
+
 $data['number'];
 $data['name'];
 $data['period'];
-
 //todo real doc/excel data
 //$data['price'];
 ?>
@@ -175,18 +178,73 @@ $data['period'];
         .clearfix {
             clear: both;
         }
+
+        /* todo new styles, refactor upper styles */
+
+        /* header */
+        .header {
+            margin: 0;
+            padding: 0;
+            /*padding: 2px 0 3px 80px;*/
+            /*background: url(data:image/gif;base64,R0lGODdhPQABAPAAAI0vSAAAACH/C1hNUCBEYXRhWE1QPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QjEzRDhGMzMxMjk4MTFFNUI5RUFEN0MyNTc0MTQ4NUMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QjEzRDhGMzQxMjk4MTFFNUI5RUFEN0MyNTc0MTQ4NUMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpCMTNEOEYzMTEyOTgxMUU1QjlFQUQ3QzI1NzQxNDg1QyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpCMTNEOEYzMjEyOTgxMUU1QjlFQUQ3QzI1NzQxNDg1QyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgH//v38+/r5+Pf29fTz8vHw7+7t7Ovq6ejn5uXk4+Lh4N/e3dzb2tnY19bV1NPS0dDPzs3My8rJyMfGxcTDwsHAv769vLu6ubi3trW0s7KxsK+urayrqqmop6alpKOioaCfnp2cm5qZmJeWlZSTkpGQj46NjIuKiYiHhoWEg4KBgH9+fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5ODc2NTQzMjEwLy4tLCsqKSgnJiUkIyIhIB8eHRwbGhkYFxYVFBMSERAPDg0MCwoJCAcGBQQDAgEAACwAAAAAPQABAEACBoSPqcvtWgA7) repeat-y;*/
+        }
+
+        .header__square {
+            width: 61px;
+            background-color: #8D2F48;
+        }
+
+        .header__gutter {
+            padding-left: 25px;
+        }
+
+        .header__title {
+            font-family: 'helveticaneuecyr-thin', Helvetica, Arial, sans-serif;
+            font-size: 48px;
+            font-weight: bold;
+            color: #8d2f48;
+        }
+
+        .header__subtitle {
+            font-family: 'arial-narrow', Arial, sans-serif;
+            font-size: 20px;
+            font-weight: normal;
+        }
+
+        .header__light {
+            font-family: 'helveticaneuecyr-light', Helvetica, Arial, sans-serif;
+        }
+
+        /* table */
+        .table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .table__cell {
+            padding: 0;
+        }
     </style>
 </head>
 <body>
 <div class="page">
-    <!-- Title block -->
-    <div class="title-b">
-        <div class="title"><?= $data['number'] ?> этап – <?= $data['name'] ?></div>
-        <!--<p class="extra">Количество посещений: {{stage_visits}}</p>-->
-
-        <p class="extra">Общая длительность этапа лечения: <?= $data['period'] ?></p>
+    <!-- header -->
+    <div class="header">
+        <table class="table">
+            <tr>
+                <td class="table__cell header__square"></td>
+                <td class="table__cell header__gutter">
+                    <div class="header__title"><?= $data['number'] ?> этап – <?= $data['name'] ?></div>
+                    <!--<p class="header__subtitle"><strong>Количество посещений:</strong> <span
+                            class="header__light">{{stage_visits}}</span></p>-->
+                    <p class="header__subtitle"><strong>Общая длительность этапа лечения:</strong> <span
+                            class="header__light"><?= $data['period'] ?></span></p>
+                </td>
+            </tr>
+        </table>
     </div>
-    <!-- /Title block -->
+    <!-- /header -->
 
     <!-- Price table -->
     <table class="tPrice">

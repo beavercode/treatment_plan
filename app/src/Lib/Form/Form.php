@@ -1,58 +1,65 @@
 <?php
+/**
+ * (c) Lex Kachan <lex.kachan@gmail.com>
+ */
 
-namespace UTI\Lib;
+namespace UTI\Lib\Form;
 
-use UTI\Core\AppException;
+use UTI\Core\Exceptions\AppException;
 
 /**
- * Form handling
+ * Form handling.
+ *
+ * todo Refactor to: form, uploadFile, validation
  *
  * http://amdy.su/work-with-forms/
  * http://amdy.su/flash-message/
  * http://amdy.su/flash-message-2/
  * http://amdy.su/template-what-is/
  *
- * @package UTI\Lib
+ * @package Form
  */
 class Form
 {
     /**
-     * @var string Form name
+     * @var string Form name.
      */
     protected $name;
     /**
-     * @var Form method
+     * @var array Form submit method: $_GET, $_POST.
      */
-    protected $method;
+    protected $method = [];
 
     /**
-     * @var array Error's array
+     * @var array Validation error.
      */
     protected $validate = [];
 
     /**
-     * @var array Represents re-arranged $_FILES array
+     * @var array Represents re-arranged $_FILES.
      */
     protected $files;
 
     /**
-     * @var string Files upload directory
+     * todo
+     * @var string Files upload directory.
      */
     protected $dirUpload;
 
     /**
-     * @var string File upload error
+     * todo
+     * @var string File upload error.
      */
     protected $uploadError;
 
     /**
-     * Initialize with form name
+     * Initialize with form name.
      *
      * @param string      $value Form name
      * @param string      $dirUpload File upload dir, mandatory for file uploading
      * @param null|string $method Form method, POST as default
      */
-    public function __construct($value = 'form', $dirUpload = '', $method = '')
+    public function __construct($value = 'form_name', $dirUpload = '', $method = '')
     {
         $this->name = $value;
         if ($method === 'get') {
@@ -67,7 +74,7 @@ class Form
     }
 
     /**
-     * Get form name
+     * Get form name.
      *
      * @return string
      */
@@ -77,8 +84,10 @@ class Form
     }
 
     /**
-     * Save form data from method array ($_POST, $_GET)
+     * Save form data from method array ($_POST, $_GET).
+     *
      * @param array $default
+     *
      * @return array|string
      */
     public function save(array $default = [])
@@ -89,7 +98,7 @@ class Form
     }
 
     /**
-     * Load form data from SESSION to method array ($_POST, $_GET)
+     * Load form data from SESSION to method array ($_POST, $_GET).
      *
      * @param null|array $formData
      */
@@ -102,10 +111,12 @@ class Form
 
     /**
      * Get field value of the form.
-     * Escaping characters to prevent XSS
+     *
+     * Escaping characters to prevent XSS.
      *
      * @param        $field
      * @param string $default
+     *
      * @return string
      */
     public function getValue($field, $default = '')
@@ -116,12 +127,13 @@ class Form
     }
 
     /**
-     * Walk array get key=>val and insert them along with optional parameter(if set) into template
+     * Walk array get key=>val and insert them along with optional parameter(if set) into template.
      *
-     * @param        $field
-     * @param        $template
+     * @param string $field
+     * @param string $template
      * @param array  $array
      * @param string $optional
+     *
      * @return string
      */
     public function getArrayValue($field, $template, array $array, $optional = '')
@@ -149,6 +161,8 @@ class Form
     /**
      * Upload file and set its value to $this->method
      *
+     * todo Refactor into separate class.
+     *
      * Codes:
      *  0 => 'There is no error, the file uploaded with success'
      *  1 => 'The uploaded file exceeds the upload_max_filesize directive in php.ini'
@@ -161,7 +175,9 @@ class Form
      *
      * @param string $field Field name in $this->files array
      * @param array  $options Additional options
+     *
      * @return bool|string
+     *
      * @throws AppException
      */
     public function uploadFile($field, array $options = [])
@@ -172,7 +188,7 @@ class Form
         //3. display filename in popover and change button style for existing correct file(green button with check mark)
 
         //if $this->files initialized, file exists in $this->files and file was selected(file was uploaded)
-        if (isset($this->files[$field]) && (null !== $this->files && $this->files[$field]['error'] !== 4)) {
+        if (isset($this->files[$field]) && (null !== $this->files && 4 !== $this->files[$field]['error'])) {
             //system error
             if (in_array($this->files[$field]['error'], [3, 6, 7, 8], true)) {
                 throw new AppException('File upload system error', $this->files[$field]['error']);
@@ -194,32 +210,34 @@ class Form
 
             //size check
             if (in_array($this->files[$field]['error'], [1, 2], true) || $this->files[$field]['size'] > $fileSize) {
-                $this->uploadError = 'Размер файла "' . $field . '" больше чем ' .
+                $this->uploadError = 'Размер файла "'.$field.'" больше чем '.
                     sprintf('%.2f Мб', $fileSize / 1024 / 1024);
 
                 return false;
             }
 
             //mime && ext checks
-            $fieldExt = end(explode('.', $this->files[$field]['name']));
+            $fileNameChunks = explode('.', $this->files[$field]['name']);
+            // end() works with reference, E_STRICT emitted
+            $fieldExt = end($fileNameChunks);
 //            $fileInfo = new finfo(FILEINFO_MIME_TYPE);
 //            $mime = $fileInfo->file($this->files[$field]['tmp_name']);
             $mime = $this->getMimeType($this->files[$field]['tmp_name']);
-            if (! (count($fileExt) && in_array($fieldExt, $fileExt, true))
-                || (! (count($fileMime) && in_array($mime, $fileMime, true)))
+            if (!(count($fileExt) && in_array($fieldExt, $fileExt, true))
+                || (!(count($fileMime) && in_array($mime, $fileMime, true)))
             ) {
-                $this->uploadError = 'Неправильный тип файла "' . $field . '", разрешенные типы файлов: ' .
-                    implode(', ', $fileExt) . '.';
+                $this->uploadError = 'Неправильный тип файла "'.$field.'", разрешенные типы файлов: '.
+                    implode(', ', $fileExt).'.';
 
                 return false;
             }
 
-            $newFileName = md5(basename($this->files[$field]['name']) . $this->files[$field]['size']) . '.' . $fieldExt;
-            $uploadFile = $this->dirUpload . $newFileName;
+            $newFileName = md5(basename($this->files[$field]['name']).$this->files[$field]['size']).'.'.$fieldExt;
+            $uploadFile = $this->dirUpload.$newFileName;
 
             if (move_uploaded_file($this->files[$field]['tmp_name'], $uploadFile)) {
                 //set file to $this->method
-                $this->method[$this->getName()][$field] = $this->dirUpload . $newFileName;
+                $this->method[$this->getName()][$field] = $this->dirUpload.$newFileName;
 
                 return [$field => [
                     $newFileName => htmlspecialchars($this->files[$field]['name'])
@@ -231,7 +249,9 @@ class Form
     }
 
     /**
-     * Get file upload error
+     * Get file upload error.
+     *
+     * todo
      *
      * @return string
      */
@@ -246,7 +266,7 @@ class Form
     }
 
     /**
-     * Set field value of the form
+     * Set field value of the form.
      *
      * @param $field
      * @param $value
@@ -257,8 +277,9 @@ class Form
     }
 
     /**
-     * Set field value of the form from array
-     * Search in array for value and return key
+     * Set field value of the form from array.
+     *
+     * Search in array for value and return key.
      *
      * @param string $field Key of super global array $_POST
      * @param array  $array Array to search
@@ -275,9 +296,9 @@ class Form
     }
 
     /**
-     * Set form field as invalid
+     * Set form field as invalid.
      *
-     * @param        $field
+     * @param string $field
      * @param string $message
      */
     public function setInvalid($field, $message = '')
@@ -286,9 +307,10 @@ class Form
     }
 
     /**
-     * Check if validation errors exists for field or fields of form
+     * Check if validation errors exists for field or fields of form.
      *
      * @param null $field
+     *
      * @return array|bool
      */
     public function isInvalid($field = null)
@@ -303,7 +325,7 @@ class Form
     }
 
     /**
-     * Is request method POST
+     * Is request method POST.
      *
      * @return bool
      */
@@ -313,7 +335,7 @@ class Form
     }
 
     /**
-     * Is form submitted using proper method
+     * Is form submitted using proper method.
      *
      * @return bool
      */
@@ -323,11 +345,14 @@ class Form
     }
 
     /**
-     * Convert the $_FILES array to the cleaner array
+     * Convert the $_FILES array to the cleaner array.
+     *
+     * todo
      *
      * @src http://php.net/manual/en/features.file-upload.multiple.php#53240
      *
      * @param $files
+     *
      * @return array
      */
     private function reArrayFiles($files)
@@ -346,13 +371,16 @@ class Form
     }
 
     /**
-     * Get MIME type of the file using shell's 'file'
+     * Get MIME type of the file using shell's 'file'.
      *
      * @param $fileName
+     *
+     * todo Use php internal functions/methods instead
+     *
      * @return string
      */
     private function getMimeType($fileName)
     {
-        return trim(exec('file --mime-type -b ' . escapeshellarg($fileName)));
+        return trim(exec('file --mime-type -b '.escapeshellarg($fileName)));
     }
 }

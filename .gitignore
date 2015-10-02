@@ -28,10 +28,11 @@ node_modules/
 assets/
 app/src/storage/sessions/*
 app/src/storage/cache/*
-app/src/storage/docx/*
+app/src/storage/upload_dir/*
 #app/src/storage/pdf/*
 #storage/tools/
 app/src/storage/logs/*
+app/src/storage/tmp/*
 pdf/*
 !placeholder
 
