@@ -7,4 +7,4 @@ namespace UTI;
 
 require 'app/App.php';
 
-(new App())->start();
+(new App($_SERVER))->start();

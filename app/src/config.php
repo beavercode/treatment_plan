@@ -78,9 +78,7 @@ return [
         ],
 
         /* Application logs */
-        'log'     => [
-            'exception' => 'storage/logs/exceptions.log'
-        ],
+        'log'     => 'storage/logs/',
 
         /* Uploaded files resides here */
         'upload'  => 'storage/upload_dir/',
