@@ -5,7 +5,7 @@
 
 namespace UTI\Lib\Form;
 
-use UTI\Core\AppException;
+use UTI\Core\Exceptions\AppException;
 
 /**
  * Form handling.
@@ -188,7 +188,7 @@ class Form
         //3. display filename in popover and change button style for existing correct file(green button with check mark)
 
         //if $this->files initialized, file exists in $this->files and file was selected(file was uploaded)
-        if (isset($this->files[$field]) && (null !== $this->files && $this->files[$field]['error'] !== 4)) {
+        if (isset($this->files[$field]) && (null !== $this->files && 4 !== $this->files[$field]['error'])) {
             //system error
             if (in_array($this->files[$field]['error'], [3, 6, 7, 8], true)) {
                 throw new AppException('File upload system error', $this->files[$field]['error']);
@@ -223,8 +223,8 @@ class Form
 //            $fileInfo = new finfo(FILEINFO_MIME_TYPE);
 //            $mime = $fileInfo->file($this->files[$field]['tmp_name']);
             $mime = $this->getMimeType($this->files[$field]['tmp_name']);
-            if (! (count($fileExt) && in_array($fieldExt, $fileExt, true))
-                || (! (count($fileMime) && in_array($mime, $fileMime, true)))
+            if (!(count($fileExt) && in_array($fieldExt, $fileExt, true))
+                || (!(count($fileMime) && in_array($mime, $fileMime, true)))
             ) {
                 $this->uploadError = 'Неправильный тип файла "'.$field.'", разрешенные типы файлов: '.
                     implode(', ', $fileExt).'.';
@@ -374,6 +374,8 @@ class Form
      * Get MIME type of the file using shell's 'file'.
      *
      * @param $fileName
+     *
+     * todo Use php internal functions/methods instead
      *
      * @return string
      */
